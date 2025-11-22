@@ -531,224 +531,265 @@
 
     <script>
         // --- 1. Three.js Robotic Arm Setup ---
-       const initThreeJS = () => {
+const initThreeJS = () => {
     const container = document.getElementById('canvas-container');
+    const hudX = document.getElementById('hud-x');
+    const hudY = document.getElementById('hud-y');
     
-    // 1. SCENE & CAMERA
+    // --- SCENE SETUP ---
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x080808, 0.02);
+    scene.fog = new THREE.FogExp2(0x050505, 0.02);
 
-    const camera = new THREE.PerspectiveCamera(40, container.offsetWidth / container.offsetHeight, 0.1, 1000);
-    camera.position.set(15, 10, 15); // Isometric-ish view
+    const camera = new THREE.PerspectiveCamera(45, container.offsetWidth / container.offsetHeight, 0.1, 1000);
+    camera.position.set(12, 8, 14);
     camera.lookAt(0, 3, 0);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
     renderer.setSize(container.offsetWidth, container.offsetHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Perf optimization
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
     container.appendChild(renderer.domElement);
 
-    // 2. MATERIALS (High Fidelity PBR)
-    const matBody = new THREE.MeshStandardMaterial({ 
-        color: 0x222222, 
-        roughness: 0.6, 
-        metalness: 0.2 
-    });
-    
-    const matArmor = new THREE.MeshStandardMaterial({ 
-        color: 0xffffff, // White armor plates
-        roughness: 0.2, 
-        metalness: 0.1 
-    });
+    // --- MATERIALS ---
+    const matDarkMetal = new THREE.MeshStandardMaterial({ color: 0x151515, roughness: 0.7, metalness: 0.5 });
+    const matSteel = new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.2, metalness: 0.9 });
+    const matAccent = new THREE.MeshStandardMaterial({ color: 0x00aa66, roughness: 0.2, metalness: 0.5, emissive: 0x004422, emissiveIntensity: 0.2 });
+    const matBlack = new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.9, metalness: 0.1 });
+    const matGlow = new THREE.MeshBasicMaterial({ color: 0x00ffaa });
+    const matLaser = new THREE.MeshBasicMaterial({ color: 0xff0033, transparent: true, opacity: 0.6 });
 
-    const matChrome = new THREE.MeshStandardMaterial({ 
-        color: 0x888888, 
-        roughness: 0.1, 
-        metalness: 0.9 
-    });
+    // --- HELPER FUNCTIONS ---
+    const createBolt = (x, y, z) => {
+        const geo = new THREE.CylinderGeometry(0.15, 0.15, 0.2, 6);
+        const mesh = new THREE.Mesh(geo, matSteel);
+        mesh.position.set(x, y, z);
+        mesh.rotation.x = Math.PI/2;
+        return mesh;
+    };
 
-    const matHazard = new THREE.MeshStandardMaterial({ 
-        color: 0xffaa00, // Safety Orange
-        roughness: 0.6,
-        metalness: 0.1
-    });
+    // --- ROBOT HIERARCHY ---
+    const robotGroup = new THREE.Group();
+    robotGroup.position.y = -3;
+    scene.add(robotGroup);
 
-    const matGlow = new THREE.MeshBasicMaterial({ color: 0x00ffff });
+    // 1. BASE
+    const baseGroup = new THREE.Group();
+    robotGroup.add(baseGroup);
 
-    // 3. BUILD THE ROBOT (Hierarchical Grouping)
-    const robotBaseGroup = new THREE.Group();
-    scene.add(robotBaseGroup);
-    robotBaseGroup.position.y = -2;
+    const basePlate = new THREE.Mesh(new THREE.CylinderGeometry(4, 4.5, 1, 8), matDarkMetal);
+    basePlate.receiveShadow = true;
+    baseGroup.add(basePlate);
 
-    // -- Base Plate --
-    const baseGeo = new THREE.CylinderGeometry(4, 5, 1, 32);
-    const baseMesh = new THREE.Mesh(baseGeo, matBody);
-    baseMesh.receiveShadow = true;
-    robotBaseGroup.add(baseMesh);
+    const baseRing = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, 1.2, 32), matSteel);
+    baseRing.position.y = 0.5;
+    baseGroup.add(baseRing);
 
-    // -- Turret (Rotates Y) --
+    // 2. TURRET (Y-Axis Rotation)
     const turretGroup = new THREE.Group();
-    robotBaseGroup.add(turretGroup);
+    turretGroup.position.y = 1;
+    baseGroup.add(turretGroup);
 
-    const turretGeo = new THREE.CylinderGeometry(3, 3.5, 2, 32);
-    const turretMesh = new THREE.Mesh(turretGeo, matBody);
-    turretMesh.position.y = 1.5;
-    turretMesh.castShadow = true;
-    turretGroup.add(turretMesh);
+    const turretBody = new THREE.Mesh(new THREE.BoxGeometry(3, 2, 3), matDarkMetal);
+    turretBody.position.y = 1;
+    turretBody.castShadow = true;
+    turretGroup.add(turretBody);
 
-    // Turret Detail (Orange Stripe)
-    const stripeGeo = new THREE.CylinderGeometry(3.1, 3.1, 0.2, 32);
-    const stripe = new THREE.Mesh(stripeGeo, matHazard);
-    stripe.position.y = 1.5;
-    turretGroup.add(stripe);
+    // Add detailed vents to turret
+    for(let i=0; i<3; i++) {
+        const vent = new THREE.Mesh(new THREE.BoxGeometry(2, 0.1, 0.1), matGlow);
+        vent.position.set(0, 1 + (i*0.3), 1.51);
+        turretGroup.add(vent);
+    }
 
-    // -- Shoulder Joint (Rotates X) --
+    // 3. SHOULDER (Z-Axis Rotation)
     const shoulderGroup = new THREE.Group();
-    shoulderGroup.position.y = 2.5;
+    shoulderGroup.position.y = 2;
     turretGroup.add(shoulderGroup);
 
-    // Shoulder Hinge Visuals
-    const hingeGeo = new THREE.CylinderGeometry(2.2, 2.2, 4.5, 32);
-    const hinge = new THREE.Mesh(hingeGeo, matBody);
-    hinge.rotation.z = Math.PI / 2;
-    hinge.castShadow = true;
-    shoulderGroup.add(hinge);
+    const hingeMesh = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 3.2, 16), matSteel);
+    hingeMesh.rotation.z = Math.PI/2;
+    hingeMesh.castShadow = true;
+    shoulderGroup.add(hingeMesh);
 
-    const hingeCapGeo = new THREE.CylinderGeometry(2.4, 2.4, 0.5, 32);
-    const capL = new THREE.Mesh(hingeCapGeo, matChrome);
-    capL.rotation.z = Math.PI / 2;
-    capL.position.x = -2.1;
-    shoulderGroup.add(capL);
+    // 4. LOWER ARM
+    const armLowerGroup = new THREE.Group();
+    shoulderGroup.add(armLowerGroup);
+
+    // Main strut (Complex shape)
+    const strutGeo = new THREE.BoxGeometry(1.5, 5, 1.5);
+    const strut = new THREE.Mesh(strutGeo, matDarkMetal);
+    strut.position.y = 2.5;
+    strut.castShadow = true;
+    armLowerGroup.add(strut);
+
+    // Hydraulic Pistons (Visual only)
+    const pistonCyl = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 2.5), matBlack);
+    pistonCyl.position.set(0, 1.5, 1);
+    pistonCyl.rotation.x = -0.3;
+    armLowerGroup.add(pistonCyl);
     
-    const capR = new THREE.Mesh(hingeCapGeo, matChrome);
-    capR.rotation.z = Math.PI / 2;
-    capR.position.x = 2.1;
-    shoulderGroup.add(capR);
+    const pistonRod = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 2.5), matSteel);
+    pistonRod.position.set(0, 2.5, 1.2);
+    pistonRod.rotation.x = -0.3;
+    armLowerGroup.add(pistonRod);
 
-    // -- Lower Arm (Main Boom) --
-    const lowerArmGroup = new THREE.Group();
-    shoulderGroup.add(lowerArmGroup);
+    // Accent plates
+    const plate = new THREE.Mesh(new THREE.BoxGeometry(1.6, 2, 0.2), matAccent);
+    plate.position.set(0, 3, 0.7);
+    armLowerGroup.add(plate);
 
-    // Arm Structure
-    const arm1Geo = new THREE.BoxGeometry(1.5, 6, 2);
-    const arm1 = new THREE.Mesh(arm1Geo, matArmor);
-    arm1.position.y = 3;
-    arm1.castShadow = true;
-    lowerArmGroup.add(arm1);
-
-    // Hydraulic Piston (Visual Only, anchored to arm)
-    const pistonCylGeo = new THREE.CylinderGeometry(0.4, 0.4, 3, 16);
-    const pistonCyl = new THREE.Mesh(pistonCylGeo, matBody);
-    pistonCyl.position.set(0, 2, 1.2);
-    pistonCyl.rotation.x = -0.2;
-    lowerArmGroup.add(pistonCyl);
-    
-    const pistonRodGeo = new THREE.CylinderGeometry(0.2, 0.2, 3, 16);
-    const pistonRod = new THREE.Mesh(pistonRodGeo, matChrome);
-    pistonRod.position.set(0, 3, 1.4);
-    pistonRod.rotation.x = -0.2;
-    lowerArmGroup.add(pistonRod);
-
-    // -- Elbow Joint --
+    // 5. ELBOW
     const elbowGroup = new THREE.Group();
-    elbowGroup.position.y = 6;
-    lowerArmGroup.add(elbowGroup);
+    elbowGroup.position.y = 5;
+    armLowerGroup.add(elbowGroup);
 
-    const elbowNode = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 2.5, 32), matBody);
-    elbowNode.rotation.z = Math.PI / 2;
-    elbowGroup.add(elbowNode);
+    const elbowJoint = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 2, 16), matSteel);
+    elbowJoint.rotation.z = Math.PI/2;
+    elbowGroup.add(elbowJoint);
 
-    // -- Upper Arm (Forearm) --
-    const upperArmGroup = new THREE.Group();
-    elbowGroup.add(upperArmGroup);
+    // 6. UPPER ARM
+    const armUpperGroup = new THREE.Group();
+    elbowGroup.add(armUpperGroup);
 
-    const arm2Geo = new THREE.BoxGeometry(1.2, 5, 1.5);
-    const arm2 = new THREE.Mesh(arm2Geo, matArmor);
-    arm2.position.y = 2.5;
-    arm2.castShadow = true;
-    upperArmGroup.add(arm2);
+    const upperStrut = new THREE.Mesh(new THREE.BoxGeometry(1, 4, 1.2), matDarkMetal);
+    upperStrut.position.y = 2;
+    upperStrut.castShadow = true;
+    armUpperGroup.add(upperStrut);
 
-    // Detail: Cables
-    const cableGeo = new THREE.TorusGeometry(3, 0.1, 8, 30, 1.5);
-    const cable = new THREE.Mesh(cableGeo, matBody);
-    cable.position.set(0.8, 0, 0);
-    cable.rotation.z = -0.5;
-    upperArmGroup.add(cable);
+    // Cabling (Torus tube)
+    const cable = new THREE.Mesh(new THREE.TorusGeometry(2, 0.05, 8, 20, 2), matBlack);
+    cable.position.set(-0.6, 1, 0);
+    cable.rotation.z = 1.5;
+    armUpperGroup.add(cable);
 
-    // -- Wrist / End Effector --
+    // 7. WRIST (Rotator)
     const wristGroup = new THREE.Group();
-    wristGroup.position.y = 5;
-    upperArmGroup.add(wristGroup);
+    wristGroup.position.y = 4;
+    armUpperGroup.add(wristGroup);
 
-    // Wrist Rotator
-    const wristGeo = new THREE.CylinderGeometry(1, 1, 0.5, 16);
-    const wrist = new THREE.Mesh(wristGeo, matHazard);
-    wrist.rotation.z = Math.PI / 2;
-    wristGroup.add(wrist);
+    const wristDisc = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 0.5, 16), matAccent);
+    wristGroup.add(wristDisc);
 
-    // -- The Claw (Gripper) --
+    // 8. CLAW / END EFFECTOR
     const clawGroup = new THREE.Group();
     wristGroup.add(clawGroup);
 
-    // Base of claw
-    const clawBase = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1, 2), matBody);
-    clawBase.position.y = 0.8;
+    const clawBase = new THREE.Mesh(new THREE.BoxGeometry(1, 0.5, 1.5), matDarkMetal);
+    clawBase.position.y = 0.5;
     clawGroup.add(clawBase);
 
-    // Finger 1
-    const f1 = new THREE.Mesh(new THREE.BoxGeometry(0.2, 1.5, 0.4), matChrome);
-    f1.position.set(0, 1.8, 0.8);
-    f1.rotation.x = 0.2;
-    clawGroup.add(f1);
+    // Three Fingers
+    const fingerGeo = new THREE.BoxGeometry(0.15, 1.2, 0.3);
+    const fingers = [];
 
-    // Finger 2
-    const f2 = new THREE.Mesh(new THREE.BoxGeometry(0.2, 1.5, 0.4), matChrome);
-    f2.position.set(0, 1.8, -0.8);
-    f2.rotation.x = -0.2;
-    clawGroup.add(f2);
+    for(let i=0; i<3; i++) {
+        const fPivot = new THREE.Group();
+        fPivot.position.y = 0.5;
+        clawGroup.add(fPivot); // Add pivot to claw group
 
-    // Laser/Sensor Eye
-    const eyeGeo = new THREE.CylinderGeometry(0.2, 0.2, 0.5);
-    const eye = new THREE.Mesh(eyeGeo, matGlow);
-    eye.rotation.z = Math.PI/2;
-    eye.position.set(0.4, 0.8, 0);
-    clawGroup.add(eye);
+        const finger = new THREE.Mesh(fingerGeo, matSteel);
+        finger.position.y = 0.6; // Offset from pivot
+        finger.position.z = 0.4; // Push out from center
+        
+        // Add rubber tip
+        const tip = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.2, 0.31), matAccent);
+        tip.position.y = 0.6;
+        finger.add(tip);
 
-    // 4. LIGHTING
-    const ambient = new THREE.AmbientLight(0xffffff, 0.4);
+        fPivot.add(finger);
+        
+        // Rotate pivots to form a triangle
+        fPivot.rotation.y = (i / 3) * Math.PI * 2;
+        fingers.push(fPivot);
+    }
+
+    // Laser Pointer Eye
+    const laserGeo = new THREE.CylinderGeometry(0.1, 0.1, 0.5);
+    const laserHousing = new THREE.Mesh(laserGeo, matBlack);
+    laserHousing.position.y = 0.5;
+    clawGroup.add(laserHousing);
+
+    const laserBeamGeo = new THREE.CylinderGeometry(0.02, 0.02, 10);
+    const laserBeam = new THREE.Mesh(laserBeamGeo, matLaser);
+    laserBeam.position.y = 5;
+    laserBeam.rotation.x = Math.PI/2; // Point forward relative to claw? No point Up relative to claw
+    // Actually let's make it point OUT of the claw
+    laserHousing.add(laserBeam);
+
+    // --- TARGET RETICLE (The thing the mouse controls) ---
+    const targetGroup = new THREE.Group();
+    scene.add(targetGroup);
+
+    const reticleGeo = new THREE.RingGeometry(0.4, 0.45, 32);
+    const reticleMesh = new THREE.Mesh(reticleGeo, matGlow);
+    targetGroup.add(reticleMesh);
+
+    const reticleDot = new THREE.Mesh(new THREE.SphereGeometry(0.1), matGlow);
+    targetGroup.add(reticleDot);
+
+    const targetLight = new THREE.PointLight(0x00ffaa, 1, 5);
+    targetGroup.add(targetLight);
+
+
+    // --- PARTICLES ---
+    const particles = new THREE.Group();
+    scene.add(particles);
+    const pGeo = new THREE.BoxGeometry(0.05, 0.05, 0.05);
+    const pMat = new THREE.MeshBasicMaterial({color: 0x00ffaa, transparent: true, opacity: 0.3});
+    for(let i=0; i<50; i++) {
+        const p = new THREE.Mesh(pGeo, pMat);
+        p.position.set((Math.random()-0.5)*20, (Math.random()-0.5)*20, (Math.random()-0.5)*20);
+        particles.add(p);
+    }
+
+
+    // --- LIGHTING ---
+    const ambient = new THREE.AmbientLight(0xffffff, 0.2);
     scene.add(ambient);
 
-    const spotLight = new THREE.SpotLight(0xffaa00, 2);
-    spotLight.position.set(10, 20, 10);
-    spotLight.angle = 0.5;
-    spotLight.penumbra = 0.5;
-    spotLight.castShadow = true;
-    spotLight.shadow.mapSize.width = 1024;
-    spotLight.shadow.mapSize.height = 1024;
-    scene.add(spotLight);
+    const mainLight = new THREE.DirectionalLight(0xffffff, 1);
+    mainLight.position.set(5, 10, 5);
+    mainLight.castShadow = true;
+    mainLight.shadow.mapSize.width = 2048;
+    mainLight.shadow.mapSize.height = 2048;
+    scene.add(mainLight);
 
-    const blueLight = new THREE.PointLight(0x0088ff, 2, 20);
-    blueLight.position.set(-5, 5, 5);
-    scene.add(blueLight);
+    const rimLight = new THREE.SpotLight(0x00ffaa, 5);
+    rimLight.position.set(-10, 5, -5);
+    rimLight.lookAt(0,0,0);
+    scene.add(rimLight);
 
-    // Ground Shadow Plane
-    const planeGeo = new THREE.PlaneGeometry(50, 50);
-    const planeMat = new THREE.ShadowMaterial({ opacity: 0.3 });
-    const plane = new THREE.Mesh(planeGeo, planeMat);
-    plane.rotation.x = -Math.PI / 2;
-    plane.position.y = -2;
-    plane.receiveShadow = true;
-    scene.add(plane);
+    const redLight = new THREE.PointLight(0xff0033, 0.5);
+    redLight.position.set(0, -2, 2);
+    scene.add(redLight);
 
-    // 5. ANIMATION & IK LOGIC
-    let mouseX = 0;
-    let mouseY = 0;
-    
-    document.addEventListener('mousemove', (e) => {
-        // Normalize mouse -1 to 1
-        mouseX = (e.clientX / window.innerWidth) * 2 - 1;
-        mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+
+    // --- INTERACTION LOGIC ---
+    let mouse = new THREE.Vector2();
+    let targetPos = new THREE.Vector3(0, 2, 0);
+    let isMoving = false;
+    let lastMouseTime = 0;
+
+    // Raycaster for accurate 3D mouse tracking
+    const raycaster = new THREE.Raycaster();
+    const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0); // Invisible plane to catch mouse
+
+    // Mouse Handler
+    container.addEventListener('mousemove', (e) => {
+        const rect = container.getBoundingClientRect();
+        mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+        
+        isMoving = true;
+        lastMouseTime = Date.now();
+
+        // HUD Update
+        if(hudX && hudY) {
+            hudX.innerText = mouse.x.toFixed(2);
+            hudY.innerText = mouse.y.toFixed(2);
+        }
     });
 
     const clock = new THREE.Clock();
@@ -756,38 +797,91 @@
     function animate() {
         requestAnimationFrame(animate);
         const t = clock.getElapsedTime();
+        const dt = clock.getDelta();
 
-        // -- Robot Logic --
+        // 1. Target Movement Logic
+        // Map mouse 2D to Scene 3D
+        // We project the mouse onto a virtual sphere/plane around the robot
+        const vector = new THREE.Vector3(mouse.x, mouse.y, 0.5);
+        vector.unproject(camera);
+        const dir = vector.sub(camera.position).normalize();
+        const distance = -camera.position.z / dir.z; // Intersect with Z=0 roughly
+        // Clamp the target so it doesn't go too far
+        const desiredPos = camera.position.clone().add(dir.multiplyScalar(12)); 
         
-        // 1. Turret follows mouse X smoothly
-        const targetTurretRot = -mouseX * 1.0;
-        turretGroup.rotation.y += (targetTurretRot - turretGroup.rotation.y) * 0.05;
+        // Smoothly interpolate target position (Lag effect)
+        targetPos.lerp(desiredPos, 0.1);
+        targetGroup.position.copy(targetPos);
+        targetGroup.lookAt(camera.position);
 
-        // 2. Lower Arm (Shoulder) breathes + mouse Y influence
-        // It bows down when mouse is low, raises when mouse is high
-        const targetShoulderRot = (mouseY * 0.5) + Math.sin(t * 0.5) * 0.1; 
-        shoulderGroup.rotation.x += (targetShoulderRot - shoulderGroup.rotation.x) * 0.05;
-
-        // 3. Upper Arm (Elbow) compensates to keep head looking forward-ish
-        // Simple inverse kinematics approximation
-        const targetElbowRot = -targetShoulderRot - 0.5 + Math.sin(t * 0.5 + 1) * 0.1;
-        elbowGroup.rotation.x += (targetElbowRot - elbowGroup.rotation.x) * 0.05;
-
-        // 4. Wrist Adjustment - Keeps gripper level
-        const targetWristRot = -elbowGroup.rotation.x - shoulderGroup.rotation.x + (Math.PI/2);
-        wristGroup.rotation.x += (targetWristRot - wristGroup.rotation.x) * 0.05;
+        // 2. Robot Inverse Kinematics (Approximation)
         
-        // 5. Claw Animation (Spinning or opening)
-        clawGroup.rotation.y += 0.01; // Scan rotation
+        // A. TURRET (Y-Axis) - Look at target horizontally
+        // Calculate angle to target
+        const angleY = Math.atan2(targetPos.x, targetPos.z);
+        // Smooth rotation
+        const targetRotY = angleY;
+        turretGroup.rotation.y += (targetRotY - turretGroup.rotation.y) * 0.08;
+
+        // B. LOWER ARM (X-Axis) - Pitch up/down based on target Height (Y)
+        const targetRotX = -(targetPos.y * 0.15) + 0.2; // Base offset
+        armLowerGroup.rotation.x += (targetRotX - armLowerGroup.rotation.x) * 0.05;
+
+        // C. UPPER ARM (Elbow) - Extend/Contract based on target distance
+        // Simple heuristic: If target is high/far, straighten out.
+        const targetElbow = -0.5 + (targetPos.y * 0.1); 
+        elbowGroup.rotation.x += (targetElbow - elbowGroup.rotation.x) * 0.05;
+
+        // D. WRIST & CLAW - Look exactly at target
+        // We use the LookAt method on the Claw group effectively
+        // But we need to compensate for parent rotations.
+        // A simpler visual trick: Rotate wrist so it points somewhat towards mouse
+        wristGroup.rotation.x += ((targetPos.y * 0.2) - wristGroup.rotation.x) * 0.1;
+        wristGroup.rotation.z = Math.sin(t) * 0.1; // Idle sway
+
+        // 3. Claw "Excitement" / Catch Logic
+        // If mouse is moving fast (recently), open claw wide.
+        // If stopped, close/pinch.
+        const timeSinceMove = Date.now() - lastMouseTime;
+        let fingerOpenAmount = 0;
         
-        // Pulse the sensor light
-        matGlow.opacity = 0.5 + Math.sin(t * 10) * 0.5;
+        if (timeSinceMove < 200) {
+            // Moving: Open wide (Aggressive)
+            fingerOpenAmount = -0.5;
+            // Spin wrist fast
+            clawGroup.rotation.z += 0.2; 
+            matLaser.color.setHex(0xff0033); // Red Laser
+        } else {
+            // Stopped: Close (Catch)
+            fingerOpenAmount = 0.1 + Math.sin(t * 5) * 0.05; // Breathe
+            // Slow wrist spin
+            clawGroup.rotation.z += 0.01;
+            matLaser.color.setHex(0x00ffaa); // Green Laser (Locked)
+        }
+
+        // Animate fingers
+        fingers.forEach((pivot, i) => {
+            // Base rotation + dynamic open/close
+            const initialRot = 0.2; // Tilted in
+            pivot.children[0].rotation.x = THREE.MathUtils.lerp(
+                pivot.children[0].rotation.x, 
+                initialRot + fingerOpenAmount, 
+                0.1
+            );
+        });
+
+        // 4. Particles Drift
+        particles.rotation.y = t * 0.05;
+        particles.children.forEach((p, i) => {
+            p.position.y += Math.sin(t + i) * 0.002;
+        });
 
         renderer.render(scene, camera);
     }
 
     animate();
 
+    // Resize
     window.addEventListener('resize', () => {
         camera.aspect = container.offsetWidth / container.offsetHeight;
         camera.updateProjectionMatrix();
