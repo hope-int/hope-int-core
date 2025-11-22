@@ -314,7 +314,83 @@
         </div>
     </div>
 </section>
-       
+
+<!-- INSERT BEFORE MODULES SECTION -->
+<section class="py-24 bg-white relative overflow-hidden">
+    <div class="max-w-7xl mx-auto px-6 lg:px-12">
+        
+        <div class="flex flex-col lg:flex-row items-center gap-16">
+            
+            <!-- Text Info -->
+            <div class="lg:w-1/2">
+                <div class="inline-block border border-black px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-6">
+                    Capstone Project
+                </div>
+                <h2 class="font-display text-5xl font-bold mb-6">The MK-1 Manipulator.</h2>
+                <p class="text-gray-600 text-lg mb-8">
+                    This is not a kit you buy. This is a machine you engineer. By Day 14, you will have built, wired, and programmed this 6-axis arm to perform autonomous tasks.
+                </p>
+                
+                <!-- Spec List -->
+                <div class="space-y-4 font-mono text-sm">
+                    <div class="flex justify-between border-b border-gray-200 pb-2">
+                        <span class="text-gray-500">Payload Capacity</span>
+                        <span class="font-bold">500g</span>
+                    </div>
+                    <div class="flex justify-between border-b border-gray-200 pb-2">
+                        <span class="text-gray-500">Degrees of Freedom</span>
+                        <span class="font-bold">6 Axis</span>
+                    </div>
+                    <div class="flex justify-between border-b border-gray-200 pb-2">
+                        <span class="text-gray-500">Refresh Rate</span>
+                        <span class="font-bold">60Hz Loop</span>
+                    </div>
+                    <div class="flex justify-between border-b border-gray-200 pb-2">
+                        <span class="text-gray-500">Connectivity</span>
+                        <span class="font-bold">WiFi / BT / Serial</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Blueprint Visual -->
+            <div class="lg:w-1/2 relative">
+                <!-- Central Graphic Placeholder (CSS Shapes) -->
+                <div class="aspect-square bg-gray-50 rounded-full border border-black/10 relative flex items-center justify-center p-12">
+                    
+                    <!-- Stylized Robot Representation -->
+                    <div class="relative w-full h-full border-2 border-dashed border-gray-300 rounded-full animate-[spin_20s_linear_infinite]"></div>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <div class="w-32 h-32 bg-black rounded-xl relative">
+                            <div class="absolute -top-10 left-10 w-4 h-20 bg-gray-400"></div>
+                            <div class="absolute -top-20 left-0 w-24 h-8 bg-gray-300 rounded-lg"></div>
+                        </div>
+                    </div>
+
+                    <!-- Pointer 1 -->
+                    <div class="absolute top-10 left-0 bg-white border border-black px-3 py-2 rounded shadow-lg">
+                        <div class="text-[10px] font-bold">SERVO_MG996R</div>
+                        <div class="w-2 h-2 bg-black absolute -bottom-1 right-4 rotate-45"></div>
+                    </div>
+
+                    <!-- Pointer 2 -->
+                    <div class="absolute bottom-20 right-0 bg-black text-white px-3 py-2 rounded shadow-lg">
+                        <div class="text-[10px] font-bold">ESP32_CORE</div>
+                        <div class="w-2 h-2 bg-black absolute -left-1 top-2 rotate-45"></div>
+                    </div>
+
+                    <!-- Pointer 3 -->
+                    <div class="absolute top-1/2 -right-10 bg-white border border-black px-3 py-2 rounded shadow-lg">
+                        <div class="text-[10px] font-bold">LIDAR_SENSOR</div>
+                        <div class="w-2 h-2 bg-white border-l border-b border-black absolute -left-1 top-2 rotate-45"></div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
 
         <!-- Bento Grid Features -->
         <!-- REPLACES THE OLD #modules SECTION -->
