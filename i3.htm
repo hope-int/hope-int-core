@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOPE CORE | The Singularity</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- GSAP for High-End Animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Fonts: Syne (Display) & Space Grotesk (Tech) -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        void: '#030303',
+                        ash: '#121212',
+                        neon: '#ccff00', // Cyber Lime
+                        holo: '#00f0ff', // Cyber Blue
+                    },
+                    fontFamily: {
+                        sans: ['Space Grotesk', 'sans-serif'],
+                        display: ['Syne', 'sans-serif'],
+                    },
+                    backgroundImage: {
+                        'noise': "url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22 opacity=%220.05%22/%3E%3C/svg%3E')",
+                    },
+                    animation: {
+                        'spin-slow': 'spin 10s linear infinite',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #030303;
+            color: #ffffff;
+            overflow-x: hidden;
+            cursor: none; /* Hiding default cursor for custom one */
+        }
+
+        /* Custom Cursor */
+        #cursor {
+            position: fixed;
+            top: 0; left: 0;
+            width: 20px; height: 20px;
+            border: 1px solid rgba(255,255,255,0.5);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s, background-color 0.3s;
+            mix-blend-mode: difference;
+        }
+        #cursor.hovered {
+            width: 60px;
+            height: 60px;
+            background-color: white;
+            border-color: transparent;
+            mix-blend-mode: difference;
+        }
+
+        /* Noise Overlay */
+        .noise-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        /* Glassmorphism 2.0 */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Text Stroke */
+        .text-stroke {
+            -webkit-text-stroke: 1px rgba(255,255,255,0.3);
+            color: transparent;
+            transition: all 0.5s ease;
+        }
+        .group:hover .text-stroke {
+            color: white;
+            -webkit-text-stroke: 0px;
+        }
+
+        /* Hide scrollbar but keep functionality */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #030303; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #fff; }
+
+        .reveal-text {
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-white selection:text-black">
+
+    <!-- Custom Cursor -->
+    <div id="cursor"></div>
+    
+    <!-- Noise Grain -->
+    <div class="noise-overlay"></div>
+
+    <!-- Preloader -->
+    <div id="preloader" class="fixed inset-0 bg-void z-[100] flex flex-col items-center justify-center text-white">
+        <div class="font-display text-4xl font-bold tracking-tighter" id="loader-text">INITIALIZING CORE</div>
+        <div class="w-64 h-1 bg-gray-800 mt-4 rounded-full overflow-hidden">
+            <div id="loader-bar" class="h-full bg-white w-0"></div>
+        </div>
+    </div>
+
+    <!-- NAVIGATION (HUD Style) -->
+    <nav class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50">
+        <div class="glass-panel rounded-full px-6 py-4 flex items-center gap-6 shadow-[0_0_30px_rgba(0,0,0,0.5)]">
+            <button onclick="scrollToSection('home')" class="nav-btn group relative p-2">
+                <i data-lucide="aperture" class="w-6 h-6 text-gray-400 group-hover:text-white transition-colors"></i>
+                <span class="absolute -top-10 left-1/2 -translate-x-1/2 bg-white text-black text-xs font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">CORE</span>
+            </button>
+            <button onclick="scrollToSection('education')" class="nav-btn group relative p-2">
+                <i data-lucide="book-open" class="w-6 h-6 text-gray-400 group-hover:text-white transition-colors"></i>
+                <span class="absolute -top-10 left-1/2 -translate-x-1/2 bg-white text-black text-xs font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">ACADEMY</span>
+            </button>
+            <button onclick="scrollToSection('iot')" class="nav-btn group relative p-2">
+                <i data-lucide="cpu" class="w-6 h-6 text-gray-400 group-hover:text-white transition-colors"></i>
+                <span class="absolute -top-10 left-1/2 -translate-x-1/2 bg-white text-black text-xs font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">LABS</span>
+            </button>
+            <div class="w-px h-6 bg-white/20"></div>
+            <button onclick="openModal('contact')" class="nav-btn bg-white text-black rounded-full p-2 hover:scale-110 transition-transform">
+                <i data-lucide="plus" class="w-5 h-5"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- MAIN WRAPPER -->
+    <main class="relative w-full">
+
+        <!-- SECTION: HERO -->
+        <section id="home" class="relative h-screen w-full flex items-center justify-center overflow-hidden">
+            <!-- 3D Background -->
+            <div id="canvas-hero" class="absolute inset-0 z-0 opacity-60"></div>
+            
+            <div class="relative z-10 text-center px-4 mix-blend-exclusion">
+                <div class="gsap-hero-reveal overflow-hidden mb-4">
+                    <h4 class="font-mono text-sm md:text-base text-gray-400 tracking-[0.5em] uppercase">System Online</h4>
+                </div>
+                <div class="gsap-hero-reveal overflow-hidden">
+                    <h1 class="font-display text-[15vw] leading-[0.8] font-bold tracking-tighter text-white">
+                        HOPE
+                    </h1>
+                </div>
+                <div class="gsap-hero-reveal overflow-hidden">
+                    <h1 class="font-display text-[15vw] leading-[0.8] font-bold tracking-tighter text-stroke">
+                        CORE
+                    </h1>
+                </div>
+                <p class="font-mono text-gray-400 mt-8 max-w-md mx-auto text-sm md:text-base leading-relaxed gsap-hero-reveal opacity-0">
+                    A fluid ecosystem integrating B.Tech academics, robotic innovation, and essential hardware supplies.
+                </p>
+            </div>
+
+            <!-- Scroll Indicator -->
+            <div class="absolute bottom-10 right-10 hidden md:flex flex-col items-center gap-2 z-10 mix-blend-difference">
+                <span class="text-xs font-mono uppercase rotate-90 origin-right translate-x-2">Scroll</span>
+                <div class="w-px h-16 bg-white/50 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-1/2 bg-white animate-bounce"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: ACADEMY (Horizontal Scroll Feel) -->
+        <section id="education" class="relative py-32 px-6 md:px-20 bg-void border-t border-white/10">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                <!-- Text Column -->
+                <div class="lg:col-span-4 sticky top-32 h-fit">
+                    <span class="text-neon font-mono text-xs tracking-widest mb-4 block">01 / MODULES</span>
+                    <h2 class="font-display text-5xl md:text-7xl font-bold mb-8">Neural<br>Learning.</h2>
+                    <p class="text-gray-400 font-sans text-lg leading-relaxed mb-8">
+                        Our repositories are living entities. Dynamic notes, AI-summarized lectures, and peer-to-peer data transfer for the modern engineer.
+                    </p>
+                    <button class="group flex items-center gap-4 text-white font-bold uppercase tracking-wider text-sm hover:text-neon transition-colors interactable">
+                        Access Database <i data-lucide="arrow-right" class="transition-transform group-hover:translate-x-2"></i>
+                    </button>
+                </div>
+
+                <!-- Cards Column -->
+                <div class="lg:col-span-8 space-y-6">
+                    <!-- Card 1 -->
+                    <div class="glass-panel p-8 md:p-12 rounded-[2rem] tilt-card group cursor-none interactable relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-8 opacity-20 group-hover:opacity-100 transition-opacity duration-500">
+                            <i data-lucide="cpu" class="w-24 h-24"></i>
+                        </div>
+                        <h3 class="font-display text-3xl font-bold mb-2 group-hover:translate-x-2 transition-transform">KTU Mainframe</h3>
+                        <p class="text-gray-500 font-mono text-sm mb-6">Modules 1-5 • Updated 2s ago</p>
+                        <div class="w-full h-px bg-white/20 mb-6 group-hover:w-full transition-all duration-700 w-12"></div>
+                        <p class="text-gray-300 max-w-md">Comprehensive digitized notes sorted by semester complexity.</p>
+                    </div>
+
+                    <!-- Card 2 -->
+                    <div class="glass-panel p-8 md:p-12 rounded-[2rem] tilt-card group cursor-none interactable relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-8 opacity-20 group-hover:opacity-100 transition-opacity duration-500">
+                            <i data-lucide="waves" class="w-24 h-24"></i>
+                        </div>
+                        <h3 class="font-display text-3xl font-bold mb-2 group-hover:translate-x-2 transition-transform">Audio Streams</h3>
+                        <p class="text-gray-500 font-mono text-sm mb-6">Binaural Beats • Lecture Mode</p>
+                        <div class="w-full h-px bg-white/20 mb-6 group-hover:w-full transition-all duration-700 w-12"></div>
+                        <p class="text-gray-300 max-w-md">Learn while commuting. High-fidelity audio lectures.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: IOT LABS -->
+        <section id="iot" class="relative min-h-screen flex flex-col items-center justify-center py-20 bg-ash overflow-hidden">
+            <!-- Background Grid -->
+            <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 40px 40px;"></div>
+            
+            <!-- 3D Object Overlay -->
+            <div id="canvas-iot" class="absolute inset-0 z-0 pointer-events-none mix-blend-screen"></div>
+
+            <div class="relative z-10 text-center max-w-4xl px-6">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-neon/30 bg-neon/10 mb-8 backdrop-blur-md">
+                    <div class="w-2 h-2 bg-neon rounded-full animate-pulse"></div>
+                    <span class="text-neon font-mono text-xs font-bold uppercase">Registrations Active</span>
+                </div>
+                
+                <h2 class="font-display text-6xl md:text-9xl font-bold mb-6 tracking-tighter text-white mix-blend-difference">
+                    HARD<br>WARE
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-left mt-12">
+                    <div class="glass-panel p-8 rounded-2xl border-l-4 border-neon">
+                        <h4 class="text-2xl font-bold mb-2">Summer Camp</h4>
+                        <p class="text-gray-400 text-sm font-mono">14 Days • Intensive • Zero to One</p>
+                        <p class="mt-4 text-gray-300">Build drones, rovers, and home automation systems from scratch.</p>
+                    </div>
+                    <div class="glass-panel p-8 rounded-2xl border-l-4 border-white">
+                        <h4 class="text-2xl font-bold mb-2">The Kit</h4>
+                        <p class="text-gray-400 text-sm font-mono">Arduino • Sensors • Chassis</p>
+                        <p class="mt-4 text-gray-300">We provide the industrial grade components. You provide the code.</p>
+                    </div>
+                </div>
+
+                <button onclick="openModal('register')" class="mt-12 bg-white text-black px-12 py-5 rounded-full font-bold text-lg hover:bg-neon hover:scale-105 transition-all interactable">
+                    Initialize Application
+                </button>
+            </div>
+        </section>
+
+        <!-- SECTION: SHOP (Marquee Style) -->
+        <section class="py-32 bg-void border-t border-white/10 overflow-hidden">
+            <div class="mb-20 px-6 md:px-20">
+                <h2 class="font-display text-5xl md:text-6xl font-bold">Supply<br>Chain.</h2>
+            </div>
+
+            <!-- Moving Marquee -->
+            <div class="relative flex overflow-x-hidden group">
+                <div class="animate-marquee whitespace-nowrap flex gap-8">
+                    <!-- Item 1 -->
+                    <div class="w-[300px] md:w-[400px] aspect-square bg-ash border border-white/10 rounded-3xl p-8 flex flex-col justify-between hover:bg-white hover:text-black transition-colors duration-500 interactable">
+                        <div class="flex justify-between items-start">
+                            <span class="font-mono text-xs">001</span>
+                            <i data-lucide="cpu" class="w-8 h-8"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-display text-4xl font-bold">Arduino</h4>
+                            <p class="opacity-60 font-mono text-sm mt-2">Microcontroller Unit</p>
+                        </div>
+                    </div>
+                    <!-- Item 2 -->
+                    <div class="w-[300px] md:w-[400px] aspect-square bg-ash border border-white/10 rounded-3xl p-8 flex flex-col justify-between hover:bg-white hover:text-black transition-colors duration-500 interactable">
+                        <div class="flex justify-between items-start">
+                            <span class="font-mono text-xs">002</span>
+                            <i data-lucide="file-text" class="w-8 h-8"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-display text-4xl font-bold">Prints</h4>
+                            <p class="opacity-60 font-mono text-sm mt-2">A4 Bond • Thesis Binding</p>
+                        </div>
+                    </div>
+                    <!-- Item 3 -->
+                    <div class="w-[300px] md:w-[400px] aspect-square bg-ash border border-white/10 rounded-3xl p-8 flex flex-col justify-between hover:bg-white hover:text-black transition-colors duration-500 interactable">
+                        <div class="flex justify-between items-start">
+                            <span class="font-mono text-xs">003</span>
+                            <i data-lucide="battery-charging" class="w-8 h-8"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-display text-4xl font-bold">Power</h4>
+                            <p class="opacity-60 font-mono text-sm mt-2">Li-Ion • 9V • Jumpers</p>
+                        </div>
+                    </div>
+                     <!-- Item 4 -->
+                     <div class="w-[300px] md:w-[400px] aspect-square bg-ash border border-white/10 rounded-3xl p-8 flex flex-col justify-between hover:bg-white hover:text-black transition-colors duration-500 interactable">
+                        <div class="flex justify-between items-start">
+                            <span class="font-mono text-xs">004</span>
+                            <i data-lucide="wifi" class="w-8 h-8"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-display text-4xl font-bold">IoT Modules</h4>
+                            <p class="opacity-60 font-mono text-sm mt-2">ESP8266 • NodeMCU</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Duplicate for loop -->
+                <div class="absolute top-0 animate-marquee2 whitespace-nowrap flex gap-8 left-full pl-8">
+                     <!-- Items Repeated for smooth loop -->
+                     <div class="w-[300px] md:w-[400px] aspect-square bg-ash border border-white/10 rounded-3xl p-8 flex flex-col justify-between hover:bg-white hover:text-black transition-colors duration-500 interactable">
+                        <div class="flex justify-between items-start">
+                            <span class="font-mono text-xs">001</span>
+                            <i data-lucide="cpu" class="w-8 h-8"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-display text-4xl font-bold">Arduino</h4>
+                            <p class="opacity-60 font-mono text-sm mt-2">Microcontroller Unit</p>
+                        </div>
+                    </div>
+                    <!-- ... other items implied for brevity/performance ... -->
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="py-20 px-6 md:px-20 bg-black text-center border-t border-white/10">
+            <h2 class="font-display text-[10vw] leading-none font-bold text-white opacity-10 hover:opacity-100 transition-opacity duration-700 select-none">HOPE.CORE</h2>
+            <div class="mt-10 flex justify-between items-end font-mono text-xs text-gray-500">
+                <p>&copy; 2025 ENGINEERING DIVISION</p>
+                <div class="flex gap-4">
+                    <a href="#" class="hover:text-white">INSTAGRAM</a>
+                    <a href="#" class="hover:text-white">LINKEDIN</a>
+                </div>
+            </div>
+        </footer>
+
+    </main>
+
+    <!-- MODALS -->
+    <div id="modal-wrapper" class="fixed inset-0 z-[999] hidden pointer-events-none">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-lg opacity-0 transition-opacity duration-300" id="modal-backdrop"></div>
+        
+        <!-- Contact Modal -->
+        <div id="modal-contact" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-[#111] border border-white/10 p-10 rounded-[2rem] scale-90 opacity-0 transition-all duration-500 pointer-events-auto hidden">
+            <h3 class="font-display text-4xl font-bold mb-2">Transmit Data</h3>
+            <p class="text-gray-500 mb-8 font-mono text-sm">Our servers are listening.</p>
+            <form onsubmit="event.preventDefault(); closeModal();" class="space-y-4">
+                <input type="text" placeholder="CALLSIGN (NAME)" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-white transition-colors font-mono text-sm">
+                <textarea placeholder="MESSAGE PAYLOAD" rows="4" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-white transition-colors font-mono text-sm"></textarea>
+                <button class="w-full bg-white text-black py-4 rounded-xl font-bold hover:bg-neon transition-colors interactable">SEND TRANSMISSION</button>
+            </form>
+            <button onclick="closeModal()" class="absolute top-6 right-6 text-gray-500 hover:text-white interactable"><i data-lucide="x"></i></button>
+        </div>
+
+        <!-- Register Modal -->
+        <div id="modal-register" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-[#111] border border-white/10 p-10 rounded-[2rem] scale-90 opacity-0 transition-all duration-500 pointer-events-auto hidden">
+            <h3 class="font-display text-4xl font-bold mb-2 text-neon">Initialize</h3>
+            <p class="text-gray-500 mb-8 font-mono text-sm">Secure your spot in the next batch.</p>
+            <form onsubmit="event.preventDefault(); closeModal();" class="space-y-4">
+                <input type="email" placeholder="UNIVERSITY EMAIL" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-neon transition-colors font-mono text-sm">
+                <button class="w-full bg-neon text-black py-4 rounded-xl font-bold hover:scale-105 transition-transform interactable">EXECUTE</button>
+            </form>
+            <button onclick="closeModal()" class="absolute top-6 right-6 text-gray-500 hover:text-white interactable"><i data-lucide="x"></i></button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. INITIALIZATION ---
+        lucide.createIcons();
+        gsap.registerPlugin(ScrollTrigger);
+
+        // --- 2. CUSTOM CURSOR LOGIC ---
+        const cursor = document.getElementById('cursor');
+        const interactables = document.querySelectorAll('.interactable, button, a');
+
+        let mouseX = 0, mouseY = 0;
+        let cursorX = 0, cursorY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        // Smooth cursor animation using GSAP ticker for performance
+        gsap.ticker.add(() => {
+            cursorX += (mouseX - cursorX) * 0.15;
+            cursorY += (mouseY - cursorY) * 0.15;
+            cursor.style.left = `${cursorX}px`;
+            cursor.style.top = `${cursorY}px`;
+        });
+
+        interactables.forEach(el => {
+            el.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
+            el.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+        });
+
+        // --- 3. PRELOADER ANIMATION ---
+        window.addEventListener('load', () => {
+            const tl = gsap.timeline();
+            
+            tl.to('#loader-bar', { width: '100%', duration: 1, ease: 'power2.inOut' })
+              .to('#loader-text', { opacity: 0, duration: 0.5 })
+              .to('#preloader', { y: '-100%', duration: 1, ease: 'expo.inOut' })
+              .from('.gsap-hero-reveal', { 
+                  y: 100, 
+                  opacity: 0, 
+                  duration: 1.5, 
+                  stagger: 0.1, 
+                  ease: 'power4.out' 
+              }, "-=0.5");
+              
+             initThreeJS(); // Start 3D scenes after load
+        });
+
+        // --- 4. SCROLL ANIMATIONS ---
+        gsap.utils.toArray('.glass-panel').forEach(panel => {
+            gsap.from(panel, {
+                scrollTrigger: {
+                    trigger: panel,
+                    start: "top 85%",
+                    toggleActions: "play none none reverse"
+                },
+                y: 50,
+                opacity: 0,
+                duration: 1,
+                ease: 'power3.out'
+            });
+        });
+
+        // Tilt Effect for Cards
+        document.querySelectorAll('.tilt-card').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const rotateX = ((y - centerY) / centerY) * -5; // Max rotation deg
+                const rotateY = ((x - centerX) / centerX) * 5;
+
+                gsap.to(card, {
+                    rotationX: rotateX,
+                    rotationY: rotateY,
+                    duration: 0.5,
+                    ease: 'power2.out'
+                });
+            });
+
+            card.addEventListener('mouseleave', () => {
+                gsap.to(card, { rotationX: 0, rotationY: 0, duration: 0.5 });
+            });
+        });
+
+        // --- 5. THREE.JS SCENES (OPTIMIZED) ---
+        function initThreeJS() {
+            // Scene 1: Hero "Ferrofluid"
+            initHeroScene();
+            // Scene 2: IoT Grid
+            initIotScene();
+        }
+
+        function initHeroScene() {
+            const container = document.getElementById('canvas-hero');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 5;
+
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
+
+            // Particles
+            const geometry = new THREE.IcosahedronGeometry(3, 4); // Detailed sphere
+            const count = geometry.attributes.position.count;
+            
+            // Create noise
+            const material = new THREE.PointsMaterial({
+                color: 0x555555,
+                size: 0.05,
+                transparent: true,
+                opacity: 0.8
+            });
+
+            const mesh = new THREE.Points(geometry, material);
+            scene.add(mesh);
+
+            // Animation Loop
+            const clock = new THREE.Clock();
+            function animate() {
+                requestAnimationFrame(animate);
+                const time = clock.getElapsedTime();
+                
+                // Wobbly effect
+                const positions = geometry.attributes.position.array;
+                const originalPositions = geometry.parameters ? geometry.parameters.radius : 3; // fallback
+
+                // Simple vertex displacement simulation
+                mesh.rotation.y = time * 0.1;
+                mesh.rotation.x = time * 0.05;
+                
+                // Pulse scale
+                const scale = 1 + Math.sin(time * 0.5) * 0.05;
+                mesh.scale.set(scale, scale, scale);
+
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            // Resize handle
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+
+        function initIotScene() {
+            const container = document.getElementById('canvas-iot');
+            if(!container) return;
+            
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+            camera.position.set(0, 10, 20);
+            camera.lookAt(0, 0, 0);
+
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
+
+            // Grid Floor
+            const gridHelper = new THREE.GridHelper(50, 50, 0xccff00, 0x222222);
+            scene.add(gridHelper);
+
+            // Floating Cubes
+            const group = new THREE.Group();
+            const geo = new THREE.BoxGeometry(1, 1, 1);
+            const mat = new THREE.MeshBasicMaterial({ color: 0xccff00, wireframe: true });
+            
+            for(let i=0; i<10; i++) {
+                const cube = new THREE.Mesh(geo, mat);
+                cube.position.set(
+                    (Math.random() - 0.5) * 20,
+                    Math.random() * 5,
+                    (Math.random() - 0.5) * 20
+                );
+                cube.userData.speed = Math.random() * 0.02;
+                group.add(cube);
+            }
+            scene.add(group);
+
+            function animate() {
+                requestAnimationFrame(animate);
+                group.rotation.y += 0.002;
+                
+                group.children.forEach(child => {
+                    child.rotation.x += child.userData.speed;
+                    child.rotation.y += child.userData.speed;
+                });
+
+                renderer.render(scene, camera);
+            }
+            animate();
+        }
+
+        // --- 6. UI LOGIC ---
+        function scrollToSection(id) {
+            const el = document.getElementById(id);
+            if(el) el.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function openModal(type) {
+            const wrapper = document.getElementById('modal-wrapper');
+            const backdrop = document.getElementById('modal-backdrop');
+            const modal = document.getElementById('modal-' + type);
+
+            wrapper.classList.remove('hidden');
+            wrapper.classList.remove('pointer-events-none');
+            modal.classList.remove('hidden');
+
+            // Animation In
+            setTimeout(() => {
+                backdrop.classList.remove('opacity-0');
+                modal.classList.remove('opacity-0', 'scale-90');
+            }, 10);
+        }
+
+        function closeModal() {
+            const wrapper = document.getElementById('modal-wrapper');
+            const backdrop = document.getElementById('modal-backdrop');
+            const modals = document.querySelectorAll('[id^="modal-"]');
+
+            backdrop.classList.add('opacity-0');
+            modals.forEach(m => {
+                if(!m.id.includes('wrapper') && !m.id.includes('backdrop')) {
+                    m.classList.add('opacity-0', 'scale-90');
+                }
+            });
+
+            setTimeout(() => {
+                wrapper.classList.add('hidden', 'pointer-events-none');
+                modals.forEach(m => {
+                    if(!m.id.includes('wrapper') && !m.id.includes('backdrop')) {
+                        m.classList.add('hidden');
+                    }
+                });
+            }, 300);
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if(e.key === 'Escape') closeModal();
+        });
+
+    </script>
+    
+    <style>
+        /* Marquee Animation Keyframes */
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
+        @keyframes marquee2 {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(0); }
+        }
+        .animate-marquee {
+            animation: marquee 25s linear infinite;
+        }
+        .animate-marquee2 {
+            animation: marquee2 25s linear infinite;
+        }
+        .group:hover .animate-marquee, .group:hover .animate-marquee2 {
+            animation-play-state: paused;
+        }
+    </style>
+</body>
+</html>
