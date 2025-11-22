@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NXTGN // IoT Robotics Camp</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Manrope:wght@300;400;600;800&display=swap');
+
+        :root {
+            --black: #0a0a0a;
+            --white: #ffffff;
+            --off-white: #f4f4f4;
+            --accent-gray: #1f1f1f;
+        }
+
+        body {
+            font-family: 'Manrope', sans-serif;
+            background-color: var(--off-white);
+            color: var(--black);
+            overflow-x: hidden;
+            cursor: crosshair; /* Tech feel */
+        }
+
+        h1, h2, h3, h4, .font-display {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        /* Ultra UI Utilities */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+        }
+        
+        .dark-glass {
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .br-heavy {
+            border-radius: 2.5rem;
+        }
+
+        .text-outline {
+            -webkit-text-stroke: 1px rgba(0,0,0,0.2);
+            color: transparent;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #fff; }
+        ::-webkit-scrollbar-thumb { background: #000; border-radius: 10px; }
+
+        /* Animations */
+        .reveal-text { opacity: 0; transform: translateY(30px); }
+        
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 50vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: all; /* Allow rotation */
+        }
+        
+        @media (max-width: 1024px) {
+            #canvas-container {
+                position: relative;
+                width: 100%;
+                height: 50vh;
+            }
+        }
+
+        /* Loader */
+        .loader-screen {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            transition: opacity 0.5s ease;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Loader -->
+    <div class="loader-screen" id="loader">
+        <div class="text-center">
+            <div class="font-display text-4xl font-bold tracking-tighter mb-2">NXTGN // SYSTEMS</div>
+            <div class="text-xs font-mono text-gray-500">INITIALIZING ROBOTICS CORE...</div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-6 left-0 right-0 z-50 px-6 flex justify-center">
+        <div class="glass-card px-8 py-3 rounded-full flex items-center gap-12 shadow-xl shadow-black/5 transition-all hover:scale-[1.02]">
+            <a href="#" class="font-display font-bold text-xl tracking-tighter">NXTGN.</a>
+            <div class="hidden md:flex gap-8 text-sm font-semibold tracking-wide">
+                <a href="#modules" class="hover:text-gray-500 transition-colors">MODULES</a>
+                <a href="#tech" class="hover:text-gray-500 transition-colors">TECH STACK</a>
+                <a href="#schedule" class="hover:text-gray-500 transition-colors">SCHEDULE</a>
+            </div>
+            <a href="#enroll" class="bg-black text-white px-6 py-2 rounded-full text-sm font-bold hover:bg-gray-800 transition-colors">
+                APPLY NOW
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content Wrapper -->
+    <main class="relative z-10">
+
+        <!-- Hero Section -->
+        <section class="min-h-screen flex items-center relative px-6 lg:px-20 pt-20">
+            <div class="w-full lg:w-1/2 relative z-20">
+                <div class="inline-block px-4 py-1 border border-black rounded-full text-xs font-bold uppercase tracking-widest mb-6 bg-white reveal-text">
+                    Summer Cohort 2025
+                </div>
+                <h1 class="font-display text-7xl lg:text-9xl font-bold leading-[0.85] tracking-tighter mb-8 text-black reveal-text">
+                    ROBOTICS<br>
+                    <span class="text-gray-400">REDEFINED.</span>
+                </h1>
+                <p class="text-xl text-gray-600 max-w-md leading-relaxed mb-10 font-medium reveal-text">
+                    Stop assembling toys. Start engineering autonomous IoT systems. A 2-week intensive for future hardware architects.
+                </p>
+                <div class="flex gap-4 reveal-text">
+                    <button onclick="document.getElementById('modules').scrollIntoView()" class="group relative overflow-hidden bg-black text-white px-8 py-4 rounded-2xl font-bold text-lg transition-all hover:scale-105">
+                        <span class="relative z-10">View Curriculum</span>
+                        <div class="absolute inset-0 bg-gray-800 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
+                    </button>
+                    <button class="px-8 py-4 rounded-2xl border-2 border-black font-bold text-lg hover:bg-black hover:text-white transition-colors">
+                        Watch Demo
+                    </button>
+                </div>
+
+                <!-- Stats -->
+                <div class="mt-20 flex gap-12 border-t border-black/10 pt-8 reveal-text">
+                    <div>
+                        <div class="font-display text-4xl font-bold">14</div>
+                        <div class="text-xs font-bold uppercase text-gray-400 tracking-wider">Days</div>
+                    </div>
+                    <div>
+                        <div class="font-display text-4xl font-bold">3+</div>
+                        <div class="text-xs font-bold uppercase text-gray-400 tracking-wider">Projects</div>
+                    </div>
+                    <div>
+                        <div class="font-display text-4xl font-bold">∞</div>
+                        <div class="text-xs font-bold uppercase text-gray-400 tracking-wider">Possibilities</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3D Canvas Host -->
+        <div id="canvas-container"></div>
+
+        <!-- Bento Grid Features -->
+        <section class="px-6 lg:px-20 py-24 bg-white rounded-t-[4rem] relative z-20 shadow-[0_-50px_100px_rgba(0,0,0,0.1)]" id="modules">
+            <div class="max-w-7xl mx-auto">
+                <div class="mb-16">
+                    <h2 class="font-display text-5xl lg:text-6xl font-bold mb-4">Engineering Grade.</h2>
+                    <p class="text-xl text-gray-500">Real hardware. Real code. No drag-and-drop.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 h-auto md:h-[600px]">
+                    <!-- Large Card -->
+                    <div class="md:col-span-2 md:row-span-2 bg-black text-white rounded-[2.5rem] p-10 flex flex-col justify-between group overflow-hidden relative">
+                        <div class="absolute top-0 right-0 w-64 h-64 bg-gray-800 rounded-full blur-[100px] opacity-50 group-hover:opacity-70 transition-opacity"></div>
+                        
+                        <div class="relative z-10">
+                            <span class="border border-white/20 px-3 py-1 rounded-full text-xs mb-4 inline-block">Phase 1</span>
+                            <h3 class="font-display text-4xl font-bold mb-4">The IoT Ecosystem</h3>
+                            <p class="text-gray-400 max-w-md">Learn how machines talk. We dive deep into ESP32 microcontrollers, MQTT protocols, and cloud dashboards. By Day 5, you'll control your robot from your phone anywhere in the world.</p>
+                        </div>
+                        <div class="mt-8 flex gap-2">
+                            <span class="px-4 py-2 bg-white/10 rounded-lg text-sm">C++</span>
+                            <span class="px-4 py-2 bg-white/10 rounded-lg text-sm">Python</span>
+                            <span class="px-4 py-2 bg-white/10 rounded-lg text-sm">WiFi/BLE</span>
+                        </div>
+                        <!-- Decorative Tech Lines -->
+                        <svg class="absolute bottom-0 right-0 w-1/2 h-1/2 text-white/10" viewBox="0 0 100 100" fill="none" stroke="currentColor">
+                            <path d="M0 100 L50 100 L50 50 L100 50" stroke-width="1"/>
+                            <circle cx="50" cy="50" r="4" fill="currentColor"/>
+                        </svg>
+                    </div>
+
+                    <!-- Tall Card -->
+                    <div class="bg-gray-100 rounded-[2.5rem] p-8 flex flex-col justify-center hover:bg-gray-200 transition-colors">
+                        <div class="w-12 h-12 bg-black rounded-xl flex items-center justify-center text-white mb-6">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg>
+                        </div>
+                        <h3 class="font-display text-2xl font-bold mb-2">Structural Design</h3>
+                        <p class="text-sm text-gray-600">3D Printing & Laser Cutting fundamentals to build custom chassis.</p>
+                    </div>
+
+                    <!-- Tall Card -->
+                    <div class="bg-white border border-black rounded-[2.5rem] p-8 flex flex-col justify-center hover:bg-black hover:text-white transition-colors group">
+                        <div class="w-12 h-12 bg-gray-200 group-hover:bg-white/20 rounded-xl flex items-center justify-center text-black group-hover:text-white mb-6 transition-colors">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                        </div>
+                        <h3 class="font-display text-2xl font-bold mb-2">Sensor Fusion</h3>
+                        <p class="text-sm text-gray-500 group-hover:text-gray-300">Combine Gyroscopes, LiDAR, and IR for perfect navigation.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tech Stack Horizontal Scroll -->
+        <section class="py-24 bg-black text-white overflow-hidden" id="tech">
+            <div class="px-6 lg:px-20 mb-12 flex justify-between items-end">
+                <h2 class="font-display text-5xl font-bold">The Arsenal.</h2>
+                <p class="text-gray-500 text-right hidden md:block">Professional tools<br>for students.</p>
+            </div>
+
+            <div class="flex gap-8 px-6 lg:px-20 overflow-x-auto pb-12 no-scrollbar">
+                <!-- Tech Item 1 -->
+                <div class="min-w-[280px] h-[350px] bg-gray-900 rounded-3xl p-6 flex flex-col justify-between border border-white/10 hover:border-white/50 transition-colors cursor-pointer">
+                    <div class="text-6xl font-display font-bold text-white/20">01</div>
+                    <div>
+                        <h3 class="text-2xl font-bold mb-2">Arduino / ESP32</h3>
+                        <p class="text-gray-400 text-sm">The brain of operations. Dual-core processing power with integrated WiFi.</p>
+                    </div>
+                </div>
+
+                <!-- Tech Item 2 -->
+                <div class="min-w-[280px] h-[350px] bg-gray-900 rounded-3xl p-6 flex flex-col justify-between border border-white/10 hover:border-white/50 transition-colors cursor-pointer">
+                    <div class="text-6xl font-display font-bold text-white/20">02</div>
+                    <div>
+                        <h3 class="text-2xl font-bold mb-2">Three.js & WebGL</h3>
+                        <p class="text-gray-400 text-sm">Visualize sensor data in real-time 3D on web dashboards.</p>
+                    </div>
+                </div>
+
+                <!-- Tech Item 3 -->
+                <div class="min-w-[280px] h-[350px] bg-gray-900 rounded-3xl p-6 flex flex-col justify-between border border-white/10 hover:border-white/50 transition-colors cursor-pointer">
+                    <div class="text-6xl font-display font-bold text-white/20">03</div>
+                    <div>
+                        <h3 class="text-2xl font-bold mb-2">Fusion 360</h3>
+                        <p class="text-gray-400 text-sm">CAD design for custom robotic parts and enclosures.</p>
+                    </div>
+                </div>
+
+                <!-- Tech Item 4 -->
+                <div class="min-w-[280px] h-[350px] bg-gray-900 rounded-3xl p-6 flex flex-col justify-between border border-white/10 hover:border-white/50 transition-colors cursor-pointer">
+                    <div class="text-6xl font-display font-bold text-white/20">04</div>
+                    <div>
+                        <h3 class="text-2xl font-bold mb-2">Firebase</h3>
+                        <p class="text-gray-400 text-sm">Realtime database for storing robot logs and telemetry.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Enrollment Form -->
+        <section class="py-32 px-6 lg:px-20 bg-white relative" id="enroll">
+            <div class="max-w-5xl mx-auto">
+                <div class="flex flex-col md:flex-row gap-12">
+                    <div class="w-full md:w-1/2">
+                        <h2 class="font-display text-6xl font-bold leading-tight mb-6">Secure<br>Your Spot.</h2>
+                        <p class="text-xl text-gray-600 mb-8">
+                            Join 20 selected students in building the next generation of intelligent machines.
+                        </p>
+                        <div class="bg-gray-50 rounded-3xl p-6 border border-black/5">
+                            <h4 class="font-bold mb-4">Included in Tuition:</h4>
+                            <ul class="space-y-3">
+                                <li class="flex items-center gap-3">
+                                    <div class="w-2 h-2 bg-black rounded-full"></div>
+                                    <span>Full Robotics Kit (ESP32, Chassis, Sensors)</span>
+                                </li>
+                                <li class="flex items-center gap-3">
+                                    <div class="w-2 h-2 bg-black rounded-full"></div>
+                                    <span>Lunch & Refreshments</span>
+                                </li>
+                                <li class="flex items-center gap-3">
+                                    <div class="w-2 h-2 bg-black rounded-full"></div>
+                                    <span>Lifetime Access to Codebase</span>
+                                </li>
+                                <li class="flex items-center gap-3">
+                                    <div class="w-2 h-2 bg-black rounded-full"></div>
+                                    <span>Certificate of Completion</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="w-full md:w-1/2">
+                        <form class="space-y-6">
+                            <div class="space-y-2">
+                                <label class="text-sm font-bold ml-4 uppercase tracking-wider">Student Name</label>
+                                <input type="text" class="w-full bg-gray-100 rounded-2xl px-6 py-4 font-medium focus:outline-none focus:ring-2 focus:ring-black transition-all" placeholder="Alex Smith">
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <label class="text-sm font-bold ml-4 uppercase tracking-wider">Email Address</label>
+                                <input type="email" class="w-full bg-gray-100 rounded-2xl px-6 py-4 font-medium focus:outline-none focus:ring-2 focus:ring-black transition-all" placeholder="alex@example.com">
+                            </div>
+
+                            <div class="space-y-2">
+                                <label class="text-sm font-bold ml-4 uppercase tracking-wider">Experience Level</label>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <label class="cursor-pointer">
+                                        <input type="radio" name="level" class="peer sr-only">
+                                        <div class="bg-gray-100 rounded-2xl px-6 py-4 text-center font-medium peer-checked:bg-black peer-checked:text-white transition-all">Beginner</div>
+                                    </label>
+                                    <label class="cursor-pointer">
+                                        <input type="radio" name="level" class="peer sr-only">
+                                        <div class="bg-gray-100 rounded-2xl px-6 py-4 text-center font-medium peer-checked:bg-black peer-checked:text-white transition-all">Advanced</div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <button class="w-full bg-black text-white font-bold text-xl rounded-2xl py-5 hover:scale-[1.02] transition-transform shadow-xl">
+                                Apply Now ($299)
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="bg-black text-white py-12 px-6 text-center border-t border-white/10">
+            <h2 class="font-display text-2xl font-bold mb-4">NXTGN.</h2>
+            <p class="text-gray-500 text-sm">© 2025 NextGen Robotics Camp. All Systems Operational.</p>
+        </footer>
+
+    </main>
+
+    <script>
+        // --- 1. Three.js Robotic Arm Setup ---
+        const initThreeJS = () => {
+            const container = document.getElementById('canvas-container');
+            const scene = new THREE.Scene();
+            
+            // Setup Camera
+            const camera = new THREE.PerspectiveCamera(35, container.offsetWidth / container.offsetHeight, 0.1, 1000);
+            camera.position.set(20, 15, 20);
+            camera.lookAt(0, 2, 0);
+
+            // Setup Renderer
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.offsetWidth, container.offsetHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+
+            // Materials
+            const matBlack = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.7, metalness: 0.1 });
+            const matWhite = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2, metalness: 0.1 });
+            const matChrome = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, roughness: 0.1, metalness: 0.9 });
+            const matGlow = new THREE.MeshBasicMaterial({ color: 0x00ff00 }); // Status light
+
+            // --- Build the Robot ---
+            const robotGroup = new THREE.Group();
+            scene.add(robotGroup);
+
+            // 1. Base
+            const baseGeo = new THREE.CylinderGeometry(4, 4.5, 1, 32);
+            const base = new THREE.Mesh(baseGeo, matBlack);
+            base.position.y = 0.5;
+            base.castShadow = true;
+            base.receiveShadow = true;
+            robotGroup.add(base);
+
+            // 2. Rotator (Turret)
+            const turretGroup = new THREE.Group();
+            turretGroup.position.y = 1;
+            robotGroup.add(turretGroup);
+
+            const turretGeo = new THREE.CylinderGeometry(2.5, 2.5, 1.5, 32);
+            const turret = new THREE.Mesh(turretGeo, matWhite);
+            turret.position.y = 0.75;
+            turret.castShadow = true;
+            turretGroup.add(turret);
+
+            // 3. Shoulder Joint
+            const shoulderGeo = new THREE.CylinderGeometry(1.2, 1.2, 3, 32);
+            const shoulder = new THREE.Mesh(shoulderGeo, matBlack);
+            shoulder.rotation.z = Math.PI / 2;
+            shoulder.position.y = 1.5;
+            turretGroup.add(shoulder);
+
+            // 4. Lower Arm
+            const arm1Group = new THREE.Group();
+            arm1Group.position.y = 1.5;
+            turretGroup.add(arm1Group);
+
+            const arm1Geo = new THREE.BoxGeometry(1, 5, 1.5);
+            const arm1 = new THREE.Mesh(arm1Geo, matWhite);
+            arm1.position.y = 2.5; // Half height
+            arm1.castShadow = true;
+            arm1Group.add(arm1);
+
+            // Piston detail
+            const pistonGeo = new THREE.CylinderGeometry(0.2, 0.2, 4);
+            const piston = new THREE.Mesh(pistonGeo, matChrome);
+            piston.position.set(0.8, 2.5, 0);
+            arm1Group.add(piston);
+
+            // 5. Elbow Joint
+            const elbowGeo = new THREE.CylinderGeometry(1, 1, 2.2, 32);
+            const elbow = new THREE.Mesh(elbowGeo, matBlack);
+            elbow.rotation.z = Math.PI / 2;
+            elbow.position.y = 5;
+            arm1Group.add(elbow);
+
+            // 6. Upper Arm (Forearm)
+            const arm2Group = new THREE.Group();
+            arm2Group.position.y = 5;
+            arm1Group.add(arm2Group);
+
+            const arm2Geo = new THREE.BoxGeometry(0.8, 4, 1.2);
+            const arm2 = new THREE.Mesh(arm2Geo, matWhite);
+            arm2.position.y = 2;
+            arm2.castShadow = true;
+            arm2Group.add(arm2);
+
+            // 7. Wrist/End Effector
+            const wristGeo = new THREE.SphereGeometry(0.8);
+            const wrist = new THREE.Mesh(wristGeo, matBlack);
+            wrist.position.y = 4;
+            arm2Group.add(wrist);
+
+            // Claw
+            const clawGroup = new THREE.Group();
+            clawGroup.position.y = 4;
+            arm2Group.add(clawGroup);
+
+            const clawPartGeo = new THREE.BoxGeometry(0.2, 1.5, 0.5);
+            const clawL = new THREE.Mesh(clawPartGeo, matChrome);
+            clawL.position.set(-0.4, 0.8, 0);
+            clawL.rotation.z = 0.2;
+            clawGroup.add(clawL);
+
+            const clawR = new THREE.Mesh(clawPartGeo, matChrome);
+            clawR.position.set(0.4, 0.8, 0);
+            clawR.rotation.z = -0.2;
+            clawGroup.add(clawR);
+
+            // Status Light
+            const lightGeo = new THREE.SphereGeometry(0.2);
+            const lightMesh = new THREE.Mesh(lightGeo, matGlow);
+            lightMesh.position.set(0, 1.5, 0.8);
+            arm1.add(lightMesh);
+
+            // --- Lighting ---
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+
+            const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+            dirLight.position.set(10, 20, 10);
+            dirLight.castShadow = true;
+            dirLight.shadow.mapSize.width = 1024;
+            dirLight.shadow.mapSize.height = 1024;
+            scene.add(dirLight);
+
+            // Floor (Invisible but catches shadow)
+            const floorGeo = new THREE.PlaneGeometry(50, 50);
+            const floorMat = new THREE.ShadowMaterial({ opacity: 0.1 });
+            const floor = new THREE.Mesh(floorGeo, floorMat);
+            floor.rotation.x = -Math.PI / 2;
+            floor.receiveShadow = true;
+            scene.add(floor);
+
+            // --- Animation Variables ---
+            let mouseX = 0;
+            let mouseY = 0;
+            
+            document.addEventListener('mousemove', (e) => {
+                const windowHalfX = window.innerWidth / 2;
+                const windowHalfY = window.innerHeight / 2;
+                mouseX = (e.clientX - windowHalfX) * 0.001;
+                mouseY = (e.clientY - windowHalfY) * 0.001;
+            });
+
+            // --- Render Loop ---
+            const clock = new THREE.Clock();
+
+            function animate() {
+                requestAnimationFrame(animate);
+                const t = clock.getElapsedTime();
+
+                // 1. Turret Rotation (Y-axis follow mouse)
+                turretGroup.rotation.y += ((-mouseX * 2) - turretGroup.rotation.y) * 0.05;
+
+                // 2. Arm 1 Movement (Bobbing + Mouse Y)
+                const targetArm1Rot = Math.sin(t * 0.5) * 0.2 + (mouseY * 1.5) + 0.5; // Base tilt
+                arm1Group.rotation.x += (targetArm1Rot - arm1Group.rotation.x) * 0.05;
+
+                // 3. Arm 2 Movement (Opposite compensation)
+                const targetArm2Rot = -Math.sin(t * 0.5) * 0.4 - 1.0;
+                arm2Group.rotation.x += (targetArm2Rot - arm2Group.rotation.x) * 0.05;
+
+                // 4. Claw Spinning
+                clawGroup.rotation.y += 0.02;
+
+                // 5. Pulse Light
+                const pulse = (Math.sin(t * 5) + 1) / 2; // 0 to 1
+                matGlow.color.setHSL(0.33, 1, 0.3 + pulse * 0.4);
+
+                renderer.render(scene, camera);
+            }
+
+            animate();
+
+            // Resize
+            window.addEventListener('resize', () => {
+                camera.aspect = container.offsetWidth / container.offsetHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.offsetWidth, container.offsetHeight);
+            });
+        };
+
+        // --- 2. GSAP Animations ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Remove Loader
+            setTimeout(() => {
+                const loader = document.getElementById('loader');
+                loader.style.opacity = '0';
+                setTimeout(() => loader.remove(), 500);
+                
+                // Init 3D after loader
+                initThreeJS();
+                
+                // Trigger Text Reveals
+                gsap.to('.reveal-text', {
+                    y: 0,
+                    opacity: 1,
+                    duration: 1.2,
+                    stagger: 0.1,
+                    ease: "power3.out"
+                });
+            }, 1500);
+            
+            // Scroll Animations for Sections
+            gsap.utils.toArray('section').forEach(section => {
+                gsap.from(section.children, {
+                    scrollTrigger: {
+                        trigger: section,
+                        start: "top 80%",
+                    },
+                    y: 50,
+                    opacity: 0,
+                    duration: 1,
+                    stagger: 0.2,
+                    ease: "power3.out"
+                });
+            });
+        });
+
+    </script>
+</body>
+</html>
