@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOPE INT CORE | Future Ecosystem</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- GSAP for High-End Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Syne:wght@400;500;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Syne', 'sans-serif'],
+                    },
+                    colors: {
+                        black: '#0a0a0a',
+                        offwhite: '#e8e8e3',
+                        accent: '#2b2b2b',
+                    },
+                    backgroundImage: {
+                        'noise': "url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22 opacity=%220.05%22/%3E%3C/svg%3E')",
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --cursor-size: 20px;
+        }
+
+        body {
+            background-color: #0a0a0a;
+            color: #e8e8e3;
+            overflow-x: hidden;
+            cursor: none; /* Hide default cursor */
+        }
+
+        /* --- CUSTOM CURSOR --- */
+        #cursor {
+            position: fixed;
+            top: 0; left: 0;
+            width: var(--cursor-size);
+            height: var(--cursor-size);
+            border: 1px solid rgba(255,255,255,0.5);
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s, background 0.3s;
+            mix-blend-mode: difference;
+        }
+        #cursor.hovered {
+            width: 50px;
+            height: 50px;
+            background: #fff;
+            border-color: #fff;
+            mix-blend-mode: difference;
+        }
+
+        /* --- NOISE OVERLAY --- */
+        .noise-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 50;
+            background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.8%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22 opacity=%220.07%22/%3E%3C/svg%3E');
+        }
+
+        /* --- UTILS --- */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .clip-text-image {
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(180deg, #fff, #666);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #0a0a0a; }
+        ::-webkit-scrollbar-thumb { background: #333; }
+
+        /* Loader */
+        .loader-curtain {
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+            transition: clip-path 1s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+        .loader-curtain.hidden {
+            clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
+        }
+
+        /* 3D Container */
+        #webgl-container {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100vh;
+            z-index: -1;
+            opacity: 0.4;
+            transition: opacity 1s ease;
+        }
+
+        .magnetic-btn {
+            display: inline-block;
+            transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+    </style>
+</head>
+<body class="selection:bg-white selection:text-black">
+
+    <!-- CURSOR -->
+    <div id="cursor"></div>
+
+    <!-- NOISE -->
+    <div class="noise-overlay"></div>
+
+    <!-- 3D BACKGROUND -->
+    <div id="webgl-container"></div>
+
+    <!-- LOADER -->
+    <div id="loader" class="loader-curtain fixed inset-0 bg-white z-[100] flex items-center justify-center">
+        <h1 class="font-display text-black text-4xl md:text-6xl font-bold tracking-tighter animate-pulse">
+            HOPE<span class="text-gray-400">CORE</span>
+        </h1>
+    </div>
+
+    <!-- HEADER (Minimal) -->
+    <header class="fixed top-0 left-0 w-full z-40 px-6 py-6 flex justify-between items-start mix-blend-difference text-white">
+        <div class="hover-trigger" data-cursor="hovered">
+            <span class="font-display font-bold text-xl tracking-tighter">HOPE_INT</span>
+            <div class="text-[10px] uppercase tracking-widest opacity-60">System v2.0</div>
+        </div>
+        
+        <button onclick="openModal('contact')" class="hover-trigger group flex items-center gap-2" data-cursor="hovered">
+            <span class="text-sm font-medium hidden md:block group-hover:underline">Get in touch</span>
+            <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+        </button>
+    </header>
+
+    <!-- FLOATING DOCK NAV -->
+    <nav class="fixed bottom-8 left-1/2 -translate-x-1/2 z-40">
+        <div class="glass-card rounded-full p-2 flex items-center gap-1 shadow-2xl scale-95 hover:scale-100 transition-transform duration-300">
+            <button onclick="router('home')" class="nav-btn w-12 h-12 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors text-white relative group" data-page="home" data-cursor="hovered">
+                <i data-lucide="home" class="w-5 h-5"></i>
+                <span class="absolute -top-10 bg-white text-black text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Home</span>
+            </button>
+            <button onclick="router('education')" class="nav-btn w-12 h-12 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors text-gray-400 hover:text-white relative group" data-page="education" data-cursor="hovered">
+                <i data-lucide="book-open" class="w-5 h-5"></i>
+                <span class="absolute -top-10 bg-white text-black text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Edu</span>
+            </button>
+            <button onclick="router('iot')" class="nav-btn w-12 h-12 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors text-gray-400 hover:text-white relative group" data-page="iot" data-cursor="hovered">
+                <i data-lucide="cpu" class="w-5 h-5"></i>
+                <span class="absolute -top-10 bg-white text-black text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Labs</span>
+            </button>
+            <div class="w-px h-6 bg-white/20 mx-1"></div>
+            <button onclick="router('shop')" class="nav-btn w-12 h-12 rounded-full flex items-center justify-center bg-white text-black hover:bg-gray-200 transition-colors relative group" data-page="shop" data-cursor="hovered">
+                <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+                <span class="absolute -top-10 bg-white text-black text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Shop</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="relative z-10 min-h-screen">
+
+        <!-- HOME PAGE -->
+        <section id="home" class="page-section min-h-screen flex flex-col justify-center px-4 md:px-12 pt-20">
+            <div class="max-w-[1800px] mx-auto w-full relative">
+                
+                <!-- Status Badge -->
+                <div class="inline-flex items-center gap-3 border border-white/20 rounded-full px-4 py-2 mb-8 backdrop-blur-sm fade-in">
+                    <span class="w-2 h-2 bg-white rounded-full"></span>
+                    <span class="text-xs uppercase tracking-widest font-mono">Admissions Open 2025</span>
+                </div>
+
+                <!-- Massive Hero Text -->
+                <h1 class="font-display text-[14vw] leading-[0.8] font-bold tracking-tighter mix-blend-overlay opacity-90 select-none">
+                    <div class="overflow-hidden"><span class="reveal-text block">FLUID</span></div>
+                    <div class="overflow-hidden"><span class="reveal-text block text-transparent stroke-text" style="-webkit-text-stroke: 2px rgba(255,255,255,0.5);">INNO</span></div>
+                    <div class="overflow-hidden"><span class="reveal-text block text-right">VATION</span></div>
+                </h1>
+
+                <!-- Subtext & CTA -->
+                <div class="flex flex-col md:flex-row justify-between items-end mt-12 gap-8 fade-in delay-200">
+                    <p class="max-w-md text-lg text-gray-400 font-light leading-relaxed">
+                        An integrated ecosystem merging B.Tech academic resources with advanced robotic laboratories and essential student supplies.
+                    </p>
+                    
+                    <button onclick="router('education')" class="magnetic-btn hover-trigger group relative px-8 py-4 bg-white text-black rounded-full font-bold overflow-hidden" data-cursor="hovered">
+                        <span class="relative z-10 group-hover:text-white transition-colors duration-300">Start Exploring</span>
+                        <div class="absolute inset-0 bg-black translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out"></div>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- EDUCATION PAGE -->
+        <section id="education" class="page-section hidden min-h-screen pt-32 px-4 md:px-12 pb-32">
+            <div class="max-w-7xl mx-auto">
+                <div class="mb-16">
+                    <h2 class="font-display text-6xl md:text-8xl font-bold mb-6">ACADEMIC<br><span class="text-gray-600">FLUIDITY</span></h2>
+                    <p class="text-xl text-gray-400">Resources that adapt to your semester.</p>
+                </div>
+
+                <!-- Bento Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                    <!-- Notes Card (Big) -->
+                    <div class="glass-card md:col-span-8 p-8 rounded-[2rem] hover:bg-white/5 transition-colors group cursor-pointer hover-trigger" data-cursor="hovered">
+                        <div class="flex justify-between items-start mb-12">
+                            <div class="p-3 bg-white/10 rounded-full"><i data-lucide="book" class="text-white"></i></div>
+                            <i data-lucide="arrow-up-right" class="opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                        </div>
+                        <h3 class="text-3xl font-display font-bold mb-2">KTU Repository</h3>
+                        <p class="text-gray-400">Full access to Modules 1-5, updated for 2025 syllabus. Includes AI-summarized key points.</p>
+                    </div>
+
+                    <!-- Audio Card -->
+                    <div class="glass-card md:col-span-4 p-8 rounded-[2rem] hover:bg-white/5 transition-colors group cursor-pointer hover-trigger" data-cursor="hovered">
+                        <div class="flex justify-between items-start mb-12">
+                            <div class="p-3 bg-white/10 rounded-full"><i data-lucide="headphones" class="text-white"></i></div>
+                            <div class="animate-pulse flex gap-1 items-end h-4">
+                                <div class="w-1 h-2 bg-white"></div>
+                                <div class="w-1 h-4 bg-white"></div>
+                                <div class="w-1 h-3 bg-white"></div>
+                            </div>
+                        </div>
+                        <h3 class="text-3xl font-display font-bold mb-2">Audio Lecs</h3>
+                        <p class="text-gray-400">Listen on the go.</p>
+                    </div>
+
+                    <!-- PYQ Card -->
+                    <div class="glass-card md:col-span-4 p-8 rounded-[2rem] hover:bg-white/5 transition-colors group cursor-pointer hover-trigger" data-cursor="hovered">
+                        <h3 class="text-5xl font-display font-bold mb-2">PYQ</h3>
+                        <p class="text-gray-400">Previous Year Questions Analysis.</p>
+                    </div>
+
+                    <!-- Community Card -->
+                    <div class="glass-card md:col-span-8 p-8 rounded-[2rem] flex items-center justify-between hover:bg-white/5 transition-colors group cursor-pointer hover-trigger" data-cursor="hovered">
+                        <div>
+                            <h3 class="text-3xl font-display font-bold mb-2">Peer Network</h3>
+                            <p class="text-gray-400">Connect with toppers from other colleges.</p>
+                        </div>
+                        <div class="flex -space-x-4">
+                            <div class="w-12 h-12 rounded-full bg-gray-700 border-2 border-black"></div>
+                            <div class="w-12 h-12 rounded-full bg-gray-600 border-2 border-black"></div>
+                            <div class="w-12 h-12 rounded-full bg-gray-500 border-2 border-black flex items-center justify-center text-xs font-bold">+40</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- IOT LABS PAGE -->
+        <section id="iot" class="page-section hidden min-h-screen pt-32 px-4 md:px-12 pb-32">
+            <div class="max-w-7xl mx-auto flex flex-col md:flex-row gap-12">
+                <div class="md:w-1/2">
+                    <div class="sticky top-32">
+                        <div class="text-xs font-mono border border-green-500 text-green-500 px-2 py-1 inline-block rounded mb-4 animate-pulse">SYSTEM ONLINE</div>
+                        <h2 class="font-display text-7xl font-bold mb-8 leading-tight">HARDWARE<br>IS HARD.<br><span class="text-gray-600">WE MAKE IT EASY.</span></h2>
+                        <p class="text-xl text-gray-400 mb-8 max-w-md">
+                            Join our 14-day intensive summer bootcamps. We provide the kits, the workspace, and the coffee. You bring the code.
+                        </p>
+                        <button onclick="openModal('register')" class="magnetic-btn hover-trigger px-8 py-4 border border-white/30 rounded-full hover:bg-white hover:text-black transition-colors" data-cursor="hovered">
+                            Apply for Batch '25
+                        </button>
+                    </div>
+                </div>
+
+                <div class="md:w-1/2 space-y-4">
+                    <!-- Project Items -->
+                    <div class="glass-card p-6 rounded-2xl group hover:border-green-500/50 transition-colors">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="font-mono text-xs text-gray-500">01</span>
+                            <i data-lucide="plane" class="text-gray-500 group-hover:text-green-500 transition-colors"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-2">Drone Dynamics</h3>
+                        <p class="text-sm text-gray-400">Build and stabilize a quadcopter from scratch using PID controllers.</p>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-2xl group hover:border-green-500/50 transition-colors">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="font-mono text-xs text-gray-500">02</span>
+                            <i data-lucide="wifi" class="text-gray-500 group-hover:text-green-500 transition-colors"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-2">Home Automation</h3>
+                        <p class="text-sm text-gray-400">ESP32 based smart switching with Alexa integration.</p>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-2xl group hover:border-green-500/50 transition-colors">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="font-mono text-xs text-gray-500">03</span>
+                            <i data-lucide="cpu" class="text-gray-500 group-hover:text-green-500 transition-colors"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-2">PCB Design</h3>
+                        <p class="text-sm text-gray-400">From schematic to KiCad Gerber files in 48 hours.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SHOP PAGE -->
+        <section id="shop" class="page-section hidden min-h-screen pt-32 px-4 md:px-12 pb-32">
+            <div class="text-center mb-20">
+                <h2 class="font-display text-6xl font-bold">SUPPLY CHAIN</h2>
+                <div class="h-1 w-20 bg-white mx-auto mt-6 rounded-full"></div>
+            </div>
+
+            <div class="max-w-[1600px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                
+                <!-- Print Service -->
+                <div class="lg:col-span-2 glass-card p-10 rounded-[2.5rem] relative overflow-hidden group hover-trigger" data-cursor="hovered">
+                    <div class="relative z-10 max-w-lg">
+                        <h3 class="text-4xl font-display font-bold mb-4">Print On Demand</h3>
+                        <p class="text-gray-400 mb-8 text-lg">Upload your records or thesis. We print, bind (spiral/hard), and deliver to your hostel lobby by 8 PM.</p>
+                        <button class="px-6 py-3 bg-white text-black rounded-full font-bold hover:scale-105 transition-transform">Upload PDF</button>
+                    </div>
+                    <div class="absolute right-0 top-0 w-1/2 h-full opacity-20 bg-gradient-to-l from-white to-transparent pointer-events-none"></div>
+                    <i data-lucide="printer" class="absolute bottom-10 right-10 w-24 h-24 text-white/10 rotate-12 group-hover:rotate-0 transition-transform duration-500"></i>
+                </div>
+
+                <!-- Product 1 -->
+                <div class="glass-card p-8 rounded-[2.5rem] flex flex-col justify-between group hover:bg-white transition-colors duration-500 hover-trigger" data-cursor="hovered">
+                    <div class="w-full aspect-square bg-gray-800 rounded-2xl mb-6 relative overflow-hidden">
+                        <!-- Placeholder for product image -->
+                        <div class="absolute inset-0 flex items-center justify-center text-gray-600 font-display text-4xl font-bold group-hover:text-gray-300">UNO</div>
+                    </div>
+                    <div class="flex justify-between items-end">
+                        <div>
+                            <h4 class="text-xl font-bold group-hover:text-black transition-colors">Starter Kit</h4>
+                            <p class="text-gray-500 text-sm group-hover:text-gray-600">Arduino + Sensors</p>
+                        </div>
+                        <span class="text-xl font-bold group-hover:text-black">₹1,499</span>
+                    </div>
+                </div>
+
+                <!-- Product 2 -->
+                <div class="glass-card p-8 rounded-[2.5rem] flex flex-col justify-between group hover:bg-white transition-colors duration-500 hover-trigger" data-cursor="hovered">
+                    <div class="w-full aspect-square bg-gray-800 rounded-2xl mb-6 relative overflow-hidden">
+                        <div class="absolute inset-0 flex items-center justify-center text-gray-600 font-display text-4xl font-bold group-hover:text-gray-300">PI</div>
+                    </div>
+                    <div class="flex justify-between items-end">
+                        <div>
+                            <h4 class="text-xl font-bold group-hover:text-black transition-colors">Raspberry Pi 5</h4>
+                            <p class="text-gray-500 text-sm group-hover:text-gray-600">8GB RAM</p>
+                        </div>
+                        <span class="text-xl font-bold group-hover:text-black">₹7,999</span>
+                    </div>
+                </div>
+
+                <!-- Product 3 -->
+                <div class="glass-card p-8 rounded-[2.5rem] flex flex-col justify-between group hover:bg-white transition-colors duration-500 hover-trigger" data-cursor="hovered">
+                    <div class="w-full aspect-square bg-gray-800 rounded-2xl mb-6 relative overflow-hidden">
+                        <div class="absolute inset-0 flex items-center justify-center text-gray-600 font-display text-4xl font-bold group-hover:text-gray-300">TOOLS</div>
+                    </div>
+                    <div class="flex justify-between items-end">
+                        <div>
+                            <h4 class="text-xl font-bold group-hover:text-black transition-colors">Soldering Station</h4>
+                            <p class="text-gray-500 text-sm group-hover:text-gray-600">60W Temp Control</p>
+                        </div>
+                        <span class="text-xl font-bold group-hover:text-black">₹1,200</span>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL -->
+    <div id="modal-wrapper" class="fixed inset-0 z-[80] hidden items-center justify-center px-4">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeModal()"></div>
+        <div class="glass-card relative w-full max-w-lg p-10 rounded-[2rem] border border-white/20 transform transition-all scale-95 opacity-0" id="modal-content">
+            <button onclick="closeModal()" class="absolute top-6 right-6 text-gray-400 hover:text-white"><i data-lucide="x"></i></button>
+            <h2 class="font-display text-4xl font-bold mb-2">Connect</h2>
+            <p class="text-gray-400 mb-8">Join the discord or drop us a query.</p>
+            
+            <form class="space-y-4" onsubmit="event.preventDefault(); closeModal();">
+                <input type="text" placeholder="Name" class="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-gray-600 focus:outline-none focus:border-white/50 transition-colors">
+                <input type="email" placeholder="Email" class="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-gray-600 focus:outline-none focus:border-white/50 transition-colors">
+                <button class="w-full bg-white text-black font-bold py-4 rounded-xl hover:bg-gray-200 transition-colors">Send Signal</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. SETUP & INIT ---
+        lucide.createIcons();
+        const cursor = document.getElementById('cursor');
+        const loader = document.getElementById('loader');
+
+        // --- 2. CUSTOM CURSOR & MAGNETIC BUTTONS ---
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+
+        const hoverTriggers = document.querySelectorAll('.hover-trigger');
+        hoverTriggers.forEach(el => {
+            el.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
+            el.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+        });
+
+        // Magnetic Effect
+        const magnets = document.querySelectorAll('.magnetic-btn');
+        magnets.forEach((btn) => {
+            btn.addEventListener('mousemove', (e) => {
+                const rect = btn.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                btn.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px)`;
+            });
+            btn.addEventListener('mouseleave', () => {
+                btn.style.transform = 'translate(0px, 0px)';
+            });
+        });
+
+        // --- 3. GSAP ANIMATIONS ---
+        // Intro Animation
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                loader.classList.add('hidden');
+                
+                // Animate Home Elements
+                const tl = gsap.timeline();
+                tl.from(".reveal-text", {
+                    y: 200,
+                    duration: 1.5,
+                    stagger: 0.1,
+                    ease: "power4.out",
+                    delay: 0.2
+                })
+                .to(".fade-in", {
+                    opacity: 1,
+                    y: 0,
+                    duration: 1,
+                    stagger: 0.2,
+                    ease: "power2.out"
+                }, "-=1");
+
+            }, 1000);
+        });
+
+        // --- 4. ROUTER ---
+        function router(pageId) {
+            // Update Nav State
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                const icon = btn.querySelector('i');
+                if(btn.dataset.page === pageId) {
+                    btn.classList.remove('text-gray-400', 'hover:text-white', 'hover:bg-white/10');
+                    btn.classList.add('bg-white', 'text-black');
+                } else {
+                    btn.classList.add('text-gray-400', 'hover:text-white', 'hover:bg-white/10');
+                    btn.classList.remove('bg-white', 'text-black');
+                }
+            });
+
+            // Switch Sections with GSAP
+            const currentSection = document.querySelector('section:not(.hidden)');
+            const nextSection = document.getElementById(pageId);
+
+            if (currentSection && currentSection.id !== pageId) {
+                gsap.to(currentSection, {
+                    opacity: 0,
+                    y: -50,
+                    duration: 0.5,
+                    onComplete: () => {
+                        currentSection.classList.add('hidden');
+                        nextSection.classList.remove('hidden');
+                        
+                        // Reset pos for entry
+                        gsap.set(nextSection, { opacity: 0, y: 50 });
+                        
+                        gsap.to(nextSection, {
+                            opacity: 1,
+                            y: 0,
+                            duration: 0.8,
+                            ease: "power2.out",
+                            onComplete: () => {
+                                ScrollTrigger.refresh(); // Refresh scroll animations
+                            }
+                        });
+                        window.scrollTo(0,0);
+                    }
+                });
+            }
+        }
+
+        // --- 5. MODAL LOGIC ---
+        function openModal(id) {
+            const wrapper = document.getElementById('modal-wrapper');
+            const content = document.getElementById('modal-content');
+            wrapper.classList.remove('hidden');
+            wrapper.classList.add('flex');
+            
+            // Anim
+            gsap.to(content, { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(1.7)" });
+        }
+
+        function closeModal() {
+            const wrapper = document.getElementById('modal-wrapper');
+            const content = document.getElementById('modal-content');
+            
+            gsap.to(content, { scale: 0.95, opacity: 0, duration: 0.3, onComplete: () => {
+                wrapper.classList.add('hidden');
+                wrapper.classList.remove('flex');
+            }});
+        }
+
+        // --- 6. THREE.JS "LIQUID" BACKGROUND ---
+        // A morphing sphere that acts as the "core" fluid
+        const initThree = () => {
+            const container = document.getElementById('webgl-container');
+            const scene = new THREE.Scene();
+            
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 2;
+
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container.appendChild(renderer.domElement);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0x404040, 2);
+            scene.add(ambientLight);
+
+            const pointLight = new THREE.PointLight(0xffffff, 2);
+            pointLight.position.set(2, 3, 4);
+            scene.add(pointLight);
+
+            const pointLight2 = new THREE.PointLight(0x4444ff, 2);
+            pointLight2.position.set(-2, -3, 4);
+            scene.add(pointLight2);
+
+            // Geometry - High Segment Sphere for displacement
+            const geometry = new THREE.IcosahedronGeometry(1, 64);
+            
+            // Material - "Liquid Chrome/Oil" look
+            const material = new THREE.MeshPhysicalMaterial({
+                color: 0x111111,
+                metalness: 0.9,
+                roughness: 0.1,
+                clearcoat: 1.0,
+                clearcoatRoughness: 0.1,
+                wireframe: false
+            });
+
+            const sphere = new THREE.Mesh(geometry, material);
+            scene.add(sphere);
+
+            // Store original positions for noise calculation
+            const originalPositions = geometry.attributes.position.array.slice();
+
+            // Simple Perlin-ish noise function for displacement
+            // (Using sine waves for performance/simplicity in single file)
+            const animate = () => {
+                requestAnimationFrame(animate);
+
+                const time = Date.now() * 0.001;
+                const positions = geometry.attributes.position.array;
+
+                for (let i = 0; i < positions.length; i += 3) {
+                    // Get original coords
+                    const ox = originalPositions[i];
+                    const oy = originalPositions[i+1];
+                    const oz = originalPositions[i+2];
+
+                    // Normalize
+                    const vector = new THREE.Vector3(ox, oy, oz).normalize();
+                    
+                    // Noise calculation based on time and position
+                    const noise = Math.sin(vector.x * 2.0 + time) * Math.cos(vector.y * 1.5 + time) * Math.sin(vector.z * 2.0 + time) * 0.3;
+
+                    // Apply displacement
+                    const scale = 1 + noise;
+                    
+                    positions[i] = ox * scale;
+                    positions[i+1] = oy * scale;
+                    positions[i+2] = oz * scale;
+                }
+
+                geometry.attributes.position.needsUpdate = true;
+                geometry.computeVertexNormals();
+
+                // Gentle Rotation
+                sphere.rotation.y += 0.002;
+                sphere.rotation.z += 0.001;
+
+                // Mouse interaction parallax
+                const mouseX = (window.mouseX || 0) * 0.05;
+                const mouseY = (window.mouseY || 0) * 0.05;
+                
+                sphere.rotation.x += (mouseY - sphere.rotation.x) * 0.05;
+                sphere.rotation.y += (mouseX - sphere.rotation.y) * 0.05;
+
+                renderer.render(scene, camera);
+            };
+
+            animate();
+
+            // Handle Resize
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+
+            // Track Mouse for Parallax
+            window.addEventListener('mousemove', (e) => {
+                window.mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+                window.mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+            });
+        };
+
+        // Initialize 3D Background
+        initThree();
+
+    </script>
+</body>
+</html>
