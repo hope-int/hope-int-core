@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOPE CORE | Hyperlab</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fonts: Clash Display & Space Grotesk -->
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@200,400,500,600,700&f[]=space-grotesk@300,400,500,700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        void: '#030303',
+                        cement: '#111111',
+                        border: '#222222',
+                        acid: '#CCFF00', // The "Cyber Lime" accent
+                        glass: 'rgba(255, 255, 255, 0.03)',
+                    },
+                    fontFamily: {
+                        sans: ['Space Grotesk', 'sans-serif'],
+                        display: ['Clash Display', 'sans-serif'],
+                    },
+                    backgroundImage: {
+                        'noise': "url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22 opacity=%220.05%22/%3E%3C/svg%3E')",
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #030303;
+            color: #ffffff;
+            overflow-x: hidden;
+            cursor: none; /* We build a custom cursor */
+        }
+
+        /* --- UI UTILITIES --- */
+        .clip-text-image {
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* Custom Cursor */
+        .cursor-dot {
+            width: 8px; height: 8px; background: #CCFF00;
+            position: fixed; top: 0; left: 0; z-index: 9999;
+            border-radius: 50%; pointer-events: none;
+        }
+        .cursor-outline {
+            width: 40px; height: 40px; border: 1px solid rgba(255,255,255,0.3);
+            position: fixed; top: 0; left: 0; z-index: 9998;
+            border-radius: 50%; pointer-events: none;
+            transition: width 0.2s, height 0.2s, background-color 0.2s;
+        }
+        body.hovering .cursor-outline {
+            width: 60px; height: 60px;
+            background-color: rgba(204, 255, 0, 0.1);
+            border-color: #CCFF00;
+        }
+
+        /* Glass Panel */
+        .glass-card {
+            background: rgba(20, 20, 20, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Bento Grid Layouts */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1.5rem;
+        }
+
+        /* Glitch Text Effect Support */
+        .glitch-hover:hover {
+            animation: glitch 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
+            color: #CCFF00;
+        }
+        @keyframes glitch {
+            0% { transform: translate(0) }
+            20% { transform: translate(-2px, 2px) }
+            40% { transform: translate(-2px, -2px) }
+            60% { transform: translate(2px, 2px) }
+            80% { transform: translate(2px, -2px) }
+            100% { transform: translate(0) }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #030303; }
+        ::-webkit-scrollbar-thumb { background: #333; }
+        ::-webkit-scrollbar-thumb:hover { background: #CCFF00; }
+
+        /* Loader */
+        .loader-overlay {
+            position: fixed; inset: 0; z-index: 10000;
+            background: #030303; display: flex; align-items: center; justify-content: center;
+        }
+    </style>
+</head>
+<body class="selection:bg-acid selection:text-black">
+
+    <!-- CURSOR -->
+    <div class="cursor-dot" id="cursor-dot"></div>
+    <div class="cursor-outline" id="cursor-outline"></div>
+
+    <!-- PRELOADER -->
+    <div class="loader-overlay" id="loader">
+        <div class="text-center">
+            <h1 class="font-display text-4xl font-bold tracking-tighter" id="loader-text">HOPE<span class="text-acid">CORE</span></h1>
+            <div class="w-48 h-1 bg-gray-900 mt-4 overflow-hidden">
+                <div class="h-full bg-acid w-0" id="loader-bar"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3D BACKGROUND -->
+    <div id="canvas-container" class="fixed inset-0 z-0 pointer-events-none opacity-60"></div>
+
+    <!-- NOISE OVERLAY -->
+    <div class="fixed inset-0 bg-noise z-[1] pointer-events-none opacity-40 mix-blend-overlay"></div>
+
+    <!-- NAVIGATION -->
+    <nav class="fixed top-6 left-0 w-full z-50 flex justify-center px-4 mix-blend-difference">
+        <div class="glass-card rounded-full px-2 py-2 flex items-center gap-1">
+            <button onclick="scrollToSec('home')" class="magnet-btn px-6 py-2 rounded-full text-sm font-bold bg-white text-black hover:bg-acid transition-colors">HOME</button>
+            <button onclick="scrollToSec('education')" class="magnet-btn px-6 py-2 rounded-full text-sm font-medium text-gray-400 hover:text-white transition-colors">ACADEMICS</button>
+            <button onclick="scrollToSec('iot')" class="magnet-btn px-6 py-2 rounded-full text-sm font-medium text-gray-400 hover:text-white transition-colors">LABS</button>
+            <button onclick="scrollToSec('shop')" class="magnet-btn px-6 py-2 rounded-full text-sm font-medium text-gray-400 hover:text-white transition-colors">SUPPLY</button>
+            <div class="w-px h-4 bg-gray-700 mx-2"></div>
+            <button class="magnet-btn w-10 h-10 rounded-full bg-cement flex items-center justify-center text-white hover:bg-acid hover:text-black transition-colors">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="relative z-10 w-full">
+
+        <!-- HERO SECTION -->
+        <section id="home" class="min-h-screen flex flex-col justify-center items-center px-6 pt-20">
+            <div class="text-center relative">
+                <div class="inline-flex items-center gap-2 border border-white/10 rounded-full px-4 py-1 mb-8 backdrop-blur-md">
+                    <div class="w-2 h-2 rounded-full bg-acid animate-pulse"></div>
+                    <span class="text-xs font-mono text-gray-400">SYSTEM ONLINE v2.0</span>
+                </div>
+                
+                <h1 class="font-display text-[12vw] leading-[0.85] font-bold tracking-tighter mix-blend-overlay opacity-80 select-none">
+                    HOPE
+                </h1>
+                <h1 class="font-display text-[12vw] leading-[0.85] font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-800 reveal-text">
+                    CORE_
+                </h1>
+                
+                <p class="mt-8 text-xl md:text-2xl text-gray-400 max-w-2xl mx-auto font-sans font-light">
+                    The intersection of <span class="text-white font-medium">Academic Fluidity</span> and <span class="text-acid font-medium">Robotic Innovation</span>.
+                </p>
+
+                <div class="mt-12 flex items-center justify-center gap-6">
+                    <button class="group relative px-8 py-4 bg-acid text-black font-bold font-display tracking-wide overflow-hidden rounded-sm hover-trigger">
+                        <span class="relative z-10 group-hover:-translate-y-[150%] transition-transform duration-500 block">INITIALIZE</span>
+                        <span class="absolute inset-0 z-10 flex items-center justify-center translate-y-[150%] group-hover:translate-y-0 transition-transform duration-500 font-bold">LET'S GO</span>
+                        <div class="absolute inset-0 bg-white scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500 ease-out z-0"></div>
+                    </button>
+                    
+                    <button class="flex items-center gap-2 text-sm font-mono text-gray-500 hover:text-white transition-colors hover-trigger">
+                        <span>[ EXPLORE MODULES ]</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="absolute bottom-10 right-10 flex flex-col items-end gap-2 mix-blend-difference">
+                <span class="text-xs font-mono text-gray-500">SCROLL VELOCITY</span>
+                <div class="w-px h-16 bg-gray-700">
+                    <div class="w-full bg-acid h-1/2 animate-bounce"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- EDUCATION SECTION -->
+        <section id="education" class="py-32 px-4 md:px-12 bg-black/50 backdrop-blur-sm border-t border-white/5">
+            <div class="max-w-[1600px] mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-end mb-16">
+                    <div>
+                        <h2 class="font-display text-6xl md:text-8xl font-medium tracking-tighter">ACADEMIC<br><span class="text-gray-600">FLUIDITY</span></h2>
+                    </div>
+                    <p class="text-gray-400 max-w-md text-lg mt-8 md:mt-0">
+                        Tailored resources that adapt to your neural pathways. Notes, podcasts, and AI-summaries.
+                    </p>
+                </div>
+
+                <!-- Bento Grid -->
+                <div class="bento-grid h-auto md:h-[600px]">
+                    <!-- Main Card -->
+                    <div class="col-span-12 md:col-span-8 glass-card rounded-[2rem] p-8 md:p-12 relative overflow-hidden group hover-trigger">
+                        <div class="absolute top-0 right-0 w-64 h-64 bg-acid/20 rounded-full blur-[100px] group-hover:bg-acid/30 transition-all duration-500"></div>
+                        <div class="relative z-10 h-full flex flex-col justify-between">
+                            <div class="flex justify-between items-start">
+                                <div class="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center border border-white/10 text-acid">
+                                    <i data-lucide="book-open" class="w-6 h-6"></i>
+                                </div>
+                                <span class="font-mono text-xs border border-white/20 px-2 py-1 rounded">KTU REPO_2025</span>
+                            </div>
+                            <div>
+                                <h3 class="font-display text-4xl mb-2">Central Notes Database</h3>
+                                <p class="text-gray-400 mb-6 max-w-lg">Access modules 1-5 for every semester. Updated in real-time by top scholars and automated scrapers.</p>
+                                <a href="#" class="inline-flex items-center gap-2 text-acid font-bold hover:gap-4 transition-all">ACCESS ARCHIVE <i data-lucide="arrow-right" class="w-4 h-4"></i></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Side Card 1 -->
+                    <div class="col-span-12 md:col-span-4 glass-card rounded-[2rem] p-8 relative overflow-hidden group hover-trigger">
+                        <div class="absolute inset-0 bg-gradient-to-br from-cement to-void group-hover:scale-105 transition-transform duration-700"></div>
+                        <div class="relative z-10">
+                            <i data-lucide="headphones" class="w-8 h-8 text-white mb-32"></i>
+                            <h3 class="font-display text-3xl mb-1">Audio Lectures</h3>
+                            <p class="text-gray-500 text-sm">Learn while you commute.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- IOT LABS SECTION -->
+        <section id="iot" class="py-32 px-4 md:px-12 relative overflow-hidden">
+            <!-- Background glow -->
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vw] bg-acid/5 rounded-full blur-[120px] pointer-events-none"></div>
+
+            <div class="max-w-[1600px] mx-auto relative z-10">
+                <div class="text-center mb-20">
+                    <span class="text-acid font-mono text-sm tracking-[0.2em] uppercase">The Hyperlab</span>
+                    <h2 class="font-display text-7xl md:text-9xl font-bold mt-4 tracking-tighter">ROBOTIC<span class="outline-text text-transparent bg-clip-text bg-gradient-to-b from-gray-700 to-black" style="-webkit-text-stroke: 1px rgba(255,255,255,0.2);">CORE</span></h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Event Card -->
+                    <div class="bg-cement border border-white/5 rounded-3xl p-1 hover:border-acid/50 transition-colors duration-500 group">
+                        <div class="bg-void rounded-[1.3rem] p-8 h-full overflow-hidden relative">
+                            <!-- Matrix rain effect placeholder -->
+                            <div class="absolute inset-0 opacity-10" style="background-image: linear-gradient(0deg, transparent 24%, rgba(204, 255, 0, .3) 25%, rgba(204, 255, 0, .3) 26%, transparent 27%, transparent 74%, rgba(204, 255, 0, .3) 75%, rgba(204, 255, 0, .3) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(204, 255, 0, .3) 25%, rgba(204, 255, 0, .3) 26%, transparent 27%, transparent 74%, rgba(204, 255, 0, .3) 75%, rgba(204, 255, 0, .3) 76%, transparent 77%, transparent); background-size: 50px 50px;"></div>
+                            
+                            <div class="relative z-10 flex flex-col h-full justify-between min-h-[400px]">
+                                <div class="flex justify-between items-center">
+                                    <span class="bg-acid text-black px-3 py-1 text-xs font-bold rounded uppercase">Bootcamp Open</span>
+                                    <i data-lucide="cpu" class="text-gray-500 group-hover:text-acid transition-colors"></i>
+                                </div>
+                                
+                                <div>
+                                    <h3 class="font-display text-5xl mb-4 group-hover:text-acid transition-colors">Drone Systems</h3>
+                                    <p class="text-gray-400 mb-8 text-lg">14 Days. Build autonomous aerial vehicles from scratch. We provide the flight controllers; you code the stability.</p>
+                                    <button class="w-full py-4 border border-white/20 rounded-xl font-bold hover:bg-white hover:text-black transition-all">REGISTER_NOW</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Image/Visual Card -->
+                    <div class="bg-cement border border-white/5 rounded-3xl p-1 hover:border-white/30 transition-colors duration-500">
+                        <div class="bg-void rounded-[1.3rem] h-full relative overflow-hidden flex items-center justify-center">
+                            <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1581092921461-eab62e97a783?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-40 grayscale group-hover:grayscale-0 transition-all duration-700"></div>
+                            <div class="relative z-10 p-10 text-center">
+                                <h3 class="font-display text-4xl font-bold mb-2">Hard Kits</h3>
+                                <p class="text-gray-400">Arduino Uno, Breadboards, Sensors.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SHOP SECTION -->
+        <section id="shop" class="py-32 bg-acid text-black">
+            <div class="max-w-[1600px] mx-auto px-4 md:px-12">
+                <div class="flex flex-col md:flex-row justify-between items-start mb-16 border-b border-black/10 pb-10">
+                    <h2 class="font-display text-6xl md:text-8xl font-bold tracking-tighter">ESSENTIAL<br>SUPPLY_</h2>
+                    <div class="mt-8 md:mt-0">
+                         <p class="font-bold text-xl mb-4">Print on Demand Service</p>
+                         <p class="max-w-xs text-black/70">Upload your thesis or record. We print, bind, and deliver to your hostel by evening.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Product 1 -->
+                    <div class="group cursor-pointer">
+                        <div class="aspect-square bg-black/5 rounded-2xl mb-4 overflow-hidden relative">
+                             <img src="https://images.unsplash.com/photo-1517055729445-dbba5f0c4238?q=80&w=1974&auto=format&fit=crop" class="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500">
+                             <div class="absolute top-4 right-4 bg-black text-white text-xs px-2 py-1 font-bold rounded">HOT</div>
+                        </div>
+                        <div class="flex justify-between items-end border-b border-black/10 pb-2">
+                            <div>
+                                <h4 class="font-bold text-lg">ESP32 Module</h4>
+                                <span class="text-sm opacity-60">IoT Components</span>
+                            </div>
+                            <span class="font-display font-bold text-xl">₹499</span>
+                        </div>
+                    </div>
+
+                     <!-- Product 2 -->
+                     <div class="group cursor-pointer">
+                        <div class="aspect-square bg-black/5 rounded-2xl mb-4 overflow-hidden relative">
+                             <img src="https://images.unsplash.com/photo-1563770095-39d468f9a51d?q=80&w=2070&auto=format&fit=crop" class="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500">
+                        </div>
+                        <div class="flex justify-between items-end border-b border-black/10 pb-2">
+                            <div>
+                                <h4 class="font-bold text-lg">Record Binding</h4>
+                                <span class="text-sm opacity-60">Services</span>
+                            </div>
+                            <span class="font-display font-bold text-xl">₹150</span>
+                        </div>
+                    </div>
+
+                    <!-- Upload Box -->
+                    <div class="bg-black text-white rounded-2xl p-8 flex flex-col justify-between group hover:bg-gray-900 transition-colors">
+                        <div>
+                            <i data-lucide="upload-cloud" class="w-12 h-12 mb-6 text-acid"></i>
+                            <h3 class="font-display text-3xl font-bold leading-none">Upload<br>Files</h3>
+                        </div>
+                        <div class="flex items-center justify-between mt-8">
+                            <span class="text-sm text-gray-400">PDF, DOCX accepted</span>
+                            <div class="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center group-hover:bg-acid group-hover:text-black group-hover:border-acid transition-all">
+                                <i data-lucide="arrow-up-right" class="w-5 h-5"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="bg-black text-white py-20 border-t border-white/10">
+            <div class="container mx-auto px-4 text-center">
+                <h2 class="font-display text-[15vw] leading-none text-white/5 font-bold select-none">HOPECORE</h2>
+                <div class="flex justify-center gap-8 mt-8 text-sm font-mono text-gray-500">
+                    <a href="#" class="hover:text-acid">INSTAGRAM</a>
+                    <a href="#" class="hover:text-acid">LINKEDIN</a>
+                    <a href="#" class="hover:text-acid">EMAIL</a>
+                </div>
+                <p class="mt-8 text-xs text-gray-700">© 2025 HOPE INTELLIGENCE CORE. SYSTEM OPTIMIZED.</p>
+            </div>
+        </footer>
+
+    </main>
+
+    <script>
+        // --- 1. INITIALIZATION & LOADER ---
+        
+        // Register GSAP plugins
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Init Lucide Icons
+        lucide.createIcons();
+
+        // Lenis Smooth Scroll
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            direction: 'vertical',
+            gestureDirection: 'vertical',
+            smooth: true,
+            mouseMultiplier: 1,
+            smoothTouch: false,
+            touchMultiplier: 2,
+        });
+
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+        requestAnimationFrame(raf);
+
+        // Loader Sequence
+        window.addEventListener('load', () => {
+            const tl = gsap.timeline();
+            
+            tl.to("#loader-bar", { width: "100%", duration: 1.5, ease: "power2.inOut" })
+              .to("#loader-text", { y: -50, opacity: 0, duration: 0.5, delay: 0.2 })
+              .to("#loader", { yPercent: -100, duration: 1, ease: "expo.inOut" }, "-=0.3")
+              .from("h1", { y: 100, opacity: 0, duration: 1.5, stagger: 0.1, ease: "power4.out" }, "-=0.5")
+              .from(".magnet-btn", { y: -20, opacity: 0, duration: 0.8, stagger: 0.05, ease: "back.out(1.7)" }, "-=1");
+        });
+
+
+        // --- 2. CUSTOM CURSOR & INTERACTIONS ---
+        const cursorDot = document.getElementById('cursor-dot');
+        const cursorOutline = document.getElementById('cursor-outline');
+        
+        window.addEventListener('mousemove', (e) => {
+            const posX = e.clientX;
+            const posY = e.clientY;
+
+            // Dot follows instantly
+            cursorDot.style.left = `${posX}px`;
+            cursorDot.style.top = `${posY}px`;
+
+            // Outline follows with lag (using GSAP for smoothness)
+            gsap.to(cursorOutline, {
+                x: posX,
+                y: posY,
+                duration: 0.15,
+                ease: "power2.out"
+            });
+            
+            // 3D Interaction Parallax
+            mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+            mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+        });
+
+        // Hover Effects for Cursor
+        const hoverTriggers = document.querySelectorAll('.hover-trigger, a, button');
+        hoverTriggers.forEach(el => {
+            el.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
+            el.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
+        });
+
+        // Magnetic Buttons in Nav
+        const magnets = document.querySelectorAll('.magnet-btn');
+        magnets.forEach((magnet) => {
+            magnet.addEventListener('mousemove', (e) => {
+                const bound = magnet.getBoundingClientRect();
+                const x = e.clientX - bound.left - bound.width / 2;
+                const y = e.clientY - bound.top - bound.height / 2;
+                
+                gsap.to(magnet, { x: x * 0.3, y: y * 0.3, duration: 0.3, ease: 'power2.out' });
+            });
+            magnet.addEventListener('mouseleave', () => {
+                gsap.to(magnet, { x: 0, y: 0, duration: 0.5, ease: 'elastic.out(1, 0.3)' });
+            });
+        });
+
+        // Router
+        function scrollToSec(id) {
+            const el = document.getElementById(id);
+            lenis.scrollTo(el);
+        }
+
+        // --- 3. THREE.JS IMMERSIVE BACKGROUND (Particle Terrain) ---
+        
+        let scene, camera, renderer, particles;
+        let mouseX = 0;
+        let mouseY = 0;
+
+        function initThree() {
+            const container = document.getElementById('canvas-container');
+            
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x030303, 0.002); // Fog matches bg color
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 50;
+            camera.position.y = 10;
+
+            renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            // Geometry - A vast plane of points
+            const geometry = new THREE.BufferGeometry();
+            const count = 5000;
+            const positions = new Float32Array(count * 3);
+            
+            for(let i = 0; i < count * 3; i+=3) {
+                // X: Spread wide
+                positions[i] = (Math.random() - 0.5) * 200;
+                // Y: Flat-ish but random height
+                positions[i+1] = (Math.random() - 0.5) * 20; 
+                // Z: Deep depth
+                positions[i+2] = (Math.random() - 0.5) * 100;
+            }
+
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+            // Material
+            const material = new THREE.PointsMaterial({
+                size: 0.2,
+                color: 0x444444, // Dark gray points
+                transparent: true,
+                opacity: 0.8,
+                sizeAttenuation: true
+            });
+
+            particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+
+            animate();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Subtle rotation based on mouse
+            particles.rotation.y += 0.001;
+            particles.rotation.x = mouseY * 0.05;
+            particles.rotation.y += mouseX * 0.05;
+
+            // Wave effect simulation
+            const positions = particles.geometry.attributes.position.array;
+            const time = Date.now() * 0.0005;
+
+            for(let i = 1; i < positions.length; i+=3) {
+                // Modulate Y based on X and Time
+                positions[i] = Math.sin(time + positions[i-1] * 0.05) * 2 + (Math.cos(time * 0.5 + positions[i+1] * 0.05) * 2);
+            }
+            particles.geometry.attributes.position.needsUpdate = true;
+
+            // Color shift based on scroll
+            // We can check lenis.scroll here if we wanted complex interactions
+            
+            renderer.render(scene, camera);
+        }
+
+        // Handle Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        initThree();
+
+    </script>
+</body>
+</html>

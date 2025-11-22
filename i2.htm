@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOPE INT CORE | Fluid Innovation</title>
+    
+    <!-- TAILWIND CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FONTS -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- ICONS -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- LIBRARIES: Three.js & GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                    },
+                    colors: {
+                        void: '#030303',
+                        neon: '#CCFF00', // Acid Green Accent
+                        glass: 'rgba(255, 255, 255, 0.05)',
+                        glassBorder: 'rgba(255, 255, 255, 0.1)',
+                    },
+                    backgroundImage: {
+                        'grid-pattern': "linear-gradient(to right, #1a1a1a 1px, transparent 1px), linear-gradient(to bottom, #1a1a1a 1px, transparent 1px)",
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --cursor-size: 20px;
+        }
+
+        body {
+            background-color: #030303;
+            color: #ffffff;
+            overflow-x: hidden;
+            cursor: none; /* Custom cursor */
+        }
+
+        /* --- NOISE OVERLAY --- */
+        .noise {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.05;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* --- CUSTOM CURSOR --- */
+        #cursor {
+            position: fixed;
+            top: 0; left: 0;
+            width: var(--cursor-size);
+            height: var(--cursor-size);
+            border: 1px solid rgba(255,255,255,0.5);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s, background-color 0.3s;
+            mix-blend-mode: difference;
+        }
+        #cursor.hovered {
+            width: 50px;
+            height: 50px;
+            background-color: white;
+            border-color: transparent;
+            mix-blend-mode: difference;
+        }
+
+        /* --- UTILS --- */
+        .glass-panel {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glassBorder);
+        }
+        
+        .text-outline {
+            -webkit-text-stroke: 1px rgba(255,255,255,0.3);
+            color: transparent;
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Nav Active Indicator */
+        .nav-dot {
+            width: 4px; height: 4px; background: #CCFF00; border-radius: 50%;
+            position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%) scale(0);
+            transition: transform 0.3s ease;
+        }
+        .nav-link.active .nav-dot { transform: translateX(-50%) scale(1); }
+        .nav-link.active { color: white; }
+
+        /* Smooth reveal mask */
+        .reveal-text {
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+        }
+    </style>
+</head>
+<body class="selection:bg-neon selection:text-black">
+
+    <!-- NOISE & CURSOR -->
+    <div class="noise"></div>
+    <div id="cursor"></div>
+
+    <!-- NAVIGATION -->
+    <nav class="fixed top-6 left-1/2 -translate-x-1/2 z-50">
+        <div class="glass-panel rounded-full px-6 py-3 flex items-center gap-8 shadow-2xl">
+            <button onclick="scrollToSection('home')" class="nav-link relative text-sm font-medium text-gray-400 hover:text-white transition-colors magnetic-area">
+                CORE
+                <span class="nav-dot"></span>
+            </button>
+            <button onclick="scrollToSection('education')" class="nav-link relative text-sm font-medium text-gray-400 hover:text-white transition-colors magnetic-area">
+                ACADEMICS
+                <span class="nav-dot"></span>
+            </button>
+            <button onclick="scrollToSection('iot')" class="nav-link relative text-sm font-medium text-gray-400 hover:text-white transition-colors magnetic-area">
+                LABS
+                <span class="nav-dot"></span>
+            </button>
+            <button onclick="scrollToSection('shop')" class="nav-link relative text-sm font-medium text-gray-400 hover:text-white transition-colors magnetic-area">
+                SUPPLY
+                <span class="nav-dot"></span>
+            </button>
+            <div class="w-px h-4 bg-white/20"></div>
+            <button onclick="toggleModal('contact')" class="bg-white text-black rounded-full p-2 hover:bg-neon transition-colors magnetic-area">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+            </button>
+        </div>
+    </nav>
+
+    <main class="w-full">
+
+        <!-- SECTION: HERO -->
+        <section id="home" class="relative w-full h-screen flex items-center justify-center overflow-hidden">
+            <!-- Background Grid -->
+            <div class="absolute inset-0 bg-[size:40px_40px] bg-grid-pattern opacity-10"></div>
+            
+            <!-- 3D Canvas -->
+            <div id="canvas-hero" class="absolute inset-0 z-0"></div>
+
+            <!-- Content -->
+            <div class="relative z-10 text-center pointer-events-none mix-blend-difference">
+                <h1 class="font-display text-[12vw] leading-none font-bold tracking-tighter">
+                    <div class="overflow-hidden"><span class="hero-char inline-block translate-y-full">H</span><span class="hero-char inline-block translate-y-full">O</span><span class="hero-char inline-block translate-y-full">P</span><span class="hero-char inline-block translate-y-full">E</span></div>
+                    <div class="overflow-hidden text-outline"><span class="hero-char inline-block translate-y-full">C</span><span class="hero-char inline-block translate-y-full">O</span><span class="hero-char inline-block translate-y-full">R</span><span class="hero-char inline-block translate-y-full">E</span></div>
+                </h1>
+                <p class="hero-sub mt-6 text-xl md:text-2xl font-light text-white/80 opacity-0 transform translate-y-4">
+                    The Fluid Intersection of Engineering & Innovation
+                </p>
+            </div>
+
+            <!-- Scroll Indicator -->
+            <div class="absolute bottom-10 left-10 flex items-center gap-4 animate-pulse">
+                <span class="text-xs font-mono text-gray-500">SCROLL TO INITIALIZE</span>
+                <div class="h-px w-20 bg-gray-500"></div>
+            </div>
+        </section>
+
+        <!-- SECTION: EDUCATION (Bento Grid) -->
+        <section id="education" class="relative py-32 px-4 md:px-8 max-w-[1600px] mx-auto min-h-screen">
+            <div class="mb-20">
+                <h2 class="font-display text-6xl md:text-8xl font-bold mb-4 split-text">ACADEMIC<br><span class="text-gray-600">FLUIDITY</span></h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 md:grid-rows-2 gap-4 h-[120vh] md:h-[800px]">
+                
+                <!-- Card 1: Main Stats -->
+                <div class="glass-panel p-8 rounded-3xl md:col-span-2 md:row-span-1 flex flex-col justify-between group hover:bg-white/5 transition-colors duration-500 magnetic-card">
+                    <div class="flex justify-between items-start">
+                        <div class="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center">
+                            <i data-lucide="book-open" class="text-neon"></i>
+                        </div>
+                        <span class="font-mono text-xs text-gray-400">V.2025.1</span>
+                    </div>
+                    <div>
+                        <h3 class="font-display text-4xl font-bold mb-2">KTU Repository</h3>
+                        <p class="text-gray-400 max-w-md">Access the complete engineered database of notes, previous year questions, and AI-summarized modules.</p>
+                    </div>
+                    <div class="w-full h-1 bg-white/10 mt-6 overflow-hidden rounded-full">
+                        <div class="h-full bg-neon w-0 group-hover:w-full transition-all duration-700 ease-out"></div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Interactive 3D Helix -->
+                <div class="glass-panel rounded-3xl md:row-span-2 relative overflow-hidden group">
+                    <div id="canvas-edu" class="absolute inset-0"></div>
+                    <div class="absolute bottom-6 left-6 z-10">
+                        <h3 class="font-display text-2xl font-bold">Live Classes</h3>
+                        <p class="text-xs font-mono text-neon">RECORDING IN PROGRESS</p>
+                    </div>
+                </div>
+
+                <!-- Card 3: Audio -->
+                <div class="glass-panel p-8 rounded-3xl flex flex-col justify-center items-center text-center group hover:border-neon/50 transition-colors duration-300 magnetic-card">
+                    <div class="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <i data-lucide="headphones" class="w-8 h-8"></i>
+                    </div>
+                    <h3 class="font-display text-2xl font-bold">Podcasts</h3>
+                    <p class="text-sm text-gray-500 mt-2">Engineering on the go.</p>
+                </div>
+
+                <!-- Card 4: Community -->
+                <div class="glass-panel p-8 rounded-3xl flex items-center justify-between group cursor-pointer magnetic-card">
+                    <div>
+                        <h3 class="font-display text-2xl font-bold">Forum</h3>
+                        <p class="text-sm text-gray-500">Join 500+ Engineers</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center group-hover:bg-white group-hover:text-black transition-all">
+                        <i data-lucide="arrow-up-right"></i>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECTION: IOT (Dark Mode/Cyber) -->
+        <section id="iot" class="relative py-32 bg-black border-y border-white/10">
+            <div class="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-gray-900 via-black to-black opacity-50"></div>
+            
+            <div class="max-w-[1600px] mx-auto px-4 md:px-8 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <!-- 3D Core -->
+                <div class="h-[500px] lg:h-[700px] relative">
+                    <div id="canvas-iot" class="absolute inset-0 w-full h-full"></div>
+                    <!-- Overlay UI Elements -->
+                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] border border-neon/30 rounded-full animate-spin-slow pointer-events-none"></div>
+                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] border border-dashed border-white/10 rounded-full animate-reverse-spin pointer-events-none"></div>
+                </div>
+
+                <!-- Content -->
+                <div class="relative z-10">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-neon/30 bg-neon/10 mb-8">
+                        <span class="w-2 h-2 bg-neon rounded-full animate-pulse"></span>
+                        <span class="text-xs font-mono text-neon tracking-widest">SYSTEM ONLINE</span>
+                    </div>
+                    
+                    <h2 class="font-display text-6xl md:text-8xl font-bold mb-8 leading-[0.9]">
+                        ROBOTIC<br>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-600">INJECTION</span>
+                    </h2>
+                    
+                    <p class="text-gray-400 text-lg mb-12 max-w-lg leading-relaxed">
+                        Hands-on summer camps engineered for the future. Build drones, smart home systems, and autonomous rovers using our proprietary hard-kits.
+                    </p>
+
+                    <div class="grid grid-cols-2 gap-6 mb-12">
+                        <div class="border-l border-neon/50 pl-6">
+                            <h4 class="text-4xl font-display font-bold">14</h4>
+                            <p class="text-sm text-gray-500 uppercase tracking-widest mt-1">Days Intensive</p>
+                        </div>
+                        <div class="border-l border-white/20 pl-6">
+                            <h4 class="text-4xl font-display font-bold">01</h4>
+                            <p class="text-sm text-gray-500 uppercase tracking-widest mt-1">Hard Kit Included</p>
+                        </div>
+                    </div>
+
+                    <button onclick="toggleModal('register')" class="group relative px-8 py-4 bg-white text-black font-bold overflow-hidden rounded-lg magnetic-area">
+                        <div class="absolute inset-0 w-full h-full bg-neon transform translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-in-out"></div>
+                        <span class="relative z-10 flex items-center gap-2">
+                            Initialize Sequence <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: SHOP -->
+        <section id="shop" class="relative py-32 px-4 md:px-8 max-w-[1600px] mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-20 border-b border-white/10 pb-10">
+                <h2 class="font-display text-6xl font-bold">ESSENTIAL<br>SUPPLY</h2>
+                <div class="text-right mt-8 md:mt-0">
+                    <p class="text-gray-400">Curated tools for builders.</p>
+                    <p class="font-mono text-neon">SHIPPING WORLDWIDE</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Shop Item 1 -->
+                <div class="group relative h-[500px] bg-void border border-white/10 rounded-2xl overflow-hidden magnetic-card">
+                    <div class="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div id="canvas-shop" class="h-3/4 w-full"></div> <!-- 3D Product -->
+                    <div class="absolute bottom-0 left-0 w-full p-6 border-t border-white/10 bg-black/50 backdrop-blur-sm flex justify-between items-center">
+                        <div>
+                            <h4 class="font-bold text-xl">Arduino Starter</h4>
+                            <p class="text-xs text-gray-500 font-mono">CORE COMPONENT</p>
+                        </div>
+                        <span class="font-display text-xl">₹1,499</span>
+                    </div>
+                </div>
+
+                <!-- Shop Item 2 (Print) -->
+                <div class="md:col-span-2 relative h-[500px] bg-white text-black rounded-2xl p-10 overflow-hidden group magnetic-card">
+                    <div class="relative z-10 h-full flex flex-col justify-between">
+                        <div>
+                            <div class="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center mb-6">
+                                <i data-lucide="printer"></i>
+                            </div>
+                            <h3 class="font-display text-5xl font-bold mb-4">Print<br>On Demand</h3>
+                            <p class="max-w-md text-gray-600 text-lg">Upload your thesis. We print, bind, and drone-drop it to your location (eventually).</p>
+                        </div>
+                        <button class="w-fit border-b-2 border-black pb-1 font-bold hover:text-neon hover:border-neon transition-colors">
+                            UPLOAD FILES
+                        </button>
+                    </div>
+                    <!-- Decorative Circle -->
+                    <div class="absolute -bottom-20 -right-20 w-[400px] h-[400px] bg-gray-100 rounded-full group-hover:scale-110 transition-transform duration-700 ease-in-out"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="py-10 text-center border-t border-white/10 mt-20">
+            <h1 class="font-display text-[15vw] leading-none text-white/5 font-bold select-none">HOPE CORE</h1>
+            <div class="flex justify-center gap-6 mt-8 text-sm text-gray-500 font-mono">
+                <a href="#" class="hover:text-white">INSTAGRAM</a>
+                <a href="#" class="hover:text-white">LINKEDIN</a>
+                <a href="#" class="hover:text-white">EMAIL</a>
+            </div>
+        </footer>
+
+    </main>
+
+    <!-- MODALS -->
+    <div id="modal-wrapper" class="fixed inset-0 z-[100] hidden">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="toggleModal(null)"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg p-1 bg-gradient-to-br from-white/20 to-transparent rounded-3xl">
+            <div class="bg-[#0a0a0a] rounded-[22px] p-8 md:p-12 relative overflow-hidden">
+                <button onclick="toggleModal(null)" class="absolute top-6 right-6 text-gray-500 hover:text-white"><i data-lucide="x"></i></button>
+                
+                <div id="modal-content-register" class="hidden">
+                    <h3 class="font-display text-3xl font-bold mb-2">Initialize</h3>
+                    <p class="text-gray-500 mb-6">Join the next batch of innovators.</p>
+                    <form onsubmit="event.preventDefault(); alert('Request Sent'); toggleModal(null);" class="space-y-4">
+                        <input type="text" placeholder="ID Code / Name" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-neon transition-colors">
+                        <input type="email" placeholder="Comms Channel (Email)" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-neon transition-colors">
+                        <button class="w-full bg-neon text-black font-bold py-4 rounded-xl hover:shadow-[0_0_20px_rgba(204,255,0,0.4)] transition-shadow">EXECUTE</button>
+                    </form>
+                </div>
+
+                <div id="modal-content-contact" class="hidden">
+                    <h3 class="font-display text-3xl font-bold mb-2">Transmissions</h3>
+                    <p class="text-gray-500 mb-6">We are listening.</p>
+                    <form onsubmit="event.preventDefault(); alert('Sent'); toggleModal(null);" class="space-y-4">
+                        <textarea rows="4" placeholder="Enter Message..." class="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-neon transition-colors"></textarea>
+                        <button class="w-full bg-white text-black font-bold py-4 rounded-xl hover:bg-gray-200 transition-colors">SEND</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. SETUP & INIT ---
+        lucide.createIcons();
+        gsap.registerPlugin(ScrollTrigger);
+
+        // --- 2. CUSTOM CURSOR LOGIC ---
+        const cursor = document.getElementById('cursor');
+        const magneticAreas = document.querySelectorAll('.magnetic-area');
+        const magneticCards = document.querySelectorAll('.magnetic-card');
+
+        document.addEventListener('mousemove', (e) => {
+            gsap.to(cursor, {
+                x: e.clientX,
+                y: e.clientY,
+                duration: 0.1,
+                ease: "power2.out"
+            });
+        });
+
+        // Hover Effects for Interactive Elements
+        magneticAreas.forEach(el => {
+            el.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
+            el.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+            
+            // Magnetic Pull Effect
+            el.addEventListener('mousemove', (e) => {
+                const rect = el.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                gsap.to(el, { x: x * 0.3, y: y * 0.3, duration: 0.3 });
+            });
+            el.addEventListener('mouseleave', () => {
+                gsap.to(el, { x: 0, y: 0, duration: 0.5, ease: "elastic.out(1, 0.3)" });
+            });
+        });
+
+        // 3D Tilt for Cards
+        magneticCards.forEach(card => {
+            card.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
+            card.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+            
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const rotateX = ((y - centerY) / centerY) * -5; // Max 5deg tilt
+                const rotateY = ((x - centerX) / centerX) * 5;
+
+                gsap.to(card, {
+                    transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`,
+                    duration: 0.4,
+                    ease: "power1.out"
+                });
+            });
+
+            card.addEventListener('mouseleave', () => {
+                gsap.to(card, {
+                    transform: `perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)`,
+                    duration: 0.6,
+                    ease: "power2.out"
+                });
+            });
+        });
+
+        // --- 3. ANIMATIONS (GSAP) ---
+        
+        // Hero Text Reveal
+        const tl = gsap.timeline();
+        tl.to('.hero-char', {
+            y: 0,
+            duration: 1,
+            stagger: 0.05,
+            ease: "power4.out",
+            delay: 0.2
+        })
+        .to('.hero-sub', {
+            opacity: 1,
+            y: 0,
+            duration: 1,
+            ease: "power2.out"
+        }, "-=0.5");
+
+        // Section Reveals
+        gsap.utils.toArray('section').forEach(section => {
+            gsap.from(section.children, {
+                scrollTrigger: {
+                    trigger: section,
+                    start: "top 80%",
+                    toggleActions: "play none none reverse"
+                },
+                y: 50,
+                opacity: 0,
+                duration: 1,
+                stagger: 0.2,
+                ease: "power3.out"
+            });
+        });
+
+        // --- 4. NAVIGATION LOGIC ---
+        function scrollToSection(id) {
+            const el = document.getElementById(id);
+            if(el) {
+                el.scrollIntoView({ behavior: 'smooth' });
+                updateActiveNav(id);
+            }
+        }
+
+        function updateActiveNav(id) {
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            const btn = document.querySelector(`button[onclick="scrollToSection('${id}')"]`);
+            if(btn) btn.classList.add('active');
+        }
+
+        // Auto update nav on scroll
+        window.addEventListener('scroll', () => {
+            const sections = ['home', 'education', 'iot', 'shop'];
+            let current = '';
+            sections.forEach(section => {
+                const el = document.getElementById(section);
+                if (window.scrollY >= (el.offsetTop - 300)) {
+                    current = section;
+                }
+            });
+            updateActiveNav(current);
+        });
+
+        // Modal Logic
+        function toggleModal(type) {
+            const wrapper = document.getElementById('modal-wrapper');
+            const regContent = document.getElementById('modal-content-register');
+            const conContent = document.getElementById('modal-content-contact');
+            
+            if(!type) {
+                wrapper.classList.add('hidden');
+                return;
+            }
+            
+            wrapper.classList.remove('hidden');
+            regContent.classList.add('hidden');
+            conContent.classList.add('hidden');
+            
+            if(type === 'register') regContent.classList.remove('hidden');
+            if(type === 'contact') conContent.classList.remove('hidden');
+        }
+
+        // --- 5. THREE.JS SCENES ---
+
+        // Shared Materials
+        const liquidMetalMat = new THREE.MeshPhysicalMaterial({
+            color: 0x222222,
+            metalness: 1,
+            roughness: 0.2,
+            clearcoat: 1,
+            clearcoatRoughness: 0.1,
+            emissive: 0x111111,
+            emissiveIntensity: 0.2
+        });
+        
+        const wireframeMat = new THREE.MeshBasicMaterial({ color: 0xCCFF00, wireframe: true });
+        const glassMat = new THREE.MeshPhysicalMaterial({
+            color: 0xffffff,
+            metalness: 0,
+            roughness: 0,
+            transmission: 0.9,
+            transparent: true
+        });
+
+        // SCENE 1: HERO (Liquid Sphere)
+        function initHeroScene() {
+            const container = document.getElementById('canvas-hero');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+            
+            const dirLight = new THREE.DirectionalLight(0xCCFF00, 2); // Neon light
+            dirLight.position.set(5, 5, 5);
+            scene.add(dirLight);
+            
+            const blueLight = new THREE.PointLight(0x0000ff, 2);
+            blueLight.position.set(-5, -5, 5);
+            scene.add(blueLight);
+
+            // Object: High poly sphere
+            const geometry = new THREE.IcosahedronGeometry(2.5, 20); // High detail for "liquid" look
+            const sphere = new THREE.Mesh(geometry, liquidMetalMat);
+            scene.add(sphere);
+
+            camera.position.z = 6;
+
+            // Animation Loop
+            const clock = new THREE.Clock();
+            
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                const t = clock.getElapsedTime();
+                
+                // Vertex Displacement for Liquid Effect
+                const positionAttribute = geometry.attributes.position;
+                const vertex = new THREE.Vector3();
+                
+                for (let i = 0; i < positionAttribute.count; i++) {
+                    vertex.fromBufferAttribute(positionAttribute, i);
+                    
+                    // Normalize to get original shape then apply noise
+                    // Simple noise simulation using sine waves
+                    const offset = geometry.parameters.radius;
+                    const amp = 0.4;
+                    const time = t * 1.5;
+                    
+                    // Complex wave combination
+                    const dist = amp * Math.sin(vertex.x * 2 + time) * Math.cos(vertex.y * 1.5 + time) * Math.sin(vertex.z * 2 + time);
+                    
+                    // Reset to sphere radius + noise
+                    vertex.normalize().multiplyScalar(offset + dist);
+                    positionAttribute.setXYZ(i, vertex.x, vertex.y, vertex.z);
+                }
+                
+                positionAttribute.needsUpdate = true;
+                geometry.computeVertexNormals();
+                
+                sphere.rotation.y += 0.002;
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            // Handle Resize
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+            
+            // Mouse Interaction
+            document.addEventListener('mousemove', (e) => {
+                const mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+                const mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+                gsap.to(sphere.rotation, { x: mouseY * 0.5, y: mouseX * 0.5, duration: 2 });
+            });
+        }
+
+        // SCENE 2: EDUCATION (Floating Helix)
+        function initEduScene() {
+            const container = document.getElementById('canvas-edu');
+            if(!container) return;
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 100);
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(width, height);
+            container.appendChild(renderer.domElement);
+
+            const group = new THREE.Group();
+            
+            // Particles arranged in Helix
+            const particleGeo = new THREE.SphereGeometry(0.08, 8, 8);
+            const particleMat = new THREE.MeshBasicMaterial({ color: 0xaaaaaa });
+            const accentMat = new THREE.MeshBasicMaterial({ color: 0xCCFF00 });
+
+            for(let i = 0; i < 40; i++) {
+                const y = (i - 20) * 0.3;
+                const x = Math.sin(i * 0.5) * 1.5;
+                const z = Math.cos(i * 0.5) * 1.5;
+
+                const p1 = new THREE.Mesh(particleGeo, i % 5 === 0 ? accentMat : particleMat);
+                p1.position.set(x, y, z);
+                group.add(p1);
+
+                const p2 = new THREE.Mesh(particleGeo, i % 5 === 0 ? accentMat : particleMat);
+                p2.position.set(-x, y, -z); // Opposite strand
+                group.add(p2);
+                
+                // Connector line
+                if (i % 2 === 0) {
+                   const lineGeo = new THREE.BufferGeometry().setFromPoints([
+                       new THREE.Vector3(x, y, z),
+                       new THREE.Vector3(-x, y, -z)
+                   ]);
+                   const line = new THREE.Line(lineGeo, new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.1 }));
+                   group.add(line);
+                }
+            }
+            scene.add(group);
+            camera.position.z = 12;
+
+            function animate() {
+                requestAnimationFrame(animate);
+                group.rotation.y += 0.01;
+                group.rotation.z = Math.sin(Date.now() * 0.001) * 0.2;
+                renderer.render(scene, camera);
+            }
+            animate();
+        }
+
+        // SCENE 3: IOT (Cyber Core)
+        function initIotScene() {
+            const container = document.getElementById('canvas-iot');
+            if(!container) return;
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 100);
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(width, height);
+            container.appendChild(renderer.domElement);
+
+            // Core Object
+            const icoGeo = new THREE.IcosahedronGeometry(2, 1);
+            const core = new THREE.Mesh(icoGeo, new THREE.MeshBasicMaterial({ color: 0x111111, wireframe: true, transparent: true, opacity: 0.1 }));
+            scene.add(core);
+
+            // Outer Shell
+            const shellGeo = new THREE.IcosahedronGeometry(3, 1);
+            const shell = new THREE.Mesh(shellGeo, wireframeMat);
+            scene.add(shell);
+            
+            // Glowing Nucleus
+            const nukeGeo = new THREE.SphereGeometry(1, 16, 16);
+            const nuke = new THREE.Mesh(nukeGeo, new THREE.MeshBasicMaterial({ color: 0xCCFF00 }));
+            scene.add(nuke);
+
+            camera.position.z = 8;
+
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                core.rotation.x += 0.005;
+                core.rotation.y -= 0.005;
+                
+                shell.rotation.x -= 0.002;
+                shell.rotation.y -= 0.002;
+                
+                const s = 1 + Math.sin(Date.now() * 0.005) * 0.2;
+                nuke.scale.set(s, s, s);
+
+                renderer.render(scene, camera);
+            }
+            animate();
+        }
+
+        // SCENE 4: SHOP (Floating Box)
+        function initShopScene() {
+            const container = document.getElementById('canvas-shop');
+            if(!container) return;
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 100);
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(width, height);
+            container.appendChild(renderer.domElement);
+            
+            const light = new THREE.DirectionalLight(0xffffff, 2);
+            light.position.set(2, 5, 5);
+            scene.add(light);
+            scene.add(new THREE.AmbientLight(0xffffff, 0.2));
+
+            const boxGeo = new THREE.BoxGeometry(2.5, 1, 3.5); // Like a kit box
+            const box = new THREE.Mesh(boxGeo, new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.3 }));
+            
+            // Add "circuit" texture via lines
+            const edges = new THREE.EdgesGeometry(boxGeo);
+            const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x444444 }));
+            box.add(line);
+            
+            scene.add(box);
+            camera.position.set(0, 3, 6);
+            camera.lookAt(0,0,0);
+
+            function animate() {
+                requestAnimationFrame(animate);
+                box.rotation.y += 0.005;
+                box.position.y = Math.sin(Date.now() * 0.002) * 0.2;
+                renderer.render(scene, camera);
+            }
+            animate();
+        }
+
+        // Initialize all
+        window.onload = () => {
+            initHeroScene();
+            initEduScene();
+            initIotScene();
+            initShopScene();
+        }
+
+    </script>
+</body>
+</html>
