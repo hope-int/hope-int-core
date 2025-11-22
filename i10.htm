@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOPE CORE | Future Academics</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fonts: DM Sans & Syne -->
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- GSAP (GreenSock Animation Platform) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['DM Sans', 'sans-serif'],
+                        display: ['Syne', 'sans-serif'],
+                    },
+                    colors: {
+                        'brand-black': '#080808',
+                        'brand-gray': '#121212',
+                        'glass': 'rgba(255, 255, 255, 0.05)',
+                    },
+                    backgroundImage: {
+                        'noise': "url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22 opacity=%220.05%22/%3E%3C/svg%3E')",
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #F3F3F3;
+            color: #080808;
+            overflow-x: hidden;
+            cursor: none; /* Using custom cursor */
+        }
+
+        /* --- CUSTOM CURSOR --- */
+        #cursor {
+            width: 20px;
+            height: 20px;
+            border: 1px solid #000;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.2s, height 0.2s, background-color 0.2s;
+            mix-blend-mode: difference;
+        }
+        #cursor.hovered {
+            width: 60px;
+            height: 60px;
+            background-color: white;
+            border-color: transparent;
+            mix-blend-mode: difference;
+        }
+
+        /* --- UTILS --- */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+        }
+
+        .dark-glass-panel {
+            background: rgba(20, 20, 20, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .bento-card {
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+        }
+        .bento-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1);
+        }
+
+        /* Hide Scrollbar but allow scroll */
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
+
+        /* Loader */
+        .loader-overlay {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- PRELOADER -->
+    <div class="loader-overlay" id="loader">
+        <div class="text-4xl font-display font-bold tracking-tighter">HOPE<span class="text-gray-500">CORE</span></div>
+    </div>
+
+    <!-- CUSTOM CURSOR -->
+    <div id="cursor" class="hidden md:block"></div>
+
+    <!-- NOISE OVERLAY -->
+    <div class="fixed inset-0 bg-noise pointer-events-none z-40 opacity-50"></div>
+
+    <!-- NAVIGATION (Dynamic Island Style) -->
+    <nav class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50">
+        <div class="glass-panel rounded-full p-2 flex items-center gap-1 shadow-2xl ring-1 ring-black/5 scale-95 hover:scale-100 transition-transform duration-300">
+            <button onclick="router('home')" class="nav-item relative px-6 py-3 rounded-full text-sm font-bold overflow-hidden group">
+                <span class="relative z-10 mix-blend-difference text-white group-hover:text-white transition-colors">Core</span>
+                <div class="absolute inset-0 bg-black translate-y-0 transition-transform duration-300 nav-bg"></div>
+            </button>
+            <button onclick="router('education')" class="nav-item relative px-6 py-3 rounded-full text-sm font-bold overflow-hidden group">
+                <span class="relative z-10 text-black group-hover:text-white transition-colors">Academia</span>
+                <div class="absolute inset-0 bg-black translate-y-full group-hover:translate-y-0 transition-transform duration-300 nav-bg"></div>
+            </button>
+            <button onclick="router('iot')" class="nav-item relative px-6 py-3 rounded-full text-sm font-bold overflow-hidden group">
+                <span class="relative z-10 text-black group-hover:text-white transition-colors">IoT Labs</span>
+                <div class="absolute inset-0 bg-black translate-y-full group-hover:translate-y-0 transition-transform duration-300 nav-bg"></div>
+            </button>
+            <button onclick="router('shop')" class="nav-item relative px-6 py-3 rounded-full text-sm font-bold overflow-hidden group">
+                <span class="relative z-10 text-black group-hover:text-white transition-colors">Supply</span>
+                <div class="absolute inset-0 bg-black translate-y-full group-hover:translate-y-0 transition-transform duration-300 nav-bg"></div>
+            </button>
+            <div class="w-px h-6 bg-gray-300 mx-2"></div>
+            <button onclick="toggleModal('contact')" class="w-10 h-10 rounded-full bg-gray-100 hover:bg-black hover:text-white flex items-center justify-center transition-colors">
+                <i data-lucide="plus" class="w-5 h-5"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTAINER -->
+    <main id="main-content" class="relative w-full">
+
+        <!-- SECTION 1: HERO (Home) -->
+        <section id="home" class="min-h-screen w-full px-4 py-6 md:p-10 flex flex-col relative">
+            <!-- Header -->
+            <header class="flex justify-between items-start z-10">
+                <h1 class="font-display text-2xl font-bold tracking-tighter">HOPE<br>CORE.</h1>
+                <div class="text-right hidden md:block">
+                    <p class="text-xs font-mono text-gray-500">EST. 2025</p>
+                    <p class="text-xs font-mono text-gray-500">FLUID ACADEMIC SYSTEM</p>
+                </div>
+            </header>
+
+            <!-- Hero Content Grid -->
+            <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 mt-4 md:mt-10">
+                
+                <!-- Hero Text -->
+                <div class="lg:col-span-7 bg-white rounded-[2rem] p-8 md:p-16 flex flex-col justify-between shadow-sm relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-gray-100 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                    
+                    <div class="z-10">
+                        <div class="inline-flex items-center gap-2 border border-black/10 px-3 py-1 rounded-full bg-white/50 backdrop-blur-sm mb-6">
+                            <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                            <span class="text-xs font-bold tracking-wider">SYSTEM ONLINE</span>
+                        </div>
+                        <h2 class="font-display text-6xl md:text-8xl font-bold leading-[0.9] tracking-tighter gs-reveal">
+                            FLUID<br><span class="text-gray-300">INNOVATION</span>
+                        </h2>
+                    </div>
+                    
+                    <div class="flex flex-col md:flex-row gap-6 md:items-end z-10 mt-10 md:mt-0">
+                        <p class="max-w-sm text-gray-500 text-lg leading-relaxed gs-reveal">
+                            An integrated ecosystem merging B.Tech academics with high-performance robotic infrastructure.
+                        </p>
+                        <button onclick="router('education')" class="hover-target group flex items-center gap-4 pl-6 pr-2 py-2 bg-black text-white rounded-full hover:scale-105 transition-transform duration-300">
+                            <span class="font-bold">Enter System</span>
+                            <div class="w-10 h-10 bg-white text-black rounded-full flex items-center justify-center">
+                                <i data-lucide="arrow-down-right" class="group-hover:rotate-[-45deg] transition-transform"></i>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 3D Interactive Area -->
+                <div class="lg:col-span-5 bg-[#F0F0F0] rounded-[2rem] relative overflow-hidden shadow-inner min-h-[400px] lg:min-h-0">
+                    <div id="canvas-hero" class="absolute inset-0 w-full h-full"></div>
+                    <div class="absolute bottom-6 left-6 bg-white/60 backdrop-blur px-4 py-2 rounded-xl pointer-events-none select-none">
+                        <p class="font-mono text-xs">INTERACTIVE MODULE /// 01</p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECTION 2: EDUCATION (Academia) -->
+        <section id="education" class="min-h-screen w-full px-4 md:px-10 py-20 hidden bg-white text-black">
+            <div class="max-w-[1600px] mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-end mb-16">
+                    <div>
+                        <p class="font-mono text-xs text-gray-400 mb-2">/// MODULE 02</p>
+                        <h2 class="font-display text-6xl md:text-7xl font-bold tracking-tighter">ACADEMIC<br>ARCHIVE</h2>
+                    </div>
+                    <p class="max-w-md text-gray-500 text-right mt-6 md:mt-0">
+                        Curated resources for the modern engineer. AI-summarized notes, audio lectures, and question banks.
+                    </p>
+                </div>
+
+                <!-- Bento Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 h-auto md:h-[600px]">
+                    
+                    <!-- Large Card -->
+                    <div class="md:col-span-2 md:row-span-2 bg-gray-100 rounded-[2rem] p-8 relative overflow-hidden bento-card group hover-target cursor-pointer">
+                        <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1456953209858-779a053f5b9a?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center opacity-0 group-hover:opacity-20 transition-opacity duration-500 grayscale"></div>
+                        <div class="relative z-10 flex flex-col h-full justify-between">
+                            <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center border border-gray-200">
+                                <i data-lucide="library" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-display text-4xl font-bold mb-2">KTU Repository</h3>
+                                <p class="text-gray-500">Comprehensive notes for Semester 1-8. Updated for 2025 Syllabus.</p>
+                            </div>
+                        </div>
+                        <div class="absolute bottom-8 right-8 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-4 group-hover:translate-x-0">
+                            <button class="w-12 h-12 rounded-full bg-black text-white flex items-center justify-center">
+                                <i data-lucide="arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tall Card -->
+                    <div class="md:col-span-1 md:row-span-2 bg-[#080808] text-white rounded-[2rem] p-8 relative overflow-hidden bento-card hover-target">
+                        <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-transparent to-black/80 z-10"></div>
+                        <!-- Audio Visualizer Mockup -->
+                        <div class="absolute inset-0 flex items-center justify-center opacity-30">
+                            <div class="flex gap-1 h-32 items-center">
+                                <div class="w-2 bg-white h-10 animate-[bounce_1s_infinite]"></div>
+                                <div class="w-2 bg-white h-20 animate-[bounce_1.2s_infinite]"></div>
+                                <div class="w-2 bg-white h-14 animate-[bounce_0.8s_infinite]"></div>
+                                <div class="w-2 bg-white h-24 animate-[bounce_1.5s_infinite]"></div>
+                                <div class="w-2 bg-white h-12 animate-[bounce_1.1s_infinite]"></div>
+                            </div>
+                        </div>
+                        <div class="relative z-20 flex flex-col h-full justify-between">
+                            <div class="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center backdrop-blur-sm">
+                                <i data-lucide="headphones" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-display text-3xl font-bold mb-2">Audio<br>Lectures</h3>
+                                <p class="text-gray-400 text-sm">Listen while you commute.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Small Card 1 -->
+                    <div class="bg-[#EBEBEB] rounded-[2rem] p-6 bento-card hover-target cursor-pointer">
+                        <div class="flex justify-between items-start">
+                            <h3 class="font-bold text-xl">QP Archive</h3>
+                            <i data-lucide="file-text" class="w-5 h-5 text-gray-500"></i>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-12">Last 5 Years</p>
+                    </div>
+
+                    <!-- Small Card 2 -->
+                    <div class="bg-[#D4D4D4] rounded-[2rem] p-6 bento-card hover-target cursor-pointer group">
+                        <div class="flex justify-between items-start">
+                            <h3 class="font-bold text-xl">CGPA Calc</h3>
+                            <i data-lucide="calculator" class="w-5 h-5 text-gray-500 group-hover:text-black transition-colors"></i>
+                        </div>
+                        <div class="mt-8 w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+                            <div class="bg-black w-3/4 h-full"></div>
+                        </div>
+                        <p class="text-xs font-bold mt-2">Target: 9.0</p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: IoT (Dark Mode) -->
+        <section id="iot" class="min-h-screen w-full px-4 md:px-10 py-20 hidden bg-[#050505] text-white">
+            <div class="max-w-[1600px] mx-auto relative">
+                
+                <!-- Background Glow -->
+                <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-purple-900/20 rounded-full blur-[120px] pointer-events-none"></div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 h-full items-center">
+                    
+                    <!-- Left: 3D Arm Area -->
+                    <div class="h-[500px] lg:h-[700px] rounded-[3rem] border border-white/10 bg-white/5 relative overflow-hidden">
+                        <div id="canvas-iot" class="w-full h-full"></div>
+                        
+                        <!-- Overlay UI -->
+                        <div class="absolute top-8 left-8 px-4 py-2 rounded-lg border border-white/20 bg-black/50 backdrop-blur text-xs font-mono text-green-400 flex items-center gap-2">
+                            <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                            SERVO STATUS: ACTIVE
+                        </div>
+                    </div>
+
+                    <!-- Right: Content -->
+                    <div class="pl-0 lg:pl-10 flex flex-col justify-center">
+                        <div class="mb-8">
+                            <span class="text-purple-400 font-mono text-sm tracking-widest uppercase">/// Summer Camp 2025</span>
+                            <h2 class="font-display text-7xl md:text-8xl font-bold leading-none mt-4 mb-6">HARD<br>WARE.</h2>
+                            <p class="text-gray-400 text-xl max-w-md">
+                                Build autonomous drones, rovers, and smart systems. We provide the silicon; you provide the logic.
+                            </p>
+                        </div>
+
+                        <!-- Stats Grid -->
+                        <div class="grid grid-cols-2 gap-4 mb-10">
+                            <div class="p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors hover-target">
+                                <h4 class="font-display text-3xl font-bold">14</h4>
+                                <p class="text-sm text-gray-500">Day Bootcamp</p>
+                            </div>
+                            <div class="p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors hover-target">
+                                <h4 class="font-display text-3xl font-bold">Arduino</h4>
+                                <p class="text-sm text-gray-500">Kit Included</p>
+                            </div>
+                        </div>
+
+                        <button onclick="alert('Application form opening...')" class="w-full sm:w-auto bg-white text-black px-8 py-4 rounded-xl font-bold hover:bg-gray-200 transition-colors hover-target">
+                            Apply for Batch '25
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: SHOP (Supply) -->
+        <section id="shop" class="min-h-screen w-full px-4 md:px-10 py-20 hidden bg-[#F3F3F3] relative">
+            <div class="max-w-[1600px] mx-auto">
+                <div class="text-center mb-16">
+                    <h2 class="font-display text-6xl font-bold mb-4">ESSENTIALS.</h2>
+                    <p class="text-gray-500 uppercase tracking-widest text-sm">Tools for builders</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    
+                    <!-- Print Service -->
+                    <div class="col-span-1 md:col-span-3 bg-white rounded-[2.5rem] p-10 shadow-lg flex flex-col md:flex-row items-center relative overflow-hidden hover-target group">
+                        <div class="relative z-10 md:w-1/2">
+                            <div class="w-14 h-14 bg-black text-white rounded-2xl flex items-center justify-center mb-6 rotate-3 group-hover:rotate-12 transition-transform duration-500">
+                                <i data-lucide="printer" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="font-display text-4xl font-bold mb-4">Print On Demand</h3>
+                            <p class="text-gray-500 mb-8 max-w-md">Upload your records, thesis, or assignments. We print, bind, and deliver to your hostel by 6 PM.</p>
+                            <button class="px-8 py-3 rounded-full border border-black font-bold hover:bg-black hover:text-white transition-colors">Upload File</button>
+                        </div>
+                        <div class="md:w-1/2 h-64 md:h-full relative mt-8 md:mt-0">
+                            <div id="canvas-shop" class="absolute inset-0"></div>
+                        </div>
+                    </div>
+
+                    <!-- Product 1 -->
+                    <div class="bg-white rounded-[2rem] p-6 shadow-sm hover:shadow-xl transition-all duration-300 hover-target group">
+                        <div class="h-48 bg-gray-100 rounded-xl mb-6 flex items-center justify-center group-hover:bg-gray-200 transition-colors">
+                           <i data-lucide="cpu" class="w-12 h-12 text-gray-400"></i>
+                        </div>
+                        <div class="flex justify-between items-end">
+                            <div>
+                                <h3 class="font-bold text-lg">Starter Kit</h3>
+                                <p class="text-sm text-gray-500">Arduino Uno + Sensors</p>
+                            </div>
+                            <span class="font-display font-bold text-xl">₹1,499</span>
+                        </div>
+                    </div>
+
+                    <!-- Product 2 -->
+                    <div class="bg-white rounded-[2rem] p-6 shadow-sm hover:shadow-xl transition-all duration-300 hover-target group">
+                        <div class="h-48 bg-gray-100 rounded-xl mb-6 flex items-center justify-center group-hover:bg-gray-200 transition-colors">
+                           <i data-lucide="wrench" class="w-12 h-12 text-gray-400"></i>
+                        </div>
+                        <div class="flex justify-between items-end">
+                            <div>
+                                <h3 class="font-bold text-lg">Soldering Stn</h3>
+                                <p class="text-sm text-gray-500">60W with Stand</p>
+                            </div>
+                            <span class="font-display font-bold text-xl">₹899</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Coming Soon -->
+                     <div class="bg-black text-white rounded-[2rem] p-6 shadow-sm flex flex-col justify-center items-center text-center hover-target">
+                        <i data-lucide="package-open" class="w-10 h-10 mb-4"></i>
+                        <h3 class="font-bold text-xl">Merch Store</h3>
+                        <p class="text-sm text-gray-400 mt-2">Coming Dec '25</p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- CONTACT MODAL -->
+    <div id="modal-contact" class="fixed inset-0 z-[60] hidden flex items-center justify-center px-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-md" onclick="toggleModal('contact')"></div>
+        <div class="relative bg-white w-full max-w-lg p-8 md:p-12 rounded-[2rem] shadow-2xl overflow-hidden">
+            <!-- Decorative blob -->
+            <div class="absolute top-[-50%] left-[-50%] w-full h-full bg-blue-100 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+            
+            <div class="relative z-10">
+                <div class="flex justify-between items-center mb-8">
+                    <h3 class="font-display text-4xl font-bold">Talk to us.</h3>
+                    <button onclick="toggleModal('contact')" class="w-10 h-10 rounded-full bg-gray-100 hover:bg-black hover:text-white flex items-center justify-center transition-colors"><i data-lucide="x"></i></button>
+                </div>
+                <form class="space-y-4">
+                    <div class="group">
+                        <label class="text-xs font-bold ml-4 mb-1 block text-gray-500">IDENTITY</label>
+                        <input type="text" placeholder="John Doe" class="w-full bg-gray-50 border border-gray-200 p-4 rounded-xl outline-none focus:border-black transition-colors">
+                    </div>
+                    <div class="group">
+                        <label class="text-xs font-bold ml-4 mb-1 block text-gray-500">TRANSMISSION</label>
+                        <textarea rows="4" placeholder="Your message..." class="w-full bg-gray-50 border border-gray-200 p-4 rounded-xl outline-none focus:border-black transition-colors"></textarea>
+                    </div>
+                    <button type="button" onclick="toggleModal('contact')" class="w-full bg-black text-white py-4 rounded-xl font-bold hover:scale-[1.02] transition-transform">Send Transmission</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- INITIALIZATION ---
+        lucide.createIcons();
+        
+        // Preloader Logic
+        window.addEventListener('load', () => {
+            const tl = gsap.timeline();
+            tl.to('#loader', { duration: 0.8, yPercent: -100, ease: "power4.inOut", delay: 0.5 })
+              .from('.gs-reveal', { y: 50, opacity: 0, duration: 1, stagger: 0.1, ease: "power3.out" }, "-=0.4");
+        });
+
+        // --- CUSTOM CURSOR LOGIC ---
+        const cursor = document.getElementById('cursor');
+        const hoverTargets = document.querySelectorAll('.hover-target, button, a, .nav-item');
+
+        document.addEventListener('mousemove', (e) => {
+            gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0.1, ease: "power2.out" });
+        });
+
+        hoverTargets.forEach(target => {
+            target.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
+            target.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+        });
+
+        // --- ROUTER ---
+        const sections = ['home', 'education', 'iot', 'shop'];
+        
+        function router(id) {
+            const current = document.querySelector('section:not(.hidden)');
+            const next = document.getElementById(id);
+            
+            if (current && current.id === id) return;
+
+            // Reset styles
+            document.body.style.backgroundColor = (id === 'iot') ? '#050505' : '#F3F3F3';
+            
+            // Navigation visual state
+            document.querySelectorAll('.nav-item div').forEach(el => el.classList.add('translate-y-full'));
+            document.querySelectorAll('.nav-item span').forEach(el => {
+                el.classList.remove('text-white', 'mix-blend-difference');
+                el.classList.add('text-black');
+            });
+
+            const activeBtn = document.querySelector(`button[onclick="router('${id}')"]`);
+            if(activeBtn) {
+                const bg = activeBtn.querySelector('.nav-bg');
+                const text = activeBtn.querySelector('span');
+                bg.classList.remove('translate-y-full');
+                bg.classList.add('translate-y-0');
+                text.classList.remove('text-black');
+                text.classList.add('text-white', 'mix-blend-difference');
+            }
+
+            // Page Transition
+            if(current) {
+                gsap.to(current, { opacity: 0, y: -20, duration: 0.3, onComplete: () => {
+                    current.classList.add('hidden');
+                    next.classList.remove('hidden');
+                    
+                    // Scroll to top
+                    window.scrollTo(0,0);
+
+                    // Animate In
+                    gsap.fromTo(next, 
+                        { opacity: 0, y: 20 }, 
+                        { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }
+                    );
+
+                    // Trigger 3D scenes
+                    initScenes(id);
+                }});
+            } else {
+                // First Load
+                next.classList.remove('hidden');
+                initScenes(id);
+            }
+        }
+
+        function toggleModal(id) {
+            const modal = document.getElementById('modal-' + id);
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                gsap.fromTo(modal.children[1], {scale: 0.9, opacity: 0}, {scale: 1, opacity: 1, duration: 0.3, ease: "back.out(1.7)"});
+            } else {
+                gsap.to(modal.children[1], {scale: 0.9, opacity: 0, duration: 0.2, onComplete: () => modal.classList.add('hidden')});
+            }
+        }
+
+        // --- THREE.JS ENGINE ---
+        let scenes = {};
+
+        function initScenes(id) {
+            if (id === 'home' && !scenes.hero) initHeroScene();
+            if (id === 'iot' && !scenes.iot) initIotScene();
+            if (id === 'shop' && !scenes.shop) initShopScene();
+        }
+
+        // Common Material
+        const commonMat = new THREE.MeshPhysicalMaterial({
+            color: 0xffffff,
+            metalness: 0.1,
+            roughness: 0.05,
+            transmission: 0.1, // glass-like
+            thickness: 1,
+            clearcoat: 1
+        });
+
+        // 1. HERO SCENE: Abstract Floating Shapes
+        function initHeroScene() {
+            const container = document.getElementById('canvas-hero');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+            camera.position.set(0, 0, 15);
+            
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            // Lights
+            const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+            dirLight.position.set(5, 5, 5);
+            scene.add(dirLight);
+            scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+
+            // Objects
+            const group = new THREE.Group();
+            
+            const geo1 = new THREE.TorusGeometry(3, 0.8, 16, 100);
+            const mesh1 = new THREE.Mesh(geo1, commonMat);
+            mesh1.position.set(-2, 0, 0);
+            mesh1.rotation.x = 0.5;
+            group.add(mesh1);
+
+            const geo2 = new THREE.SphereGeometry(1.5, 32, 32);
+            const mesh2 = new THREE.Mesh(geo2, new THREE.MeshStandardMaterial({color: 0x000000}));
+            mesh2.position.set(3, 1, 1);
+            group.add(mesh2);
+
+            scene.add(group);
+
+            // Mouse interaction
+            let mouseX = 0;
+            let mouseY = 0;
+            document.addEventListener('mousemove', (e) => {
+                mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+                mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+            });
+
+            scenes.hero = true;
+            function animate() {
+                requestAnimationFrame(animate);
+                if(!document.getElementById('home').classList.contains('hidden')) {
+                    mesh1.rotation.x += 0.005;
+                    mesh1.rotation.y += 0.005;
+                    mesh2.position.y = 1 + Math.sin(Date.now() * 0.001) * 0.5;
+
+                    // Parallax
+                    group.rotation.x = mouseY * 0.1;
+                    group.rotation.y = mouseX * 0.1;
+
+                    renderer.render(scene, camera);
+                }
+            }
+            animate();
+        }
+
+        // 2. IOT SCENE: Robotic Arm (Abstract)
+        function initIotScene() {
+            const container = document.getElementById('canvas-iot');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 100);
+            camera.position.set(5, 5, 10);
+            camera.lookAt(0, 2, 0);
+            
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+
+            scene.add(new THREE.DirectionalLight(0xffffff, 1));
+            scene.add(new THREE.AmbientLight(0x404040));
+
+            // Construct Arm
+            const baseGeo = new THREE.CylinderGeometry(2, 2.5, 0.5, 32);
+            const base = new THREE.Mesh(baseGeo, new THREE.MeshStandardMaterial({color: 0x222222}));
+            scene.add(base);
+
+            const armGroup = new THREE.Group();
+            const limb1 = new THREE.Mesh(new THREE.BoxGeometry(1, 4, 1), new THREE.MeshStandardMaterial({color: 0xffffff}));
+            limb1.position.y = 2;
+            armGroup.add(limb1);
+
+            const joint = new THREE.Mesh(new THREE.SphereGeometry(1, 32, 32), new THREE.MeshStandardMaterial({color: 0x00ff00, emissive: 0x00aa00, emissiveIntensity: 0.2}));
+            joint.position.y = 4;
+            armGroup.add(joint);
+
+            const limb2 = new THREE.Mesh(new THREE.BoxGeometry(0.8, 4, 0.8), new THREE.MeshStandardMaterial({color: 0xffffff}));
+            limb2.position.y = 6;
+            limb2.rotation.z = 0.5;
+            armGroup.add(limb2);
+
+            scene.add(armGroup);
+
+            scenes.iot = true;
+            function animate() {
+                requestAnimationFrame(animate);
+                if(!document.getElementById('iot').classList.contains('hidden')) {
+                    armGroup.rotation.y = Math.sin(Date.now() * 0.001) * 0.5;
+                    renderer.render(scene, camera);
+                }
+            }
+            animate();
+        }
+
+        // 3. SHOP SCENE: Levitating Object
+        function initShopScene() {
+            const container = document.getElementById('canvas-shop');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+            camera.position.set(0, 0, 8);
+            
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+
+            const light = new THREE.PointLight(0xffffff, 1);
+            light.position.set(5, 5, 5);
+            scene.add(light);
+            scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+
+            // Stack of paper/books
+            const group = new THREE.Group();
+            const paperGeo = new THREE.BoxGeometry(3, 0.1, 2.2);
+            const paperMat = new THREE.MeshStandardMaterial({color: 0xffffff});
+
+            for(let i=0; i<10; i++) {
+                const mesh = new THREE.Mesh(paperGeo, paperMat);
+                mesh.position.y = i * 0.15;
+                mesh.rotation.y = Math.random() * 0.2 - 0.1;
+                group.add(mesh);
+            }
+            
+            // Binder ring
+            const ring = new THREE.Mesh(new THREE.TorusGeometry(3.5, 0.05, 16, 100), new THREE.MeshBasicMaterial({color: 0x000000}));
+            ring.rotation.x = Math.PI / 2;
+            group.add(ring);
+
+            scene.add(group);
+
+            scenes.shop = true;
+            function animate() {
+                requestAnimationFrame(animate);
+                if(!document.getElementById('shop').classList.contains('hidden')) {
+                    group.rotation.y += 0.01;
+                    group.rotation.x = Math.sin(Date.now() * 0.001) * 0.2;
+                    renderer.render(scene, camera);
+                }
+            }
+            animate();
+        }
+
+        // Resize Handler
+        window.addEventListener('resize', () => {
+           // In a real app, update camera aspect ratios here
+        });
+
+        // Init
+        initScenes('home');
+
+    </script>
+</body>
+</html>
