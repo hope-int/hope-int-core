@@ -783,71 +783,167 @@
 </section>
 
         <!-- Enrollment Form -->
-        <section class="py-32 px-6 lg:px-20 bg-white relative" id="enroll">
-            <div class="max-w-5xl mx-auto">
-                <div class="flex flex-col md:flex-row gap-12">
-                    <div class="w-full md:w-1/2">
-                        <h2 class="font-display text-6xl font-bold leading-tight mb-6">Secure<br>Your Spot.</h2>
-                        <p class="text-xl text-gray-600 mb-8">
-                            Join 20 selected students in building the next generation of intelligent machines.
-                        </p>
-                        <div class="bg-gray-50 rounded-3xl p-6 border border-black/5">
-                            <h4 class="font-bold mb-4">Included in Tuition:</h4>
-                            <ul class="space-y-3">
-                                <li class="flex items-center gap-3">
-                                    <div class="w-2 h-2 bg-black rounded-full"></div>
-                                    <span>Full Robotics Kit (ESP32, Chassis, Sensors)</span>
-                                </li>
-                                <li class="flex items-center gap-3">
-                                    <div class="w-2 h-2 bg-black rounded-full"></div>
-                                    <span>Lunch & Refreshments</span>
-                                </li>
-                                <li class="flex items-center gap-3">
-                                    <div class="w-2 h-2 bg-black rounded-full"></div>
-                                    <span>Lifetime Access to Codebase</span>
-                                </li>
-                                <li class="flex items-center gap-3">
-                                    <div class="w-2 h-2 bg-black rounded-full"></div>
-                                    <span>Certificate of Completion</span>
-                                </li>
-                            </ul>
+<!-- REPLACES THE OLD #enroll SECTION -->
+<section class="py-32 bg-[#F4F4F5] relative overflow-hidden" id="enroll">
+    
+    <!-- Background Decor: Grid lines -->
+    <div class="absolute inset-0 pointer-events-none opacity-[0.05]" 
+         style="background-image: linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px); background-size: 60px 60px;">
+    </div>
+
+    <div class="max-w-7xl mx-auto px-6 lg:px-12 relative z-10">
+        <div class="grid lg:grid-cols-12 gap-16 items-start">
+            
+            <!-- LEFT COLUMN: Value & Kit -->
+            <div class="lg:col-span-5">
+                <div class="inline-block px-3 py-1 bg-black text-white text-xs font-mono mb-6 rounded-md">
+                    /// CAPACITY: 14/20 SEATS FILLED
+                </div>
+                <h2 class="font-display text-5xl lg:text-6xl font-bold mb-6 leading-[0.95]">
+                    Secure Your<br>Clearance.
+                </h2>
+                <p class="text-xl text-gray-500 mb-12 leading-relaxed">
+                    Join the elite cohort. Tuition includes your personal engineering kit, lunch, and lifetime access to the codebase.
+                </p>
+
+                <!-- The "Supply Drop" Card -->
+                <div class="bg-white rounded-[2rem] p-8 shadow-[0_20px_40px_rgba(0,0,0,0.05)] border border-black/5 relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 bg-black text-white text-[10px] font-bold px-4 py-2 rounded-bl-2xl font-mono z-10">
+                        KIT_MANIFEST_V3
+                    </div>
+                    
+                    <!-- Animated Scan Line overlay -->
+                    <div class="absolute top-0 left-0 w-full h-1 bg-emerald-500/30 blur-sm group-hover:animate-[scan_2s_linear_infinite] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+
+                    <h3 class="font-display text-2xl font-bold mb-8">Issued Hardware</h3>
+                    
+                    <div class="space-y-6">
+                        <!-- Item 1 -->
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center text-xl shrink-0 border border-black/5">
+                                📟
+                            </div>
+                            <div>
+                                <div class="font-bold text-lg">ESP32-S3 Controller</div>
+                                <div class="text-xs text-gray-400 font-mono uppercase tracking-wider">Dual Core • WiFi • BLE</div>
+                            </div>
+                        </div>
+
+                        <!-- Item 2 -->
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center text-xl shrink-0 border border-black/5">
+                                🦾
+                            </div>
+                            <div>
+                                <div class="font-bold text-lg">6-DOF Servo Arm</div>
+                                <div class="text-xs text-gray-400 font-mono uppercase tracking-wider">Metal Gear • High Torque</div>
+                            </div>
+                        </div>
+
+                        <!-- Item 3 -->
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center text-xl shrink-0 border border-black/5">
+                                🔋
+                            </div>
+                            <div>
+                                <div class="font-bold text-lg">Power Infrastructure</div>
+                                <div class="text-xs text-gray-400 font-mono uppercase tracking-wider">LiPo Cells • Buck Converter</div>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="w-full md:w-1/2">
-                        <form class="space-y-6">
-                            <div class="space-y-2">
-                                <label class="text-sm font-bold ml-4 uppercase tracking-wider">Student Name</label>
-                                <input type="text" class="w-full bg-gray-100 rounded-2xl px-6 py-4 font-medium focus:outline-none focus:ring-2 focus:ring-black transition-all" placeholder="Alex Smith">
+                    <div class="mt-10 pt-6 border-t-2 border-dashed border-gray-100 flex justify-between items-end">
+                        <div>
+                            <div class="text-xs text-gray-400 font-bold uppercase tracking-wider mb-1">Total Tuition</div>
+                            <div class="text-5xl font-display font-bold text-black">$299</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full">
+                                IN STOCK
                             </div>
-                            
-                            <div class="space-y-2">
-                                <label class="text-sm font-bold ml-4 uppercase tracking-wider">Email Address</label>
-                                <input type="email" class="w-full bg-gray-100 rounded-2xl px-6 py-4 font-medium focus:outline-none focus:ring-2 focus:ring-black transition-all" placeholder="alex@example.com">
-                            </div>
-
-                            <div class="space-y-2">
-                                <label class="text-sm font-bold ml-4 uppercase tracking-wider">Experience Level</label>
-                                <div class="grid grid-cols-2 gap-4">
-                                    <label class="cursor-pointer">
-                                        <input type="radio" name="level" class="peer sr-only">
-                                        <div class="bg-gray-100 rounded-2xl px-6 py-4 text-center font-medium peer-checked:bg-black peer-checked:text-white transition-all">Beginner</div>
-                                    </label>
-                                    <label class="cursor-pointer">
-                                        <input type="radio" name="level" class="peer sr-only">
-                                        <div class="bg-gray-100 rounded-2xl px-6 py-4 text-center font-medium peer-checked:bg-black peer-checked:text-white transition-all">Advanced</div>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <button class="w-full bg-black text-white font-bold text-xl rounded-2xl py-5 hover:scale-[1.02] transition-transform shadow-xl">
-                                Apply Now ($299)
-                            </button>
-                        </form>
+                        </div>
                     </div>
                 </div>
             </div>
-        </section>
+
+            <!-- RIGHT COLUMN: The Terminal Form -->
+            <div class="lg:col-span-7">
+                <form class="bg-white rounded-[2.5rem] p-8 lg:p-12 shadow-2xl shadow-black/5 border border-black/5 relative">
+                    
+                    <!-- Form Header -->
+                    <div class="flex items-center justify-between mb-10 pb-6 border-b border-black/5">
+                        <div class="flex items-center gap-3">
+                            <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                            <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                        </div>
+                        <div class="font-mono text-xs text-gray-400">CANDIDATE_REGISTRATION</div>
+                    </div>
+
+                    <div class="space-y-8">
+                        <!-- Name Field -->
+                        <div class="group">
+                            <label class="block font-mono text-xs font-bold text-gray-500 uppercase mb-2 ml-1">Full Designation (Name)</label>
+                            <div class="relative">
+                                <input type="text" class="w-full bg-gray-50 rounded-xl px-6 py-4 font-bold text-lg border-2 border-transparent focus:border-black focus:bg-white focus:outline-none transition-all placeholder-gray-300" placeholder="Ex: Alex Chen">
+                                <div class="absolute right-4 top-1/2 -translate-y-1/2 w-2 h-2 bg-black rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
+                            </div>
+                        </div>
+
+                        <!-- Email Field -->
+                        <div class="group">
+                            <label class="block font-mono text-xs font-bold text-gray-500 uppercase mb-2 ml-1">Comms Link (Email)</label>
+                            <div class="relative">
+                                <input type="email" class="w-full bg-gray-50 rounded-xl px-6 py-4 font-bold text-lg border-2 border-transparent focus:border-black focus:bg-white focus:outline-none transition-all placeholder-gray-300" placeholder="alex@example.com">
+                            </div>
+                        </div>
+
+                        <!-- Experience Level Selector -->
+                        <div>
+                            <label class="block font-mono text-xs font-bold text-gray-500 uppercase mb-4 ml-1">Clearance Level</label>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- Option 1 -->
+                                <label class="relative cursor-pointer group">
+                                    <input type="radio" name="level" class="peer sr-only" checked>
+                                    <div class="p-6 bg-gray-50 rounded-2xl border-2 border-transparent peer-checked:border-black peer-checked:bg-white transition-all hover:bg-gray-100">
+                                        <div class="font-bold text-lg mb-1">Rookie</div>
+                                        <div class="text-xs text-gray-500 leading-tight">No hardware experience. Ready to learn from scratch.</div>
+                                    </div>
+                                    <div class="absolute top-4 right-4 w-4 h-4 rounded-full border-2 border-gray-300 peer-checked:border-black peer-checked:bg-black transition-all"></div>
+                                </label>
+
+                                <!-- Option 2 -->
+                                <label class="relative cursor-pointer group">
+                                    <input type="radio" name="level" class="peer sr-only">
+                                    <div class="p-6 bg-gray-50 rounded-2xl border-2 border-transparent peer-checked:border-black peer-checked:bg-white transition-all hover:bg-gray-100">
+                                        <div class="font-bold text-lg mb-1">Architect</div>
+                                        <div class="text-xs text-gray-500 leading-tight">Some coding/robotics knowledge. Ready for advanced tasks.</div>
+                                    </div>
+                                    <div class="absolute top-4 right-4 w-4 h-4 rounded-full border-2 border-gray-300 peer-checked:border-black peer-checked:bg-black transition-all"></div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button class="w-full group relative overflow-hidden bg-black text-white rounded-xl py-5 font-bold text-xl shadow-xl hover:bg-emerald-600 transition-colors duration-300">
+                            <span class="relative z-10 flex items-center justify-center gap-3">
+                                Initialize Application
+                                <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                            </span>
+                            <!-- Hover Effect -->
+                            <div class="absolute inset-0 bg-white/10 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                        </button>
+
+                        <p class="text-center text-xs text-gray-400 font-medium">
+                            By clicking above, you agree to the <a href="#" class="underline hover:text-black">Safety Protocols</a>.
+                        </p>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</section>
 
         <footer class="bg-black text-white py-12 px-6 text-center border-t border-white/10">
             <h2 class="font-display text-2xl font-bold mb-4">NXTGN.</h2>
