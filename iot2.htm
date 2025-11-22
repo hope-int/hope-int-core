@@ -1152,7 +1152,6 @@
 </section>
 
 
-        <!-- Enrollment Form -->
 <!-- REPLACES THE OLD #enroll SECTION -->
 <section class="py-32 bg-[#F4F4F5] relative overflow-hidden" id="enroll">
     
@@ -1238,7 +1237,7 @@
 
             <!-- RIGHT COLUMN: The Terminal Form -->
             <div class="lg:col-span-7">
-                <form class="bg-white rounded-[2.5rem] p-8 lg:p-12 shadow-2xl shadow-black/5 border border-black/5 relative">
+                <form class="bg-white rounded-[2.5rem] p-8 lg:p-12 shadow-2xl shadow-black/5 border border-black/5 relative z-20">
                     
                     <!-- Form Header -->
                     <div class="flex items-center justify-between mb-10 pb-6 border-b border-black/5">
@@ -1295,7 +1294,7 @@
                         </div>
 
                         <!-- Submit Button -->
-                        <button class="w-full group relative overflow-hidden bg-black text-white rounded-xl py-5 font-bold text-xl shadow-xl hover:bg-emerald-600 transition-colors duration-300">
+                        <button type="button" class="w-full group relative overflow-hidden bg-black text-white rounded-xl py-5 font-bold text-xl shadow-xl hover:bg-emerald-600 transition-colors duration-300">
                             <span class="relative z-10 flex items-center justify-center gap-3">
                                 Initialize Application
                                 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
@@ -1305,14 +1304,100 @@
                         </button>
 
                         <p class="text-center text-xs text-gray-400 font-medium">
-                            By clicking above, you agree to the <a href="#" class="underline hover:text-black">Safety Protocols</a>.
+                            By clicking above, you agree to the <button type="button" onclick="toggleSafetyModal()" class="underline hover:text-black font-bold text-black/70">Safety Protocols</button>.
                         </p>
                     </div>
                 </form>
             </div>
-
         </div>
     </div>
+
+    <!-- SAFETY PROTOCOLS MODAL (Initially Hidden) -->
+    <div id="safety-modal" class="fixed inset-0 z-[100] hidden opacity-0 transition-opacity duration-300">
+        
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="toggleSafetyModal()"></div>
+        
+        <!-- Modal Window -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl p-4">
+            <div class="bg-[#0a0a0a] border border-emerald-500/30 rounded-xl overflow-hidden shadow-[0_0_50px_rgba(16,185,129,0.2)] relative">
+                
+                <!-- Header -->
+                <div class="bg-emerald-900/20 border-b border-emerald-500/20 p-4 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                        <span class="font-mono text-emerald-500 text-xs tracking-widest uppercase">Safety_Protocol_v9.pdf</span>
+                    </div>
+                    <button onclick="toggleSafetyModal()" class="text-emerald-500 hover:text-white font-mono text-xs">[CLOSE_TERMINAL]</button>
+                </div>
+
+                <!-- Content -->
+                <div class="p-8 max-h-[60vh] overflow-y-auto custom-scrollbar text-gray-300 font-mono text-sm space-y-6">
+                    
+                    <div class="border-l-2 border-red-500 pl-4 bg-red-500/5 p-4 rounded-r-lg">
+                        <h4 class="text-red-400 font-bold mb-2">WARNING: HIGH CURRENT</h4>
+                        <p class="text-xs opacity-80">The robotic servos operate on high-amperage external power. Improper wiring may result in component failure or thermal events.</p>
+                    </div>
+
+                    <div>
+                        <h4 class="text-emerald-400 font-bold mb-2">01 // Eye Protection</h4>
+                        <p class="text-xs opacity-80 leading-relaxed">Safety glasses must be worn at all times during soldering sessions and when the robotic arm is in "Active Torque" mode. Mechanical failure can result in high-velocity debris.</p>
+                    </div>
+
+                    <div>
+                        <h4 class="text-emerald-400 font-bold mb-2">02 // LiPo Battery Handling</h4>
+                        <p class="text-xs opacity-80 leading-relaxed">Lithium Polymer batteries are volatile. Do not puncture, short circuit, or leave charging unattended. All batteries must be stored in the provided fire-safe bags when not in use.</p>
+                    </div>
+
+                    <div>
+                        <h4 class="text-emerald-400 font-bold mb-2">03 // Emergency Stop</h4>
+                        <p class="text-xs opacity-80 leading-relaxed">Familiarize yourself with the hardware kill-switch location on your workbench. In the event of a code loop causing erratic movement, cut power immediately.</p>
+                    </div>
+
+                    <div class="font-mono text-[10px] text-gray-600 pt-4 border-t border-white/10">
+                        DIGITAL SIGNATURE REQUIRED FOR ADMITTANCE.<br>
+                        HASH: 8f9a2b3c4d5e6f7a8b9c0d1e2f3a4b5c
+                    </div>
+                </div>
+
+                <!-- Footer Action -->
+                <div class="p-4 bg-black/50 border-t border-white/5 flex justify-end">
+                    <button onclick="toggleSafetyModal()" class="bg-emerald-500 hover:bg-emerald-400 text-black px-6 py-3 rounded font-bold text-sm transition-colors flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        I ACKNOWLEDGE RISKS
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleSafetyModal() {
+            const modal = document.getElementById('safety-modal');
+            const body = document.body;
+            
+            if (modal.classList.contains('hidden')) {
+                // Open
+                modal.classList.remove('hidden');
+                // Small delay to allow display:block to apply before opacity transition
+                setTimeout(() => {
+                    modal.classList.remove('opacity-0');
+                    modal.classList.add('opacity-100');
+                }, 10);
+                body.style.overflow = 'hidden'; // Prevent background scrolling
+            } else {
+                // Close
+                modal.classList.remove('opacity-100');
+                modal.classList.add('opacity-0');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 300); // Wait for transition
+                body.style.overflow = '';
+            }
+        }
+    </script>
+
 </section>
 
        <!-- REPLACES THE FOOTER -->
