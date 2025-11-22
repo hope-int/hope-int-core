@@ -531,182 +531,189 @@
 
     <script>
         // --- 1. Three.js Robotic Arm Setup ---
-       const initThreeJS = () => {
-    const container = document.getElementById('canvas-container');
-    
-    // SCENE SETUP
-    const scene = new THREE.Scene();
-    // Add slight fog for depth
-    scene.fog = new THREE.FogExp2(0x050505, 0.035);
+        const initThreeJS = () => {
+            const container = document.getElementById('canvas-container');
+            const scene = new THREE.Scene();
+            
+            // Setup Camera
+            const camera = new THREE.PerspectiveCamera(35, container.offsetWidth / container.offsetHeight, 0.1, 1000);
+            camera.position.set(20, 15, 20);
+            camera.lookAt(0, 2, 0);
 
-    const camera = new THREE.PerspectiveCamera(45, container.offsetWidth / container.offsetHeight, 0.1, 1000);
-    // Move camera back to fit the larger model
-    camera.position.set(0, 0, 16); 
-    camera.lookAt(0, 0, 0);
+            // Setup Renderer
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.offsetWidth, container.offsetHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(container.offsetWidth, container.offsetHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    container.appendChild(renderer.domElement);
+            // Materials
+            const matBlack = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.7, metalness: 0.1 });
+            const matWhite = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2, metalness: 0.1 });
+            const matChrome = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, roughness: 0.1, metalness: 0.9 });
+            const matGlow = new THREE.MeshBasicMaterial({ color: 0x00ff00 }); // Status light
 
-    // --- MATERIALS ---
-    // Sleek dark metal
-    const matMetal = new THREE.MeshStandardMaterial({ 
-        color: 0x111111, 
-        roughness: 0.3, 
-        metalness: 0.8,
-        flatShading: true
-    });
-    
-    // Glowing highlights (emissive)
-    const matGlow = new THREE.MeshStandardMaterial({
-        color: 0x000000,
-        emissive: 0x00ff88, // Cyan/Green glow
-        emissiveIntensity: 2,
-        roughness: 0.1,
-        metalness: 1
-    });
+            // --- Build the Robot ---
+            const robotGroup = new THREE.Group();
+            scene.add(robotGroup);
 
-    // Wireframe material for the data sphere
-    const matWireframe = new THREE.MeshBasicMaterial({
-        color: 0x444444,
-        wireframe: true,
-        transparent: true,
-        opacity: 0.15
-    });
+            // 1. Base
+            const baseGeo = new THREE.CylinderGeometry(4, 4.5, 1, 32);
+            const base = new THREE.Mesh(baseGeo, matBlack);
+            base.position.y = 0.5;
+            base.castShadow = true;
+            base.receiveShadow = true;
+            robotGroup.add(base);
 
-    // --- GEOMETRY: THE GYROSCOPIC CORE ---
-    const coreGroup = new THREE.Group();
-    scene.add(coreGroup);
+            // 2. Rotator (Turret)
+            const turretGroup = new THREE.Group();
+            turretGroup.position.y = 1;
+            robotGroup.add(turretGroup);
 
-    // 1. Central Data Sphere (The "Brain")
-    const sphereGeo = new THREE.IcosahedronGeometry(1.5, 1);
-    const coreSphere = new THREE.Mesh(sphereGeo, matMetal);
-    coreGroup.add(coreSphere);
+            const turretGeo = new THREE.CylinderGeometry(2.5, 2.5, 1.5, 32);
+            const turret = new THREE.Mesh(turretGeo, matWhite);
+            turret.position.y = 0.75;
+            turret.castShadow = true;
+            turretGroup.add(turret);
 
-    // Wireframe overlay
-    const wireGeo = new THREE.IcosahedronGeometry(1.6, 1);
-    const wireSphere = new THREE.Mesh(wireGeo, matWireframe);
-    coreGroup.add(wireSphere);
+            // 3. Shoulder Joint
+            const shoulderGeo = new THREE.CylinderGeometry(1.2, 1.2, 3, 32);
+            const shoulder = new THREE.Mesh(shoulderGeo, matBlack);
+            shoulder.rotation.z = Math.PI / 2;
+            shoulder.position.y = 1.5;
+            turretGroup.add(shoulder);
 
-    // Glowing Nodes on the sphere
-    const nodeGeo = new THREE.BoxGeometry(0.1, 0.1, 0.5);
-    for(let i=0; i<12; i++) {
-        const node = new THREE.Mesh(nodeGeo, matGlow);
-        node.position.set(
-            (Math.random() - 0.5) * 3,
-            (Math.random() - 0.5) * 3,
-            (Math.random() - 0.5) * 3
-        ).normalize().multiplyScalar(1.5);
-        node.lookAt(0,0,0);
-        coreSphere.add(node);
-    }
+            // 4. Lower Arm
+            const arm1Group = new THREE.Group();
+            arm1Group.position.y = 1.5;
+            turretGroup.add(arm1Group);
 
-    // 2. Gyroscopic Rings
-    // Ring 1 (Inner)
-    const ring1Geo = new THREE.TorusGeometry(2.2, 0.05, 16, 100);
-    const ring1 = new THREE.Mesh(ring1Geo, matGlow);
-    coreGroup.add(ring1);
+            const arm1Geo = new THREE.BoxGeometry(1, 5, 1.5);
+            const arm1 = new THREE.Mesh(arm1Geo, matWhite);
+            arm1.position.y = 2.5; // Half height
+            arm1.castShadow = true;
+            arm1Group.add(arm1);
 
-    // Ring 2 (Outer - Thicker)
-    const ring2Geo = new THREE.TorusGeometry(2.8, 0.15, 16, 100);
-    const ring2 = new THREE.Mesh(ring2Geo, matMetal);
-    coreGroup.add(ring2);
+            // Piston detail
+            const pistonGeo = new THREE.CylinderGeometry(0.2, 0.2, 4);
+            const piston = new THREE.Mesh(pistonGeo, matChrome);
+            piston.position.set(0.8, 2.5, 0);
+            arm1Group.add(piston);
 
-    // Ring 3 (Vertical)
-    const ring3Geo = new THREE.TorusGeometry(3.4, 0.08, 16, 100);
-    const ring3 = new THREE.Mesh(ring3Geo, matMetal);
-    ring3.rotation.x = Math.PI / 2;
-    coreGroup.add(ring3);
+            // 5. Elbow Joint
+            const elbowGeo = new THREE.CylinderGeometry(1, 1, 2.2, 32);
+            const elbow = new THREE.Mesh(elbowGeo, matBlack);
+            elbow.rotation.z = Math.PI / 2;
+            elbow.position.y = 5;
+            arm1Group.add(elbow);
 
-    // 3. Floating Data Particles
-    const particleCount = 200;
-    const particlesGeo = new THREE.BufferGeometry();
-    const posArray = new Float32Array(particleCount * 3);
-    
-    for(let i=0; i < particleCount * 3; i++) {
-        posArray[i] = (Math.random() - 0.5) * 15; // Spread them out
-    }
-    particlesGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-    const particlesMat = new THREE.PointsMaterial({
-        size: 0.03,
-        color: 0xffffff,
-        transparent: true,
-        opacity: 0.6
-    });
-    const particlesMesh = new THREE.Points(particlesGeo, particlesMat);
-    scene.add(particlesMesh);
+            // 6. Upper Arm (Forearm)
+            const arm2Group = new THREE.Group();
+            arm2Group.position.y = 5;
+            arm1Group.add(arm2Group);
 
-    // --- LIGHTING ---
-    // Main directional light
-    const light = new THREE.DirectionalLight(0xffffff, 2);
-    light.position.set(10, 10, 10);
-    scene.add(light);
+            const arm2Geo = new THREE.BoxGeometry(0.8, 4, 1.2);
+            const arm2 = new THREE.Mesh(arm2Geo, matWhite);
+            arm2.position.y = 2;
+            arm2.castShadow = true;
+            arm2Group.add(arm2);
 
-    // Blue rim light for sci-fi feel
-    const rimLight = new THREE.SpotLight(0x0088ff, 5);
-    rimLight.position.set(-10, 0, -5);
-    rimLight.lookAt(0,0,0);
-    scene.add(rimLight);
+            // 7. Wrist/End Effector
+            const wristGeo = new THREE.SphereGeometry(0.8);
+            const wrist = new THREE.Mesh(wristGeo, matBlack);
+            wrist.position.y = 4;
+            arm2Group.add(wrist);
 
-    // Ambient
-    scene.add(new THREE.AmbientLight(0x404040, 2));
+            // Claw
+            const clawGroup = new THREE.Group();
+            clawGroup.position.y = 4;
+            arm2Group.add(clawGroup);
 
-    // --- ANIMATION ---
-    let mouseX = 0;
-    let mouseY = 0;
-    
-    // Add slight parallax to camera based on scroll
-    let targetY = 0;
-    
-    document.addEventListener('mousemove', (e) => {
-        mouseX = (e.clientX - window.innerWidth / 2) * 0.001;
-        mouseY = (e.clientY - window.innerHeight / 2) * 0.001;
-    });
+            const clawPartGeo = new THREE.BoxGeometry(0.2, 1.5, 0.5);
+            const clawL = new THREE.Mesh(clawPartGeo, matChrome);
+            clawL.position.set(-0.4, 0.8, 0);
+            clawL.rotation.z = 0.2;
+            clawGroup.add(clawL);
 
-    const clock = new THREE.Clock();
+            const clawR = new THREE.Mesh(clawPartGeo, matChrome);
+            clawR.position.set(0.4, 0.8, 0);
+            clawR.rotation.z = -0.2;
+            clawGroup.add(clawR);
 
-    function animate() {
-        requestAnimationFrame(animate);
-        const t = clock.getElapsedTime();
+            // Status Light
+            const lightGeo = new THREE.SphereGeometry(0.2);
+            const lightMesh = new THREE.Mesh(lightGeo, matGlow);
+            lightMesh.position.set(0, 1.5, 0.8);
+            arm1.add(lightMesh);
 
-        // 1. Rotate Core (Idle animation)
-        coreSphere.rotation.y += 0.005;
-        coreSphere.rotation.z = Math.sin(t * 0.5) * 0.2;
+            // --- Lighting ---
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
 
-        // 2. Spin Rings
-        ring1.rotation.x = Math.sin(t * 0.5) + (mouseY * 2);
-        ring1.rotation.y += 0.02;
-        
-        ring2.rotation.y = Math.cos(t * 0.3) + (mouseX * 2);
-        ring2.rotation.z += 0.01;
+            const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+            dirLight.position.set(10, 20, 10);
+            dirLight.castShadow = true;
+            dirLight.shadow.mapSize.width = 1024;
+            dirLight.shadow.mapSize.height = 1024;
+            scene.add(dirLight);
 
-        ring3.rotation.x += 0.015;
-        ring3.rotation.y = mouseX;
+            // Floor (Invisible but catches shadow)
+            const floorGeo = new THREE.PlaneGeometry(50, 50);
+            const floorMat = new THREE.ShadowMaterial({ opacity: 0.1 });
+            const floor = new THREE.Mesh(floorGeo, floorMat);
+            floor.rotation.x = -Math.PI / 2;
+            floor.receiveShadow = true;
+            scene.add(floor);
 
-        // 3. Hover Effect (Whole group bobs up and down)
-        coreGroup.position.y = Math.sin(t) * 0.2;
+            // --- Animation Variables ---
+            let mouseX = 0;
+            let mouseY = 0;
+            
+            document.addEventListener('mousemove', (e) => {
+                const windowHalfX = window.innerWidth / 2;
+                const windowHalfY = window.innerHeight / 2;
+                mouseX = (e.clientX - windowHalfX) * 0.001;
+                mouseY = (e.clientY - windowHalfY) * 0.001;
+            });
 
-        // 4. Mouse Follow (Smooth Damping)
-        coreGroup.rotation.y += (mouseX * 2 - coreGroup.rotation.y) * 0.05;
-        coreGroup.rotation.x += (mouseY * 2 - coreGroup.rotation.x) * 0.05;
+            // --- Render Loop ---
+            const clock = new THREE.Clock();
 
-        // 5. Particle Float
-        particlesMesh.rotation.y = t * 0.05;
-        particlesMesh.rotation.x = mouseY * 0.1;
+            function animate() {
+                requestAnimationFrame(animate);
+                const t = clock.getElapsedTime();
 
-        renderer.render(scene, camera);
-    }
+                // 1. Turret Rotation (Y-axis follow mouse)
+                turretGroup.rotation.y += ((-mouseX * 2) - turretGroup.rotation.y) * 0.05;
 
-    animate();
+                // 2. Arm 1 Movement (Bobbing + Mouse Y)
+                const targetArm1Rot = Math.sin(t * 0.5) * 0.2 + (mouseY * 1.5) + 0.5; // Base tilt
+                arm1Group.rotation.x += (targetArm1Rot - arm1Group.rotation.x) * 0.05;
 
-    // Resize Handler
-    window.addEventListener('resize', () => {
-        camera.aspect = container.offsetWidth / container.offsetHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(container.offsetWidth, container.offsetHeight);
-    });
-};
+                // 3. Arm 2 Movement (Opposite compensation)
+                const targetArm2Rot = -Math.sin(t * 0.5) * 0.4 - 1.0;
+                arm2Group.rotation.x += (targetArm2Rot - arm2Group.rotation.x) * 0.05;
+
+                // 4. Claw Spinning
+                clawGroup.rotation.y += 0.02;
+
+                // 5. Pulse Light
+                const pulse = (Math.sin(t * 5) + 1) / 2; // 0 to 1
+                matGlow.color.setHSL(0.33, 1, 0.3 + pulse * 0.4);
+
+                renderer.render(scene, camera);
+            }
+
+            animate();
+
+            // Resize
+            window.addEventListener('resize', () => {
+                camera.aspect = container.offsetWidth / container.offsetHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.offsetWidth, container.offsetHeight);
+            });
+        };
+
         // --- 2. GSAP Animations ---
         document.addEventListener('DOMContentLoaded', () => {
             // Remove Loader
