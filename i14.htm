@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOPE INT CORE | Future Systems</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- GSAP (For pro-level animations) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        void: '#050505',
+                        ash: '#1a1a1a',
+                        alabaster: '#F2F2F0',
+                        neon: '#CCFF00', // Subtle acid accent
+                    },
+                    fontFamily: {
+                        sans: ['Space Grotesk', 'sans-serif'],
+                        display: ['Syne', 'sans-serif'],
+                    },
+                    backgroundImage: {
+                        'noise': "url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22 opacity=%220.05%22/%3E%3C/svg%3E')",
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --cursor-size: 20px;
+        }
+
+        body {
+            background-color: #F2F2F0;
+            color: #050505;
+            overflow-x: hidden;
+            cursor: none; /* Custom cursor */
+        }
+
+        /* --- NOISE OVERLAY --- */
+        .noise-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22 opacity=%220.04%22/%3E%3C/svg%3E');
+        }
+
+        /* --- CUSTOM CURSOR --- */
+        #cursor {
+            position: fixed;
+            top: 0; left: 0;
+            width: var(--cursor-size);
+            height: var(--cursor-size);
+            border: 1px solid #000;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s, background-color 0.3s;
+            mix-blend-mode: difference;
+            background-color: transparent;
+        }
+        #cursor.hovered {
+            width: 50px;
+            height: 50px;
+            background-color: #fff;
+            border-color: transparent;
+        }
+
+        /* --- UTILITIES --- */
+        .glass-nav {
+            background: rgba(242, 242, 240, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .text-reveal-mask {
+            overflow: hidden;
+            display: block;
+        }
+        .text-reveal-child {
+            display: block;
+            transform: translateY(110%);
+            transition: transform 1s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+        .is-visible .text-reveal-child {
+            transform: translateY(0);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #F2F2F0; }
+        ::-webkit-scrollbar-thumb { background: #000; border-radius: 3px; }
+
+        /* BENTO GRID HOVER */
+        .bento-card {
+            transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .bento-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1);
+        }
+
+        /* 3D Container */
+        .canvas-container {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-black selection:text-white">
+
+    <!-- NOISE & CURSOR -->
+    <div class="noise-overlay"></div>
+    <div id="cursor"></div>
+
+    <!-- PRELOADER -->
+    <div id="preloader" class="fixed inset-0 bg-void z-[100] flex items-center justify-center text-white">
+        <div class="text-center">
+            <h1 class="font-display text-4xl md:text-6xl font-bold tracking-tighter">HOPE<span class="text-gray-600">CORE</span></h1>
+            <div class="w-48 h-1 bg-gray-800 mt-4 overflow-hidden rounded-full mx-auto">
+                <div id="loader-bar" class="w-0 h-full bg-white"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NAVIGATION -->
+    <nav class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 py-6 md:px-12 pointer-events-none">
+        <!-- Logo -->
+        <a href="#" onclick="router('home')" class="pointer-events-auto font-display font-bold text-xl tracking-tighter mix-blend-difference text-void z-50">
+            HC<span class="text-xs align-top">©25</span>
+        </a>
+
+        <!-- Dynamic Island Nav -->
+        <div class="pointer-events-auto glass-nav rounded-full px-2 py-2 flex items-center gap-1 shadow-lg transform transition-transform hover:scale-105">
+            <button onclick="router('home')" class="nav-btn px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest bg-black text-white transition-colors" data-target="home">Home</button>
+            <button onclick="router('education')" class="nav-btn px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-black hover:bg-gray-200 transition-colors" data-target="education">Edu</button>
+            <button onclick="router('iot')" class="nav-btn px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-black hover:bg-gray-200 transition-colors" data-target="iot">Labs</button>
+            <button onclick="router('shop')" class="nav-btn px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest text-gray-500 hover:text-black hover:bg-gray-200 transition-colors" data-target="shop">Supply</button>
+        </div>
+
+        <!-- Menu/Contact -->
+        <button onclick="openModal('contact')" class="pointer-events-auto w-12 h-12 rounded-full bg-black text-white flex items-center justify-center hover:scale-110 transition-transform magnetic-btn">
+            <i data-lucide="plus" class="w-5 h-5 transition-transform group-hover:rotate-90"></i>
+        </button>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="relative min-h-screen">
+
+        <!-- SECTION: HERO -->
+        <div id="home" class="page-section min-h-screen flex flex-col pt-32 pb-10 px-6 md:px-12 relative overflow-hidden">
+            
+            <!-- Background Typography -->
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[15vw] md:text-[20vw] font-display font-bold leading-none text-gray-200 opacity-30 select-none whitespace-nowrap z-0">
+                SYSTEM
+            </div>
+
+            <div class="relative z-10 mt-auto mb-20 md:mb-0 md:mt-0 md:h-[70vh] flex flex-col justify-center items-start max-w-7xl mx-auto w-full">
+                
+                <div class="text-reveal-mask">
+                    <p class="text-reveal-child text-sm font-mono uppercase tracking-widest mb-4 border-l-2 border-black pl-4">
+                        Dept. of Computer Science & Eng.
+                    </p>
+                </div>
+
+                <div class="text-reveal-mask">
+                    <h1 class="text-reveal-child font-display text-6xl md:text-9xl font-bold tracking-tighter leading-[0.9] mb-6">
+                        FLUID<br>INNOVATION
+                    </h1>
+                </div>
+                
+                <div class="text-reveal-mask max-w-xl">
+                    <p class="text-reveal-child text-lg text-gray-600 font-medium leading-relaxed">
+                        An integrated academic ecosystem blurring the lines between theoretical learning, robotic application, and material supply.
+                    </p>
+                </div>
+
+                <div class="text-reveal-mask mt-10">
+                    <div class="text-reveal-child flex gap-4">
+                        <button onclick="router('education')" class="magnetic-btn bg-black text-white px-8 py-4 rounded-full font-bold uppercase text-sm tracking-widest hover:bg-gray-900 transition-colors flex items-center gap-2">
+                            <span>Enter System</span>
+                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="openModal('video')" class="magnetic-btn border border-black px-8 py-4 rounded-full font-bold uppercase text-sm tracking-widest hover:bg-black hover:text-white transition-colors">
+                            Watch Reel
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hero 3D Object (Absolute Right) -->
+            <div class="absolute top-20 right-[-10%] w-[60%] h-[80%] z-0 pointer-events-none hidden md:block opacity-0 fade-in-delayed">
+                <div id="canvas-hero" class="w-full h-full"></div>
+            </div>
+        </div>
+
+        <!-- SECTION: EDUCATION (Bento Grid) -->
+        <div id="education" class="page-section hidden min-h-screen pt-32 pb-20 px-6 md:px-12 bg-alabaster">
+            <div class="max-w-7xl mx-auto">
+                <div class="mb-16">
+                    <h2 class="font-display text-5xl md:text-7xl font-bold mb-4">ACADEMIC<br><span class="text-gray-400">ARCHIVE</span></h2>
+                    <div class="h-px w-full bg-gray-300"></div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 h-auto md:h-[600px]">
+                    
+                    <!-- Large Card: Main Resources -->
+                    <div class="md:col-span-8 bento-card bg-white rounded-[2rem] p-10 relative overflow-hidden group cursor-pointer border border-gray-100">
+                        <div class="relative z-10 flex flex-col h-full justify-between">
+                            <div>
+                                <div class="w-12 h-12 rounded-full bg-alabaster flex items-center justify-center mb-6">
+                                    <i data-lucide="book-open" class="w-5 h-5"></i>
+                                </div>
+                                <h3 class="font-display text-4xl font-bold">KTU Repository</h3>
+                                <p class="text-gray-500 mt-2 max-w-sm">Access the complete distilled notes for Modules 1-5. Updated for the 2025 Syllabus.</p>
+                            </div>
+                            <div class="flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-gray-400">
+                                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                                Live Sync Active
+                            </div>
+                        </div>
+                        <div class="absolute right-[-50px] top-1/2 -translate-y-1/2 opacity-10 group-hover:opacity-20 transition-opacity rotate-12">
+                            <i data-lucide="file-text" class="w-64 h-64"></i>
+                        </div>
+                    </div>
+
+                    <!-- Tall Card: Podcast -->
+                    <div class="md:col-span-4 bento-card bg-black text-white rounded-[2rem] p-8 relative overflow-hidden group cursor-pointer">
+                        <div class="absolute inset-0 bg-gradient-to-br from-gray-800 to-black opacity-50"></div>
+                        <div class="relative z-10 h-full flex flex-col justify-between">
+                            <div class="flex justify-between items-start">
+                                <i data-lucide="mic" class="w-6 h-6"></i>
+                                <span class="font-mono text-xs border border-white/20 px-2 py-1 rounded-full">S3 E4</span>
+                            </div>
+                            <div class="mt-auto">
+                                <div class="flex items-center gap-4 mb-4">
+                                    <div class="flex gap-1 h-8 items-end">
+                                        <div class="w-1 bg-white h-4 animate-[bounce_1s_infinite]"></div>
+                                        <div class="w-1 bg-white h-8 animate-[bounce_1.2s_infinite]"></div>
+                                        <div class="w-1 bg-white h-3 animate-[bounce_0.8s_infinite]"></div>
+                                        <div class="w-1 bg-white h-6 animate-[bounce_1.5s_infinite]"></div>
+                                    </div>
+                                </div>
+                                <h3 class="font-display text-2xl font-bold">Audio<br>Lectures</h3>
+                            </div>
+                        </div>
+                        <!-- Decorative Circle -->
+                        <div class="absolute -top-10 -right-10 w-40 h-40 bg-gray-700 rounded-full blur-3xl group-hover:bg-gray-600 transition-colors"></div>
+                    </div>
+
+                    <!-- Wide Low Card: AI Tutor -->
+                    <div class="md:col-span-12 bento-card bg-[#EBEBEB] rounded-[2rem] p-8 flex flex-col md:flex-row items-center justify-between gap-6 cursor-pointer group hover:bg-[#E1E1E1] transition-colors">
+                        <div class="flex items-center gap-6">
+                            <div class="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-sm">
+                                <i data-lucide="bot" class="w-8 h-8"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-display text-2xl font-bold">Hope AI Assistant</h3>
+                                <p class="text-gray-500">Ask questions about assignments, code logic, or exam schedules.</p>
+                            </div>
+                        </div>
+                        <div class="w-12 h-12 rounded-full border border-black flex items-center justify-center group-hover:bg-black group-hover:text-white transition-all">
+                            <i data-lucide="arrow-up-right" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: IOT LABS (Dark Mode) -->
+        <div id="iot" class="page-section hidden min-h-screen pt-32 pb-20 px-6 md:px-12 bg-void text-white">
+            <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-[70vh]">
+                
+                <!-- Text Content -->
+                <div class="order-2 lg:order-1">
+                    <div class="inline-flex items-center gap-2 border border-white/20 rounded-full px-4 py-1 mb-8">
+                        <div class="w-2 h-2 bg-neon rounded-full shadow-[0_0_10px_#CCFF00]"></div>
+                        <span class="text-xs font-mono uppercase tracking-widest text-gray-300">Lab Access: Granted</span>
+                    </div>
+
+                    <h2 class="font-display text-6xl md:text-8xl font-bold mb-6 leading-[0.9]">
+                        HARD<br><span class="text-gray-600">WARE</span>
+                    </h2>
+                    
+                    <p class="text-gray-400 text-lg mb-10 max-w-md leading-relaxed">
+                        Join the elite fabrication squad. Summer camps focused on drone kinetics, autonomous rovers, and ESP32 architecture.
+                    </p>
+
+                    <div class="flex flex-col gap-4">
+                        <div class="p-6 rounded-2xl bg-ash border border-white/5 hover:border-white/20 transition-colors cursor-default">
+                            <div class="flex justify-between items-center mb-2">
+                                <h4 class="font-bold text-xl">Drone Architecture</h4>
+                                <span class="font-mono text-xs text-neon">BATCH 01</span>
+                            </div>
+                            <p class="text-sm text-gray-500">Aerodynamics, PID Tuning, Flight Controllers.</p>
+                        </div>
+
+                        <div class="p-6 rounded-2xl bg-ash border border-white/5 hover:border-white/20 transition-colors cursor-default">
+                            <div class="flex justify-between items-center mb-2">
+                                <h4 class="font-bold text-xl">Smart Home IoT</h4>
+                                <span class="font-mono text-xs text-neon">BATCH 02</span>
+                            </div>
+                            <p class="text-sm text-gray-500">HomeAssistant, MQTT, Relay Logic.</p>
+                        </div>
+                    </div>
+
+                    <button onclick="openModal('register')" class="mt-10 magnetic-btn w-full md:w-auto bg-white text-black px-10 py-4 rounded-full font-bold uppercase tracking-widest hover:bg-neon transition-colors">
+                        Apply for Access
+                    </button>
+                </div>
+
+                <!-- 3D Canvas -->
+                <div class="order-1 lg:order-2 h-[400px] lg:h-[600px] relative">
+                    <div id="canvas-iot" class="w-full h-full"></div>
+                    <!-- Overlay Grid -->
+                    <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: SHOP -->
+        <div id="shop" class="page-section hidden min-h-screen pt-32 pb-20 px-6 md:px-12 bg-alabaster">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-end mb-16">
+                    <h2 class="font-display text-6xl font-bold leading-none">SUPPLY<br>CHAIN</h2>
+                    <p class="text-gray-500 max-w-xs mt-6 md:mt-0 text-right">Essential components and services delivered to your dorm.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    
+                    <!-- Product 1 -->
+                    <div class="group relative bg-white rounded-[2rem] p-4 cursor-pointer hover:shadow-2xl transition-all duration-500">
+                        <div class="h-64 bg-gray-50 rounded-[1.5rem] relative overflow-hidden flex items-center justify-center">
+                            <!-- 3D Placeholder Image -->
+                            <div id="canvas-shop-1" class="w-full h-full absolute inset-0"></div>
+                            <div class="absolute top-4 right-4 bg-black text-white text-xs font-bold px-3 py-1 rounded-full">New</div>
+                        </div>
+                        <div class="p-4">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 class="font-bold text-xl mb-1 group-hover:text-gray-600 transition-colors">Arduino Starter</h3>
+                                    <p class="text-xs text-gray-400 font-mono">CODE: ARD-001</p>
+                                </div>
+                                <span class="font-display font-bold text-lg">₹1,499</span>
+                            </div>
+                            <button class="w-full mt-6 bg-black text-white py-3 rounded-xl text-sm font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                                Add to Cart
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Product 2 -->
+                    <div class="group relative bg-white rounded-[2rem] p-4 cursor-pointer hover:shadow-2xl transition-all duration-500">
+                        <div class="h-64 bg-gray-50 rounded-[1.5rem] relative overflow-hidden flex items-center justify-center">
+                            <i data-lucide="printer" class="w-20 h-20 text-gray-300 group-hover:scale-110 transition-transform duration-500"></i>
+                        </div>
+                        <div class="p-4">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 class="font-bold text-xl mb-1 group-hover:text-gray-600 transition-colors">Print Service</h3>
+                                    <p class="text-xs text-gray-400 font-mono">A4 / A3 / BINDING</p>
+                                </div>
+                                <span class="font-display font-bold text-lg">₹2/pg</span>
+                            </div>
+                            <button class="w-full mt-6 bg-black text-white py-3 rounded-xl text-sm font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                                Upload File
+                            </button>
+                        </div>
+                    </div>
+
+                     <!-- Product 3 -->
+                     <div class="group relative bg-white rounded-[2rem] p-4 cursor-pointer hover:shadow-2xl transition-all duration-500">
+                        <div class="h-64 bg-gray-50 rounded-[1.5rem] relative overflow-hidden flex items-center justify-center">
+                            <i data-lucide="cpu" class="w-20 h-20 text-gray-300 group-hover:scale-110 transition-transform duration-500"></i>
+                        </div>
+                        <div class="p-4">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 class="font-bold text-xl mb-1 group-hover:text-gray-600 transition-colors">Sensor Pack</h3>
+                                    <p class="text-xs text-gray-400 font-mono">ULTRASONIC / IR</p>
+                                </div>
+                                <span class="font-display font-bold text-lg">₹499</span>
+                            </div>
+                            <button class="w-full mt-6 bg-black text-white py-3 rounded-xl text-sm font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                                Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-black text-white py-12 px-6 md:px-12 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+            <p class="font-mono text-xs text-gray-500">HOPE INT CORE © 2025. EST. KERALA.</p>
+            <div class="flex gap-6">
+                <a href="#" class="text-xs font-bold uppercase tracking-widest hover:text-gray-400 transition-colors">Instagram</a>
+                <a href="#" class="text-xs font-bold uppercase tracking-widest hover:text-gray-400 transition-colors">LinkedIn</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- MODALS -->
+    <!-- Register -->
+    <div id="modal-register" class="fixed inset-0 z-[100] hidden flex items-center justify-center px-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeModal('register')"></div>
+        <div class="relative bg-white w-full max-w-md p-8 rounded-[2rem] shadow-2xl scale-95 opacity-0 transition-all duration-300 modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="font-display text-2xl font-bold">Access Protocol</h3>
+                <button onclick="closeModal('register')" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-black hover:text-white transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <form onsubmit="event.preventDefault(); closeModal('register');" class="space-y-4">
+                <div>
+                    <label class="text-xs font-bold uppercase tracking-widest ml-2 mb-1 block">Identity</label>
+                    <input type="text" placeholder="Full Name" class="w-full bg-gray-50 border-none p-4 rounded-xl focus:ring-2 focus:ring-black">
+                </div>
+                <div>
+                    <label class="text-xs font-bold uppercase tracking-widest ml-2 mb-1 block">Contact</label>
+                    <input type="email" placeholder="Email" class="w-full bg-gray-50 border-none p-4 rounded-xl focus:ring-2 focus:ring-black">
+                </div>
+                <button class="w-full bg-black text-white py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-neon hover:text-black transition-colors">Initiate</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Contact -->
+    <div id="modal-contact" class="fixed inset-0 z-[100] hidden flex items-center justify-center px-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeModal('contact')"></div>
+        <div class="relative bg-white w-full max-w-md p-8 rounded-[2rem] shadow-2xl scale-95 opacity-0 transition-all duration-300 modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="font-display text-2xl font-bold">Transmission</h3>
+                <button onclick="closeModal('contact')" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-black hover:text-white transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+            <textarea placeholder="Type your message..." rows="5" class="w-full bg-gray-50 border-none p-4 rounded-xl focus:ring-2 focus:ring-black mb-4"></textarea>
+            <button onclick="closeModal('contact')" class="w-full bg-black text-white py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-neon hover:text-black transition-colors">Send Data</button>
+        </div>
+    </div>
+
+
+    <script>
+        // --- 1. PRELOADER & INIT ---
+        window.addEventListener('load', () => {
+            const loader = document.getElementById('loader-bar');
+            const preloader = document.getElementById('preloader');
+            
+            // Simulate load
+            loader.style.transition = 'width 1.5s cubic-bezier(0.19, 1, 0.22, 1)';
+            loader.style.width = '100%';
+
+            setTimeout(() => {
+                gsap.to(preloader, {
+                    yPercent: -100,
+                    duration: 1.2,
+                    ease: "power4.inOut",
+                    onComplete: () => {
+                        preloader.style.display = 'none';
+                        revealHome();
+                    }
+                });
+            }, 1500);
+
+            lucide.createIcons();
+            initCustomCursor();
+            initThreeJS();
+        });
+
+        function revealHome() {
+            // Trigger text reveals
+            const elements = document.querySelectorAll('#home .text-reveal-mask');
+            elements.forEach((el, index) => {
+                setTimeout(() => {
+                    el.classList.add('is-visible');
+                }, index * 200);
+            });
+            
+            // Fade in canvas
+            gsap.to('#home .fade-in-delayed', { opacity: 1, duration: 2, delay: 0.5 });
+        }
+
+        // --- 2. NAVIGATION ROUTER ---
+        const sections = ['home', 'education', 'iot', 'shop'];
+        
+        function router(targetId) {
+            // Update Active State
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if(btn.dataset.target === targetId) {
+                    btn.classList.add('bg-black', 'text-white');
+                    btn.classList.remove('text-gray-500', 'hover:text-black', 'hover:bg-gray-200');
+                } else {
+                    btn.classList.remove('bg-black', 'text-white');
+                    btn.classList.add('text-gray-500', 'hover:text-black', 'hover:bg-gray-200');
+                }
+            });
+
+            // Transition Sections
+            const currentSection = sections.find(id => !document.getElementById(id).classList.contains('hidden'));
+            
+            if(currentSection !== targetId) {
+                // Fade Out Current
+                if(currentSection) {
+                    const el = document.getElementById(currentSection);
+                    gsap.to(el, { opacity: 0, y: -20, duration: 0.5, onComplete: () => {
+                        el.classList.add('hidden');
+                        
+                        // Fade In New
+                        const target = document.getElementById(targetId);
+                        target.classList.remove('hidden');
+                        target.style.opacity = 0;
+                        target.style.transform = 'translateY(20px)';
+                        
+                        gsap.to(target, { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" });
+                        
+                        window.scrollTo(0,0);
+                    }});
+                }
+            }
+        }
+
+        // --- 3. CUSTOM CURSOR & MAGNETIC BTNS ---
+        function initCustomCursor() {
+            const cursor = document.getElementById('cursor');
+            const magneticBtns = document.querySelectorAll('.magnetic-btn, .nav-btn, a, button, .bento-card');
+
+            document.addEventListener('mousemove', (e) => {
+                cursor.style.left = e.clientX + 'px';
+                cursor.style.top = e.clientY + 'px';
+            });
+
+            magneticBtns.forEach(btn => {
+                btn.addEventListener('mouseenter', () => {
+                    cursor.classList.add('hovered');
+                });
+                btn.addEventListener('mouseleave', () => {
+                    cursor.classList.remove('hovered');
+                    gsap.to(btn, { x: 0, y: 0, duration: 0.3 });
+                });
+                
+                // Magnetic Effect
+                if(btn.classList.contains('magnetic-btn')) {
+                    btn.addEventListener('mousemove', (e) => {
+                        const rect = btn.getBoundingClientRect();
+                        const x = e.clientX - rect.left - rect.width / 2;
+                        const y = e.clientY - rect.top - rect.height / 2;
+                        gsap.to(btn, { x: x * 0.2, y: y * 0.2, duration: 0.3 });
+                    });
+                }
+            });
+        }
+
+        // --- 4. MODALS ---
+        function openModal(id) {
+            const modal = document.getElementById('modal-' + id);
+            // Safety check for missing modals (e.g. video)
+            if (!modal) return; 
+            const content = modal.querySelector('.modal-content');
+            modal.classList.remove('hidden');
+            // Small delay for transition
+            requestAnimationFrame(() => {
+                content.style.opacity = '1';
+                content.style.transform = 'scale(1)';
+            });
+        }
+
+        function closeModal(id) {
+            const modal = document.getElementById('modal-' + id);
+            if (!modal) return;
+            const content = modal.querySelector('.modal-content');
+            content.style.opacity = '0';
+            content.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        // --- 5. THREE.JS (High Fidelity) ---
+        function initThreeJS() {
+            // Scene 1: Hero (Glass Helix)
+            initHeroCanvas();
+            // Scene 2: IoT (Robotic Arm)
+            initIotCanvas();
+            // Scene 3: Shop (Product)
+            initShopCanvas();
+        }
+
+        function initHeroCanvas() {
+            const container = document.getElementById('canvas-hero');
+            if(!container) return;
+            
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+            camera.position.set(0, 0, 12);
+            
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+            const pointLight = new THREE.PointLight(0xffffff, 1);
+            pointLight.position.set(5, 5, 5);
+            scene.add(pointLight);
+
+            // Torus Knot (Abstract Shape)
+            const geometry = new THREE.TorusKnotGeometry(2.5, 0.8, 100, 16);
+            const material = new THREE.MeshPhysicalMaterial({
+                color: 0x111111,
+                metalness: 0.1,
+                roughness: 0.1,
+                clearcoat: 1.0,
+                clearcoatRoughness: 0.1,
+                wireframe: true
+            });
+            const torusKnot = new THREE.Mesh(geometry, material);
+            scene.add(torusKnot);
+
+            // Animation
+            function animate() {
+                requestAnimationFrame(animate);
+                torusKnot.rotation.x += 0.002;
+                torusKnot.rotation.y += 0.005;
+                renderer.render(scene, camera);
+            }
+            animate();
+            
+            // Handle Resize
+            window.addEventListener('resize', () => {
+                 camera.aspect = container.clientWidth / container.clientHeight;
+                 camera.updateProjectionMatrix();
+                 renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+        }
+
+        function initIotCanvas() {
+            const container = document.getElementById('canvas-iot');
+            if(!container) return;
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 100);
+            camera.position.set(5, 5, 10);
+            camera.lookAt(0, 2, 0);
+
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            // Lights for Dark Mode
+            const light1 = new THREE.DirectionalLight(0xCCFF00, 1.5); // Neon Accent
+            light1.position.set(-5, 5, 5);
+            scene.add(light1);
+            const light2 = new THREE.PointLight(0xffffff, 0.5);
+            light2.position.set(5, 5, 5);
+            scene.add(light2);
+
+            // Robotic Arm Simulation (Simple Grouping)
+            const group = new THREE.Group();
+            
+            // Base
+            const baseGeo = new THREE.CylinderGeometry(2, 2.5, 0.5, 32);
+            const matDark = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.4, metalness: 0.8 });
+            const base = new THREE.Mesh(baseGeo, matDark);
+            group.add(base);
+
+            // Joint
+            const jointGeo = new THREE.SphereGeometry(1.2, 32, 32);
+            const joint = new THREE.Mesh(jointGeo, matDark);
+            joint.position.y = 1;
+            group.add(joint);
+
+            // Arm
+            const armGeo = new THREE.BoxGeometry(0.8, 5, 0.8);
+            const arm = new THREE.Mesh(armGeo, matDark);
+            arm.position.y = 3.5;
+            group.add(arm);
+
+            scene.add(group);
+
+            function animate() {
+                requestAnimationFrame(animate);
+                // Subtle breathing animation
+                group.rotation.y += 0.005;
+                group.position.y = Math.sin(Date.now() * 0.001) * 0.2;
+                renderer.render(scene, camera);
+            }
+            animate();
+            
+            window.addEventListener('resize', () => {
+                 if(document.getElementById('iot').classList.contains('hidden')) return;
+                 camera.aspect = container.clientWidth / container.clientHeight;
+                 camera.updateProjectionMatrix();
+                 renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+        }
+        
+        function initShopCanvas() {
+            const container = document.getElementById('canvas-shop-1');
+            // This runs even if hidden, but we check existence
+            if(!container) return;
+            
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 100);
+            camera.position.z = 4;
+            
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+            
+            const light = new THREE.DirectionalLight(0xffffff, 1);
+            light.position.set(2,2,5);
+            scene.add(light);
+            scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+            
+            const geo = new THREE.BoxGeometry(1.5, 1, 0.1); // Like a microcontroller board
+            const mat = new THREE.MeshPhysicalMaterial({ color: 0x0050A0, metalness: 0.5, roughness: 0.2 });
+            const board = new THREE.Mesh(geo, mat);
+            
+            scene.add(board);
+            
+            function animate() {
+                requestAnimationFrame(animate);
+                board.rotation.x += 0.01;
+                board.rotation.y += 0.01;
+                renderer.render(scene, camera);
+            }
+            animate();
+        }
+
+    </script>
+</body>
+</html>
