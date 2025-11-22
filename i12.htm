@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en" class="antialiased">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOPE INT CORE | Fluid Innovation</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fonts: Syne & Space Grotesk for that Tech/Editorial look -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- GSAP for Pro Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    
+    <!-- Lenis for Smooth Scroll (Updated Source) -->
+    <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        void: '#050505',
+                        card: '#0A0A0A',
+                        border: '#1F1F1F',
+                        neon: '#D4F240', // Acid Green accent
+                        accent: '#3B82F6'
+                    },
+                    fontFamily: {
+                        sans: ['Space Grotesk', 'sans-serif'],
+                        display: ['Syne', 'sans-serif'],
+                    },
+                    backgroundImage: {
+                        'noise': "url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22 opacity=%220.05%22/%3E%3C/svg%3E')",
+                        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #050505;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        /* Spotlight Effect CSS */
+        .spotlight-card {
+            position: relative;
+            background: #0A0A0A;
+            overflow: hidden;
+        }
+        .spotlight-card::before {
+            content: '';
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            top: 0; left: 0;
+            background: radial-gradient(
+                800px circle at var(--mouse-x) var(--mouse-y),
+                rgba(255, 255, 255, 0.06),
+                transparent 40%
+            );
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+        }
+        .spotlight-card:hover::before {
+            opacity: 1;
+        }
+        .spotlight-card::after {
+            content: '';
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            top: 0; left: 0;
+            background: radial-gradient(
+                600px circle at var(--mouse-x) var(--mouse-y),
+                rgba(212, 242, 64, 0.1),
+                transparent 40%
+            );
+            z-index: 0;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        .spotlight-card:hover::after {
+            opacity: 1;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 0px; }
+
+        /* Text Selection */
+        ::selection {
+            background: #D4F240;
+            color: #000;
+        }
+
+        /* 3D Canvas container */
+        .canvas-container {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0; left: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        /* Navigation Blur */
+        .nav-blur {
+            background: rgba(5, 5, 5, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+    </style>
+</head>
+<body class="bg-void relative">
+
+    <!-- NOISE OVERLAY -->
+    <div class="fixed inset-0 bg-noise z-50 pointer-events-none opacity-50"></div>
+
+    <!-- NAVIGATION -->
+    <nav class="fixed top-6 left-1/2 -translate-x-1/2 z-[60]">
+        <div class="nav-blur rounded-full px-2 py-2 flex items-center gap-1 shadow-2xl shadow-black/50">
+            <button onclick="scrollToSection('home')" class="nav-btn px-6 py-2 rounded-full text-sm font-medium text-gray-400 hover:text-white hover:bg-white/10 transition-all" data-target="home">Core</button>
+            <button onclick="scrollToSection('education')" class="nav-btn px-6 py-2 rounded-full text-sm font-medium text-gray-400 hover:text-white hover:bg-white/10 transition-all" data-target="education">Learn</button>
+            <button onclick="scrollToSection('iot')" class="nav-btn px-6 py-2 rounded-full text-sm font-medium text-gray-400 hover:text-white hover:bg-white/10 transition-all" data-target="iot">Labs</button>
+            <div class="w-px h-4 bg-white/10 mx-1"></div>
+            <button onclick="scrollToSection('shop')" class="w-9 h-9 rounded-full bg-neon text-black flex items-center justify-center hover:scale-110 transition-transform font-bold">
+                <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main id="smooth-wrapper">
+        
+        <!-- SECTION: HERO -->
+        <section id="home" class="relative h-screen w-full flex items-center justify-center overflow-hidden">
+            <!-- 3D Background -->
+            <div id="hero-canvas" class="canvas-container opacity-60"></div>
+            
+            <div class="relative z-10 text-center px-4 mix-blend-difference">
+                <div class="hero-badge inline-flex items-center gap-2 border border-white/20 rounded-full px-4 py-1 mb-6 backdrop-blur-md">
+                    <span class="w-2 h-2 bg-neon rounded-full animate-pulse"></span>
+                    <span class="text-xs font-bold tracking-widest uppercase text-white">System Online</span>
+                </div>
+                
+                <h1 class="font-display text-[15vw] leading-[0.85] font-bold text-white mix-blend-overlay tracking-tighter hero-text">
+                    HOPE
+                </h1>
+                <h1 class="font-display text-[15vw] leading-[0.85] font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-600 tracking-tighter hero-text">
+                    CORE
+                </h1>
+                
+                <p class="mt-8 max-w-md mx-auto text-gray-400 text-lg font-light hero-sub">
+                    The fluid intersection of academic rigor, robotic innovation, and essential engineering supply.
+                </p>
+            </div>
+
+            <div class="absolute bottom-10 left-10 hidden md:block">
+                <div class="w-px h-24 bg-gradient-to-b from-neon to-transparent"></div>
+                <span class="text-xs font-mono text-gray-500 mt-2 block">SCROLL TO INITIALIZE</span>
+            </div>
+        </section>
+
+        <!-- SECTION: BENTO GRID (Education & IoT) -->
+        <section id="education" class="py-32 px-4 md:px-8 max-w-[1600px] mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-16">
+                <h2 class="font-display text-6xl md:text-8xl font-bold leading-none">
+                    ACADEMIC<br><span class="text-gray-600">FLUIDITY</span>
+                </h2>
+                <p class="text-gray-400 max-w-sm mt-6 md:mt-0">
+                    Resources that adapt to your semester. AI-driven notes, audio archives, and robotic bootcamps.
+                </p>
+            </div>
+
+            <!-- BENTO GRID -->
+            <div class="grid grid-cols-1 md:grid-cols-3 md:grid-rows-2 gap-4 h-auto md:h-[800px]">
+                
+                <!-- Card 1: Notes (Tall) -->
+                <div class="spotlight-card group md:row-span-2 rounded-3xl border border-border p-8 flex flex-col justify-between hover:border-white/20 transition-colors">
+                    <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-white mb-4 group-hover:bg-neon group-hover:text-black transition-colors">
+                        <i data-lucide="book-open" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-display text-3xl font-bold mb-2">Archive.</h3>
+                        <p class="text-gray-500 text-sm mb-8">Access 500+ curated KTU notes, solved papers, and module summaries.</p>
+                        <div class="h-40 w-full bg-gradient-to-t from-neon/20 to-transparent rounded-xl border border-white/5 relative overflow-hidden">
+                            <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
+                            <!-- Decor line -->
+                            <div class="absolute bottom-0 left-0 w-full h-1 bg-neon"></div>
+                        </div>
+                    </div>
+                    <button class="w-full py-4 border border-white/10 rounded-xl mt-6 hover:bg-white hover:text-black transition-all font-bold uppercase text-sm tracking-wider">Access Library</button>
+                </div>
+
+                <!-- Card 2: Audio (Wide) -->
+                <div class="spotlight-card group md:col-span-2 rounded-3xl border border-border p-8 flex flex-col md:flex-row items-center gap-8 relative overflow-hidden">
+                    <div class="flex-1 z-10">
+                        <div class="flex items-center gap-3 mb-4">
+                             <div class="flex gap-1">
+                                <span class="w-1 h-4 bg-neon animate-[bounce_1s_infinite]"></span>
+                                <span class="w-1 h-6 bg-neon animate-[bounce_1.2s_infinite]"></span>
+                                <span class="w-1 h-3 bg-neon animate-[bounce_0.8s_infinite]"></span>
+                             </div>
+                             <span class="text-xs font-bold uppercase text-neon">Now Streaming</span>
+                        </div>
+                        <h3 class="font-display text-4xl font-bold mb-2">Neural Audio.</h3>
+                        <p class="text-gray-500">Listen to lectures on the go. AI-synthesized summaries for rapid revision.</p>
+                    </div>
+                    <div class="w-full md:w-1/2 h-40 md:h-full rounded-2xl bg-black border border-white/10 flex items-center justify-center relative">
+                        <!-- 3D Canvas Placeholder -->
+                        <div id="audio-canvas" class="absolute inset-0 w-full h-full opacity-50"></div>
+                        <button class="z-10 w-16 h-16 rounded-full bg-white text-black flex items-center justify-center hover:scale-110 transition-transform">
+                            <i data-lucide="play" class="fill-black"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Card 3: IoT Labs -->
+                <div id="iot" class="spotlight-card group md:col-span-2 rounded-3xl bg-neon text-black p-8 flex flex-col md:flex-row items-center justify-between overflow-hidden relative">
+                    <div class="relative z-10 max-w-md">
+                        <div class="inline-block px-3 py-1 bg-black text-white rounded-full text-xs font-bold mb-4">REGISTRATIONS OPEN</div>
+                        <h3 class="font-display text-4xl font-bold mb-2">Robotic Core.</h3>
+                        <p class="font-medium opacity-80 mb-6">14-Day Intensive Bootcamp. Build autonomous drones and rovers from scratch.</p>
+                        <button onclick="openModal('register')" class="bg-black text-white px-8 py-3 rounded-full font-bold hover:px-10 transition-all">Join Batch '25</button>
+                    </div>
+                    <!-- Decorative robotic visual -->
+                    <div class="absolute right-[-50px] top-[-20px] w-[300px] h-[300px] opacity-20 md:opacity-100 pointer-events-none">
+                         <div id="iot-canvas" class="w-full h-full"></div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECTION: SHOP (Horizontal Marquee Style) -->
+        <section id="shop" class="py-32 bg-white text-black rounded-t-[3rem] relative overflow-hidden">
+            <div class="px-4 md:px-8 max-w-[1600px] mx-auto">
+                <div class="flex justify-between items-center mb-20">
+                    <h2 class="font-display text-6xl md:text-9xl font-bold tracking-tighter">SUPPLY</h2>
+                    <div class="text-right">
+                        <p class="text-xl font-medium">Print on Demand & <br>Prototyping Kits</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Upload Box -->
+                    <div class="bg-gray-100 rounded-[2rem] p-10 relative overflow-hidden group cursor-pointer hover:bg-black hover:text-white transition-all duration-500">
+                        <div class="absolute top-6 right-6 w-10 h-10 border border-current rounded-full flex items-center justify-center group-hover:rotate-45 transition-transform">
+                            <i data-lucide="arrow-up-right"></i>
+                        </div>
+                        <div class="mt-20">
+                            <i data-lucide="printer" class="w-12 h-12 mb-6"></i>
+                            <h3 class="font-display text-4xl font-bold mb-2">Rapid Print</h3>
+                            <p class="opacity-60">Upload thesis/records. Delivered to hostel by 8 PM.</p>
+                        </div>
+                    </div>
+
+                    <!-- Kit Box -->
+                    <div class="bg-gray-100 rounded-[2rem] p-10 relative overflow-hidden group cursor-pointer hover:bg-neon hover:text-black transition-all duration-500">
+                        <div class="absolute top-6 right-6 w-10 h-10 border border-current rounded-full flex items-center justify-center group-hover:rotate-90 transition-transform">
+                            <i data-lucide="plus"></i>
+                        </div>
+                        <div class="mt-20">
+                            <i data-lucide="box" class="w-12 h-12 mb-6"></i>
+                            <h3 class="font-display text-4xl font-bold mb-2">Arduino Starter</h3>
+                            <p class="opacity-60">Uno, Sensors, Jumper Wires, Breadboard.</p>
+                            <p class="text-2xl font-bold mt-4">₹1,499</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <footer class="mt-32 px-4 md:px-8 border-t border-gray-200 pt-10 flex flex-col md:flex-row justify-between items-center">
+                <p class="font-display font-bold text-2xl">HOPE CORE © 2025</p>
+                <div class="flex gap-6 mt-4 md:mt-0">
+                    <a href="#" class="hover:underline">Instagram</a>
+                    <a href="#" class="hover:underline">WhatsApp</a>
+                    <a href="#" class="hover:underline">Email</a>
+                </div>
+            </footer>
+        </section>
+
+    </main>
+
+    <!-- MODAL -->
+    <div id="modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center px-4">
+        <div class="absolute inset-0 bg-black/90 backdrop-blur-sm" onclick="closeModal()"></div>
+        <div class="bg-card border border-border w-full max-w-lg p-10 rounded-3xl relative z-10 transform transition-all scale-95 opacity-0" id="modal-content">
+            <button onclick="closeModal()" class="absolute top-6 right-6 text-gray-500 hover:text-white"><i data-lucide="x"></i></button>
+            <h3 class="font-display text-4xl font-bold text-white mb-2">Initialize.</h3>
+            <p class="text-gray-400 mb-8">Join the robotics cohort. Limited seats available.</p>
+            <form class="space-y-4" onsubmit="event.preventDefault(); closeModal();">
+                <div>
+                    <input type="text" placeholder="Operative Name" class="w-full bg-void border border-border text-white px-6 py-4 rounded-xl focus:border-neon outline-none transition-colors">
+                </div>
+                <div>
+                    <input type="email" placeholder="Contact Protocol (Email)" class="w-full bg-void border border-border text-white px-6 py-4 rounded-xl focus:border-neon outline-none transition-colors">
+                </div>
+                <button class="w-full bg-neon text-black font-bold text-lg py-4 rounded-xl hover:scale-[1.02] transition-transform">Submit Request</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // --- INITIALIZATION ---
+        // Init icons and scripts only after content loads
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            
+            // Initialize Lenis with Safety Check
+            let lenis;
+            if (typeof Lenis !== 'undefined') {
+                lenis = new Lenis();
+                
+                function raf(time) {
+                    lenis.raf(time);
+                    requestAnimationFrame(raf);
+                }
+                requestAnimationFrame(raf);
+                
+                // Scroll to function using Lenis
+                window.scrollToSection = function(id) {
+                     lenis.scrollTo(`#${id}`, { duration: 1.5, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
+                }
+            } else {
+                console.warn('Lenis not loaded. Falling back to native scroll.');
+                // Fallback
+                window.scrollToSection = function(id) {
+                    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+            
+            // --- GSAP ANIMATIONS ---
+            if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+                gsap.registerPlugin(ScrollTrigger);
+
+                // Hero Animation
+                const tl = gsap.timeline();
+                tl.from(".hero-text", { y: 100, opacity: 0, duration: 1, stagger: 0.2, ease: "power4.out", delay: 0.5 })
+                .from(".hero-sub", { y: 20, opacity: 0, duration: 1, ease: "power2.out" }, "-=0.5")
+                .from("nav", { y: -50, opacity: 0, duration: 1, ease: "power2.out" }, "-=0.8");
+
+                // Scroll Animations for Sections
+                gsap.utils.toArray('.spotlight-card').forEach(card => {
+                    gsap.from(card, {
+                        scrollTrigger: {
+                            trigger: card,
+                            start: "top 85%",
+                        },
+                        y: 50,
+                        opacity: 0,
+                        duration: 1,
+                        ease: "power2.out"
+                    });
+                });
+            }
+        });
+
+        // --- MOUSE SPOTLIGHT EFFECT ---
+        document.querySelectorAll('.spotlight-card').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+            });
+        });
+
+        // --- NAVIGATION LOGIC ---
+        function openModal() {
+            const modal = document.getElementById('modal');
+            const content = document.getElementById('modal-content');
+            modal.classList.remove('hidden');
+            // Small delay to allow display block to apply before animating opacity
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            const content = document.getElementById('modal-content');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        // --- THREE.JS PRO IMPLEMENTATION ---
+        
+        // 1. HERO SCENE (Abstract Wireframe Landscape)
+        function initHeroScene() {
+            const container = document.getElementById('hero-canvas');
+            if (!container) return;
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
+
+            // Geometry
+            const geometry = new THREE.IcosahedronGeometry(10, 2);
+            const material = new THREE.MeshBasicMaterial({ 
+                color: 0x333333, 
+                wireframe: true,
+                transparent: true,
+                opacity: 0.3
+            });
+            const sphere = new THREE.Mesh(geometry, material);
+            scene.add(sphere);
+
+            // Floating Particles
+            const particlesGeo = new THREE.BufferGeometry();
+            const particlesCount = 200;
+            const posArray = new Float32Array(particlesCount * 3);
+            for(let i = 0; i < particlesCount * 3; i++) {
+                posArray[i] = (Math.random() - 0.5) * 25;
+            }
+            particlesGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            const particlesMat = new THREE.PointsMaterial({
+                size: 0.05,
+                color: 0xD4F240
+            });
+            const particles = new THREE.Points(particlesGeo, particlesMat);
+            scene.add(particles);
+
+            camera.position.z = 15;
+
+            // Mouse interaction
+            let mouseX = 0;
+            let mouseY = 0;
+            window.addEventListener('mousemove', (event) => {
+                mouseX = event.clientX / window.innerWidth - 0.5;
+                mouseY = event.clientY / window.innerHeight - 0.5;
+            });
+
+            function animate() {
+                requestAnimationFrame(animate);
+                sphere.rotation.y += 0.002;
+                sphere.rotation.x += 0.001;
+                
+                // Parallax
+                particles.rotation.y = -mouseX * 0.5;
+                particles.rotation.x = -mouseY * 0.5;
+                
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+
+        // 2. IOT SCENE (Robotic Arm Abstract)
+        function initIotScene() {
+            const container = document.getElementById('iot-canvas');
+            if(!container) return;
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 100);
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            
+            renderer.setSize(width, height);
+            container.appendChild(renderer.domElement);
+
+            const geometry = new THREE.TorusKnotGeometry(2.5, 0.6, 100, 16);
+            const material = new THREE.MeshBasicMaterial({ 
+                color: 0x000000, // Black inner
+                wireframe: true
+            });
+            const wireframe = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ color: 0x000000, wireframe: true }));
+            const mesh = new THREE.Mesh(geometry, new THREE.MeshNormalMaterial({ wireframe: true, opacity: 0.2, transparent: true })); // Use normal for tech look
+            
+            scene.add(mesh);
+
+            camera.position.z = 10;
+
+            function animate() {
+                requestAnimationFrame(animate);
+                mesh.rotation.x += 0.01;
+                mesh.rotation.y += 0.01;
+                renderer.render(scene, camera);
+            }
+            animate();
+        }
+        
+        // 3. AUDIO WAVEFORM
+        function initAudioScene() {
+             const container = document.getElementById('audio-canvas');
+            if(!container) return;
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 100);
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            
+            renderer.setSize(width, height);
+            container.appendChild(renderer.domElement);
+            
+            const curve = new THREE.CatmullRomCurve3([
+                new THREE.Vector3(-5, 0, 0),
+                new THREE.Vector3(-2, 1, 0),
+                new THREE.Vector3(2, -1, 0),
+                new THREE.Vector3(5, 0, 0)
+            ]);
+            
+            const geometry = new THREE.TubeGeometry(curve, 20, 0.2, 8, false);
+            const material = new THREE.MeshBasicMaterial({ color: 0xD4F240, wireframe: true });
+            const tube = new THREE.Mesh(geometry, material);
+            scene.add(tube);
+            
+            camera.position.z = 8;
+            
+            function animate() {
+                requestAnimationFrame(animate);
+                tube.rotation.z += 0.005;
+                 // Wiggle effect simulation via scaling
+                tube.scale.y = 1 + Math.sin(Date.now() * 0.005) * 0.3;
+                renderer.render(scene, camera);
+            }
+            animate();
+        }
+
+        // Start Scenes
+        initHeroScene();
+        setTimeout(initIotScene, 100); // Delay slightly for DOM layout
+        setTimeout(initAudioScene, 100);
+
+    </script>
+</body>
+</html>
