@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en" class="antialiased">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOPE INT CORE | Future Academy</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- GSAP & Lenis (Animation Engines) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
+
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Space Grotesk', 'monospace'],
+                        display: ['Syne', 'sans-serif'],
+                    },
+                    colors: {
+                        black: '#050505',
+                        offwhite: '#EAEAEA',
+                        glass: 'rgba(255, 255, 255, 0.05)',
+                        glassBorder: 'rgba(255, 255, 255, 0.1)',
+                    },
+                    backgroundImage: {
+                        'noise': "url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22 opacity=%220.05%22/%3E%3C/svg%3E')",
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* --- CORE STYLES --- */
+        body {
+            background-color: #050505;
+            color: #EAEAEA;
+            overflow-x: hidden;
+        }
+
+        /* Noise Overlay */
+        .noise-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22 opacity=%220.07%22/%3E%3C/svg%3E');
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.4;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 0px; }
+
+        /* Utilities */
+        .clip-text-image {
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(to bottom, #ffffff, #888888);
+        }
+
+        .glass-panel {
+            background: rgba(25, 25, 25, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .glass-button {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .glass-button:hover {
+            background: rgba(255, 255, 255, 1);
+            color: #000;
+            transform: scale(1.05);
+        }
+
+        /* Navigation Active State indicator */
+        .nav-dot {
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        button.active .nav-dot { opacity: 1; }
+
+        /* Bento Grid Cards */
+        .bento-card {
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .bento-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255,255,255,0.3);
+        }
+        .bento-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: skewX(-25deg);
+            transition: left 0.7s ease;
+        }
+        .bento-card:hover::before {
+            left: 150%;
+        }
+
+        /* Canvas Positioning */
+        .canvas-container {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="noise-overlay"></div>
+
+    <!-- NAVIGATION -->
+    <nav class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-8 py-6 mix-blend-difference text-white">
+        <div class="font-display font-bold text-2xl tracking-tighter">HOPE<span class="text-gray-500">CORE</span></div>
+        
+        <!-- Desktop Nav -->
+        <div class="hidden md:flex glass-panel rounded-full px-2 py-2 gap-1">
+            <button onclick="scrollToSection('home')" class="relative px-6 py-2 rounded-full text-sm font-mono uppercase tracking-wide hover:bg-white/10 transition-colors active" data-target="home">
+                Index <div class="nav-dot"></div>
+            </button>
+            <button onclick="scrollToSection('education')" class="relative px-6 py-2 rounded-full text-sm font-mono uppercase tracking-wide hover:bg-white/10 transition-colors" data-target="education">
+                Academy <div class="nav-dot"></div>
+            </button>
+            <button onclick="scrollToSection('iot')" class="relative px-6 py-2 rounded-full text-sm font-mono uppercase tracking-wide hover:bg-white/10 transition-colors" data-target="iot">
+                Labs <div class="nav-dot"></div>
+            </button>
+            <button onclick="scrollToSection('shop')" class="relative px-6 py-2 rounded-full text-sm font-mono uppercase tracking-wide hover:bg-white/10 transition-colors" data-target="shop">
+                Supply <div class="nav-dot"></div>
+            </button>
+        </div>
+
+        <button class="glass-button w-12 h-12 rounded-full flex items-center justify-center group">
+            <i data-lucide="menu" class="w-5 h-5 group-hover:rotate-180 transition-transform duration-500"></i>
+        </button>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <section id="home" class="relative w-full h-screen flex flex-col justify-center items-center overflow-hidden px-4">
+        <div id="canvas-hero" class="canvas-container z-0 opacity-60"></div>
+        
+        <div class="z-10 text-center mix-blend-difference flex flex-col items-center">
+            <div class="overflow-hidden mb-4">
+                <div class="hero-anim-text text-xs font-mono border border-white/30 px-3 py-1 rounded-full uppercase tracking-[0.2em]">
+                    System v2.5 Online
+                </div>
+            </div>
+            
+            <h1 class="hero-anim-text font-display text-[15vw] leading-[0.8] font-bold tracking-tighter text-white mix-blend-overlay opacity-90">
+                FLUID
+            </h1>
+            <h1 class="hero-anim-text font-display text-[15vw] leading-[0.8] font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-transparent">
+                CORE
+            </h1>
+
+            <p class="hero-anim-text max-w-md text-center text-gray-400 font-mono mt-8 text-sm md:text-base leading-relaxed">
+                The convergence of academic rigor and robotic innovation. 
+                An ecosystem designed for the next generation of engineers.
+            </p>
+        </div>
+
+        <div class="absolute bottom-10 left-0 w-full flex justify-between px-10 text-xs font-mono text-gray-500 uppercase">
+            <span class="hero-anim-text">Scroll to Explore</span>
+            <span class="hero-anim-text">Kerala, IN [2025]</span>
+        </div>
+    </section>
+
+    <!-- EDUCATION SECTION (BENTO GRID) -->
+    <section id="education" class="relative w-full min-h-screen bg-black py-32 px-4 md:px-10">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-16 border-b border-white/10 pb-8">
+                <div>
+                    <span class="text-xs font-mono text-purple-400 mb-2 block">/// ACADEMIC DATABASE</span>
+                    <h2 class="font-display text-5xl md:text-7xl font-bold">Neural<br>Learning.</h2>
+                </div>
+                <p class="text-gray-400 max-w-xs text-right mt-6 md:mt-0 font-mono text-sm">
+                    Adaptive resources tailored to your semester cycle. Powered by community intelligence.
+                </p>
+            </div>
+
+            <!-- Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 grid-rows-2 gap-4 md:h-[800px]">
+                
+                <!-- Large Card -->
+                <div class="bento-card col-span-1 md:col-span-2 row-span-2 glass-panel rounded-[2rem] p-10 flex flex-col justify-between group">
+                    <div class="absolute top-0 right-0 p-10 opacity-50 group-hover:opacity-100 transition-opacity duration-500">
+                        <i data-lucide="arrow-up-right" class="w-10 h-10 text-white"></i>
+                    </div>
+                    <div class="w-full h-64 relative bg-gradient-to-br from-gray-900 to-black rounded-2xl overflow-hidden border border-white/5 mb-8">
+                         <!-- Placeholder for dynamic content -->
+                         <div class="absolute inset-0 flex items-center justify-center">
+                             <div class="w-32 h-32 rounded-full border border-white/20 flex items-center justify-center animate-pulse">
+                                 <div class="w-20 h-20 rounded-full bg-white/10 backdrop-blur"></div>
+                             </div>
+                         </div>
+                    </div>
+                    <div>
+                        <h3 class="font-display text-4xl font-bold mb-2">KTU Repository</h3>
+                        <p class="text-gray-400 font-mono text-sm">Access digitized notes, previous year matrixes, and AI-summarized lecture logic. Updated in real-time.</p>
+                    </div>
+                </div>
+
+                <!-- Small Card 1 -->
+                <div class="bento-card col-span-1 glass-panel rounded-[2rem] p-8 flex flex-col justify-center group">
+                    <i data-lucide="headphones" class="w-8 h-8 text-white mb-4"></i>
+                    <h3 class="font-display text-2xl font-bold mb-2">Audio Lectures</h3>
+                    <p class="text-gray-500 text-xs font-mono">Learn on the commute. High fidelity audio summaries.</p>
+                </div>
+
+                <!-- Small Card 2 -->
+                <div class="bento-card col-span-1 glass-panel rounded-[2rem] p-8 flex flex-col justify-center bg-white text-black group">
+                    <i data-lucide="users" class="w-8 h-8 text-black mb-4"></i>
+                    <h3 class="font-display text-2xl font-bold mb-2">Peer Connect</h3>
+                    <p class="text-gray-600 text-xs font-mono">Find study groups and project partners instantly.</p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- IOT SECTION -->
+    <section id="iot" class="relative w-full min-h-screen bg-[#080808] py-32 px-4 md:px-10 overflow-hidden">
+        <!-- Background Grid -->
+        <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+        
+        <div class="relative max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-20 items-center">
+            <div class="order-2 md:order-1">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-green-500/30 bg-green-500/10 mb-6">
+                    <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span class="text-green-500 text-xs font-mono font-bold uppercase">Registration Open</span>
+                </div>
+                <h2 class="font-display text-6xl md:text-8xl font-bold mb-8 leading-none">Hard<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">Ware.</span></h2>
+                
+                <div class="space-y-8 font-mono">
+                    <div class="flex items-start gap-6 border-l border-white/20 pl-6">
+                        <div class="text-4xl font-bold text-white/20">01</div>
+                        <div>
+                            <h4 class="text-xl font-bold mb-2">Drone Architecture</h4>
+                            <p class="text-gray-500 text-sm">Build autonomous flight systems from scratch. PID tuning included.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-6 border-l border-white/20 pl-6">
+                        <div class="text-4xl font-bold text-white/20">02</div>
+                        <div>
+                            <h4 class="text-xl font-bold mb-2">Home Automation</h4>
+                            <p class="text-gray-500 text-sm">ESP32 based smart relays and voice integration protocols.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="alert('Opening Registration Form...')" class="mt-12 glass-button px-10 py-4 rounded-full text-sm font-bold font-mono uppercase tracking-wider flex items-center gap-3">
+                    Initialize Sequence <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <div class="order-1 md:order-2 h-[500px] relative">
+                <div id="canvas-iot" class="absolute inset-0 w-full h-full"></div>
+                <div class="absolute bottom-0 right-0 p-4 bg-black/50 backdrop-blur border border-white/10 rounded-xl">
+                    <p class="font-mono text-xs text-green-400">> Servo_Status: Active</p>
+                    <p class="font-mono text-xs text-gray-500">> Torque: 4.2Nm</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SHOP SECTION -->
+    <section id="shop" class="relative w-full bg-white text-black py-32 px-4 md:px-10 rounded-t-[3rem]">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-20">
+                <h2 class="font-display text-6xl md:text-8xl font-bold mb-4">Supply.</h2>
+                <p class="font-mono text-gray-500 uppercase tracking-widest">Logistics & Prototyping</p>
+            </div>
+
+            <!-- Horizontal Scroll Container -->
+            <div class="flex overflow-x-auto gap-6 pb-10 snap-x snap-mandatory no-scrollbar">
+                
+                <!-- Card 1 -->
+                <div class="min-w-[300px] md:min-w-[400px] h-[500px] bg-[#F5F5F5] rounded-[2rem] p-8 flex flex-col justify-between snap-center relative overflow-hidden group cursor-pointer">
+                    <div class="absolute inset-0 bg-gray-200 scale-0 group-hover:scale-100 rounded-[2rem] transition-transform duration-500 origin-bottom"></div>
+                    <div class="relative z-10">
+                        <div class="flex justify-between items-start mb-6">
+                            <span class="font-bold font-mono text-xl">001</span>
+                            <span class="px-3 py-1 bg-black text-white text-xs rounded-full">Popular</span>
+                        </div>
+                        <h3 class="font-display text-4xl font-bold">Starter Kit</h3>
+                    </div>
+                    <div class="relative z-10 flex justify-center items-center h-full">
+                         <div id="canvas-shop-1" class="w-full h-48"></div>
+                    </div>
+                    <div class="relative z-10 flex justify-between items-center border-t border-black/10 pt-6">
+                        <span class="font-bold text-2xl">₹1,499</span>
+                        <button class="w-10 h-10 bg-black text-white rounded-full flex items-center justify-center hover:scale-110 transition-transform">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="min-w-[300px] md:min-w-[400px] h-[500px] bg-[#F5F5F5] rounded-[2rem] p-8 flex flex-col justify-between snap-center relative overflow-hidden group cursor-pointer">
+                     <div class="absolute inset-0 bg-gray-200 scale-0 group-hover:scale-100 rounded-[2rem] transition-transform duration-500 origin-bottom"></div>
+                    <div class="relative z-10">
+                        <div class="flex justify-between items-start mb-6">
+                            <span class="font-bold font-mono text-xl">002</span>
+                            <span class="px-3 py-1 border border-black text-black text-xs rounded-full">Service</span>
+                        </div>
+                        <h3 class="font-display text-4xl font-bold">Print Lab</h3>
+                    </div>
+                    <div class="relative z-10">
+                        <p class="font-mono text-sm text-gray-600 mb-4">Upload documents. We print, bind, and deliver to your hostel.</p>
+                        <button class="w-full py-3 border border-black rounded-xl hover:bg-black hover:text-white transition-colors font-bold">Upload PDF</button>
+                    </div>
+                    <div class="relative z-10 flex justify-between items-center border-t border-black/10 pt-6">
+                        <span class="font-bold text-2xl">₹2/pg</span>
+                    </div>
+                </div>
+
+                 <!-- Card 3 -->
+                 <div class="min-w-[300px] md:min-w-[400px] h-[500px] bg-[#F5F5F5] rounded-[2rem] p-8 flex flex-col justify-between snap-center relative overflow-hidden group cursor-pointer">
+                    <div class="absolute inset-0 bg-gray-200 scale-0 group-hover:scale-100 rounded-[2rem] transition-transform duration-500 origin-bottom"></div>
+                    <div class="relative z-10">
+                        <div class="flex justify-between items-start mb-6">
+                            <span class="font-bold font-mono text-xl">003</span>
+                        </div>
+                        <h3 class="font-display text-4xl font-bold">Components</h3>
+                    </div>
+                     <div class="relative z-10 flex justify-center items-center h-full">
+                        <!-- Simple CSS Shape representation -->
+                        <div class="w-32 h-32 border-4 border-black rounded-full flex items-center justify-center">
+                            <div class="w-20 h-20 bg-black rounded-full"></div>
+                        </div>
+                    </div>
+                    <div class="relative z-10 flex justify-between items-center border-t border-black/10 pt-6">
+                        <span class="font-bold text-2xl">Browse</span>
+                        <button class="w-10 h-10 bg-black text-white rounded-full flex items-center justify-center hover:scale-110 transition-transform">
+                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-white text-black py-10 text-center border-t border-gray-100">
+        <p class="font-mono text-xs uppercase opacity-50">HOPE INT CORE © 2025 • Thrissur Engineering Wing</p>
+    </footer>
+
+    <script>
+        // --- 1. INITIALIZATION ---
+        lucide.createIcons();
+        
+        // Smooth Scroll (Lenis)
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            direction: 'vertical',
+            gestureDirection: 'vertical',
+            smooth: true,
+            mouseMultiplier: 1,
+            smoothTouch: false,
+            touchMultiplier: 2,
+        });
+
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+        requestAnimationFrame(raf);
+
+        // Scroll To Function for Nav
+        function scrollToSection(id) {
+            const el = document.getElementById(id);
+            if(el) lenis.scrollTo(el);
+            
+            // Update active nav state
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.classList.remove('active');
+                if(btn.getAttribute('data-target') === id) btn.classList.add('active');
+            });
+        }
+
+        // --- 2. GSAP ANIMATIONS ---
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Hero Entrance
+        const tl = gsap.timeline();
+        tl.from(".hero-anim-text", {
+            y: 100,
+            opacity: 0,
+            duration: 1.5,
+            stagger: 0.1,
+            ease: "power4.out",
+            delay: 0.5
+        });
+
+        // Section Reveal Animations
+        gsap.utils.toArray('section:not(#home)').forEach(section => {
+            gsap.from(section.children, {
+                scrollTrigger: {
+                    trigger: section,
+                    start: "top 80%",
+                    end: "top 20%",
+                    scrub: 1
+                },
+                y: 50,
+                opacity: 0,
+                duration: 1,
+                ease: "power2.out"
+            });
+        });
+
+        // --- 3. THREE.JS SCENES (Pro Materials) ---
+
+        // Common Materials
+        const glassMaterial = new THREE.MeshPhysicalMaterial({
+            color: 0xffffff,
+            metalness: 0,
+            roughness: 0,
+            transmission: 1, // Glass-like
+            thickness: 0.5,
+            clearcoat: 1,
+            clearcoatRoughness: 0.1,
+        });
+
+        const liquidMetalMaterial = new THREE.MeshStandardMaterial({
+            color: 0xffffff,
+            metalness: 1,
+            roughness: 0.2,
+        });
+
+        const darkMetalMaterial = new THREE.MeshStandardMaterial({
+            color: 0x111111,
+            metalness: 0.8,
+            roughness: 0.2,
+        });
+
+        // --- HERO SCENE (Abstract Knot) ---
+        function initHeroScene() {
+            const container = document.getElementById('canvas-hero');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 5;
+
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+            
+            const pointLight1 = new THREE.PointLight(0x3b82f6, 2); // Blue
+            pointLight1.position.set(5, 5, 5);
+            scene.add(pointLight1);
+
+            const pointLight2 = new THREE.PointLight(0xa855f7, 2); // Purple
+            pointLight2.position.set(-5, -5, 5);
+            scene.add(pointLight2);
+
+            // Object
+            const geometry = new THREE.TorusKnotGeometry(1.5, 0.4, 150, 20);
+            const torusKnot = new THREE.Mesh(geometry, glassMaterial);
+            scene.add(torusKnot);
+
+            // Mouse interaction vars
+            let mouseX = 0;
+            let mouseY = 0;
+            let targetX = 0;
+            let targetY = 0;
+
+            const windowHalfX = window.innerWidth / 2;
+            const windowHalfY = window.innerHeight / 2;
+
+            document.addEventListener('mousemove', (event) => {
+                mouseX = (event.clientX - windowHalfX) * 0.001;
+                mouseY = (event.clientY - windowHalfY) * 0.001;
+            });
+
+            function animate() {
+                requestAnimationFrame(animate);
+
+                targetX = mouseX * 2;
+                targetY = mouseY * 2;
+
+                torusKnot.rotation.y += 0.05 * (targetX - torusKnot.rotation.y);
+                torusKnot.rotation.x += 0.05 * (targetY - torusKnot.rotation.x);
+                
+                // Constant float
+                torusKnot.rotation.z += 0.002;
+                torusKnot.position.y = Math.sin(Date.now() * 0.001) * 0.2;
+
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+
+        // --- IOT SCENE (Robotic Arm / Tech) ---
+        function initIotScene() {
+            const container = document.getElementById('canvas-iot');
+            if(!container) return;
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 100);
+            camera.position.set(5, 5, 5);
+            camera.lookAt(0, 0, 0);
+
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+
+            const light = new THREE.DirectionalLight(0xffffff, 1);
+            light.position.set(2, 5, 2);
+            scene.add(light);
+            scene.add(new THREE.AmbientLight(0xffffff, 0.2));
+
+            // Group
+            const group = new THREE.Group();
+            
+            // Abstract Tech Shape
+            const coreGeo = new THREE.IcosahedronGeometry(1.5, 0);
+            const core = new THREE.Mesh(coreGeo, darkMetalMaterial);
+            group.add(core);
+
+            // Orbiting rings
+            const ringGeo = new THREE.TorusGeometry(2.2, 0.05, 16, 100);
+            const ring = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({color: 0x22c55e})); // Green
+            group.add(ring);
+
+            const ring2Geo = new THREE.TorusGeometry(2.5, 0.02, 16, 100);
+            const ring2 = new THREE.Mesh(ring2Geo, new THREE.MeshBasicMaterial({color: 0xffffff, transparent:true, opacity:0.3}));
+            group.add(ring2);
+
+            scene.add(group);
+
+            function animate() {
+                requestAnimationFrame(animate);
+                core.rotation.x += 0.01;
+                core.rotation.y += 0.01;
+                
+                ring.rotation.x += 0.02;
+                ring.rotation.y -= 0.01;
+                
+                ring2.rotation.x -= 0.01;
+                ring2.rotation.z += 0.01;
+
+                renderer.render(scene, camera);
+            }
+            animate();
+
+             // Basic resize observer
+            new ResizeObserver(() => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            }).observe(container);
+        }
+
+        // --- SHOP SCENE (Floating Box) ---
+        function initShopScene() {
+            const container = document.getElementById('canvas-shop-1');
+            if(!container) return;
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 100);
+            camera.position.z = 4;
+
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+
+            const light = new THREE.DirectionalLight(0xffffff, 1);
+            light.position.set(5, 5, 5);
+            scene.add(light);
+
+            const geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
+            const cube = new THREE.Mesh(geometry, liquidMetalMaterial);
+            scene.add(cube);
+
+            function animate() {
+                requestAnimationFrame(animate);
+                cube.rotation.x += 0.01;
+                cube.rotation.y += 0.01;
+                renderer.render(scene, camera);
+            }
+            animate();
+        }
+
+        // Trigger Scenes
+        initHeroScene();
+        initIotScene();
+        initShopScene();
+
+    </script>
+</body>
+</html>
