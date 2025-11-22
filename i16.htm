@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOPE CORE | Fluid Innovation</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fonts: Syne & Space Grotesk for that 'Tech Editorial' look -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- GSAP for Pro Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    
+    <!-- Lenis for Smooth Scroll (Updated CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        black: '#080808',
+                        offwhite: '#EAEAEA',
+                        accent: '#3B82F6', // Electric Blue
+                        surface: '#F3F3F3'
+                    },
+                    fontFamily: {
+                        sans: ['Space Grotesk', 'sans-serif'],
+                        display: ['Syne', 'sans-serif'],
+                    },
+                    backgroundImage: {
+                        'noise': "url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22 opacity=%220.05%22/%3E%3C/svg%3E')"
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --cursor-size: 20px;
+        }
+
+        body {
+            background-color: #EAEAEA;
+            color: #080808;
+            cursor: none; /* Custom cursor logic */
+            overflow-x: hidden;
+        }
+
+        /* --- CUSTOM CURSOR --- */
+        #cursor {
+            position: fixed;
+            top: 0; left: 0;
+            width: var(--cursor-size);
+            height: var(--cursor-size);
+            border: 1px solid #000;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s, background-color 0.3s;
+            mix-blend-mode: difference;
+        }
+        #cursor.hovered {
+            width: 60px;
+            height: 60px;
+            background-color: white;
+            border-color: transparent;
+            mix-blend-mode: difference;
+        }
+
+        /* --- UTILS --- */
+        .reveal-text {
+            overflow: hidden;
+            display: block;
+        }
+        .reveal-text span {
+            display: block;
+            transform: translateY(100%);
+        }
+
+        .glass-nav {
+            background: rgba(234, 234, 234, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .bento-card {
+            background: #F3F3F3;
+            border: 1px solid rgba(0,0,0,0.05);
+            transition: transform 0.5s cubic-bezier(0.2, 1, 0.3, 1), box-shadow 0.5s;
+        }
+        .bento-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1);
+        }
+
+        /* WEBGL LAYER */
+        #webgl-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        /* NAVIGATION PILL */
+        .nav-link {
+            position: relative;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            width: 0%;
+            height: 1px;
+            background: black;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: translateX(-50%);
+        }
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        .nav-link.active::after {
+            width: 100%;
+            height: 2px;
+        }
+
+    </style>
+</head>
+<body class="bg-offwhite bg-noise">
+
+    <!-- CUSTOM CURSOR -->
+    <div id="cursor"></div>
+
+    <!-- WEBGL BACKGROUND -->
+    <div id="webgl-container"></div>
+
+    <!-- NAVIGATION -->
+    <nav class="fixed top-6 left-0 w-full z-50 flex justify-center px-4">
+        <div class="glass-nav rounded-full px-6 py-3 flex items-center gap-8 shadow-lg" data-cursor="hover">
+            <span class="font-display font-bold text-lg tracking-tight">HOPE.</span>
+            <div class="h-4 w-px bg-black/10"></div>
+            <div class="flex gap-6 text-sm font-medium tracking-wide">
+                <button onclick="scrollToSection('home')" class="nav-link active">INDEX</button>
+                <button onclick="scrollToSection('education')" class="nav-link">ACADEMICS</button>
+                <button onclick="scrollToSection('iot')" class="nav-link">LABS</button>
+                <button onclick="scrollToSection('shop')" class="nav-link">SUPPLY</button>
+            </div>
+            <button onclick="openModal('contact')" class="bg-black text-white rounded-full w-8 h-8 flex items-center justify-center hover:scale-110 transition-transform">
+                <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="w-full">
+
+        <!-- HERO SECTION -->
+        <section id="home" class="min-h-screen flex flex-col justify-center items-center relative px-6 pt-20">
+            <div class="text-center z-10 mix-blend-difference text-black">
+                <div class="overflow-hidden mb-2">
+                    <p class="reveal-hero text-sm md:text-base font-mono tracking-widest uppercase opacity-60">Core Systems v2.5</p>
+                </div>
+                
+                <h1 class="font-display text-[12vw] leading-[0.85] font-bold tracking-tighter">
+                    <div class="reveal-text"><span>FLUID</span></div>
+                    <div class="reveal-text"><span class="pl-[10vw] italic font-light">INNOVATION</span></div>
+                </h1>
+
+                <div class="mt-12 flex flex-col md:flex-row gap-8 items-center">
+                    <p class="max-w-md text-left text-lg leading-relaxed font-sans mix-blend-difference text-gray-800 reveal-hero">
+                        An integrated ecosystem for the modern engineer. 
+                        Academic resources, robotic infrastructure, and logistical support blended into one.
+                    </p>
+                    <button onclick="scrollToSection('education')" class="group relative px-8 py-4 bg-black text-white rounded-full overflow-hidden reveal-hero" data-cursor="hover">
+                        <div class="absolute inset-0 w-full h-full bg-gray-800 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out"></div>
+                        <span class="relative z-10 font-bold flex items-center gap-2">
+                            ENTER SYSTEM <i data-lucide="arrow-down" class="w-4 h-4"></i>
+                        </span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="absolute bottom-10 left-10 hidden md:block mix-blend-difference text-gray-600">
+                <p class="font-mono text-xs">SCROLL TO EXPLORE</p>
+            </div>
+        </section>
+
+        <!-- EDUCATION SECTION (Bento Grid) -->
+        <section id="education" class="min-h-screen px-6 py-20 max-w-[1600px] mx-auto">
+            <div class="mb-16 border-b border-black/10 pb-6 flex justify-between items-end">
+                <h2 class="font-display text-6xl md:text-8xl font-bold tracking-tighter">ACADEMICS</h2>
+                <span class="font-mono text-sm">(01)</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6 h-auto md:h-[800px]">
+                
+                <!-- Big Card Left -->
+                <div class="md:col-span-7 bento-card rounded-[2rem] p-10 relative overflow-hidden group flex flex-col justify-between" data-cursor="hover">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-100 to-transparent rounded-full blur-3xl opacity-0 group-hover:opacity-50 transition-opacity duration-700"></div>
+                    
+                    <div>
+                        <div class="w-12 h-12 rounded-full border border-black/10 flex items-center justify-center mb-6">
+                            <i data-lucide="library" class="w-5 h-5"></i>
+                        </div>
+                        <h3 class="font-display text-4xl md:text-5xl font-bold mb-4">KTU Archive</h3>
+                        <p class="text-gray-500 max-w-sm">Comprehensive automated notes repository for B.Tech Semesters 1-8. AI-summarized modules.</p>
+                    </div>
+
+                    <div class="mt-10 flex items-center justify-between border-t border-black/5 pt-6">
+                        <span class="font-mono text-xs">UPDATED: TODAY</span>
+                        <button class="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center group-hover:rotate-45 transition-transform duration-500">
+                            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Top Right -->
+                <div class="md:col-span-5 bento-card rounded-[2rem] p-10 flex flex-col justify-center items-center text-center group" data-cursor="hover">
+                    <div class="w-20 h-20 bg-white rounded-full shadow-sm flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500">
+                        <i data-lucide="headphones" class="w-8 h-8"></i>
+                    </div>
+                    <h3 class="font-display text-3xl font-bold mb-2">Audio Lectures</h3>
+                    <p class="text-gray-500 text-sm">Listen on the commute.</p>
+                </div>
+
+                <!-- Bottom Right -->
+                <div class="md:col-span-5 md:col-start-8 bento-card rounded-[2rem] p-10 bg-black text-white relative overflow-hidden group" data-cursor="hover">
+                    <div class="absolute inset-0 bg-gray-900 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div class="relative z-10 h-full flex flex-col justify-between">
+                        <h3 class="font-display text-3xl font-bold">Exam Prep</h3>
+                        <div class="flex items-center gap-4">
+                            <div class="h-1 w-full bg-white/20 rounded-full overflow-hidden">
+                                <div class="h-full w-3/4 bg-white"></div>
+                            </div>
+                            <span class="font-mono text-xs">75%</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- IOT LABS (Dark Mode Transition) -->
+        <section id="iot" class="min-h-screen bg-[#0a0a0a] text-[#f0f0f0] px-6 py-20 relative overflow-hidden rounded-t-[3rem] -mt-10 z-20">
+            <div class="max-w-[1600px] mx-auto relative z-10">
+                <div class="flex flex-col md:flex-row md:items-end justify-between mb-20">
+                    <div>
+                        <div class="flex items-center gap-2 mb-4 text-green-400">
+                            <div class="w-2 h-2 rounded-full bg-current animate-pulse"></div>
+                            <span class="font-mono text-xs uppercase">Live Batch 2025</span>
+                        </div>
+                        <h2 class="font-display text-6xl md:text-9xl font-bold tracking-tighter leading-none">ROBOTIC<br><span class="text-gray-600 italic">CORE</span></h2>
+                    </div>
+                    <p class="max-w-sm text-gray-400 mt-8 md:mt-0">
+                        Hands-on specialized bootcamps. We provide the hardware kits; you provide the logic.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Workshop Card 1 -->
+                    <div class="group relative border-t border-white/20 pt-8 hover:border-white transition-colors duration-500 cursor-none" data-cursor="hover">
+                        <span class="font-mono text-xs text-gray-500 mb-2 block">01 / HARDWARE</span>
+                        <h3 class="text-3xl font-display font-bold mb-4 group-hover:translate-x-2 transition-transform">Drone Config</h3>
+                        <p class="text-sm text-gray-400 mb-8">Build and calibrate flight controllers from scratch.</p>
+                        <div class="w-full h-64 bg-white/5 rounded-xl overflow-hidden relative">
+                            <!-- Image Placeholder -->
+                            <div class="absolute inset-0 flex items-center justify-center text-white/10 font-display text-8xl font-bold group-hover:scale-110 transition-transform duration-700">IoT</div>
+                        </div>
+                    </div>
+
+                    <!-- Workshop Card 2 -->
+                    <div class="group relative border-t border-white/20 pt-8 hover:border-white transition-colors duration-500 cursor-none" data-cursor="hover">
+                        <span class="font-mono text-xs text-gray-500 mb-2 block">02 / SOFTWARE</span>
+                        <h3 class="text-3xl font-display font-bold mb-4 group-hover:translate-x-2 transition-transform">Vision AI</h3>
+                        <p class="text-sm text-gray-400 mb-8">OpenCV implementation on Raspberry Pi clusters.</p>
+                        <div class="w-full h-64 bg-white/5 rounded-xl overflow-hidden relative">
+                             <div class="absolute inset-0 flex items-center justify-center text-white/10 font-display text-8xl font-bold group-hover:scale-110 transition-transform duration-700">AI</div>
+                        </div>
+                    </div>
+
+                    <!-- CTA Card -->
+                    <div class="flex flex-col justify-between border-t border-white/20 pt-8">
+                        <div>
+                             <span class="font-mono text-xs text-gray-500 mb-2 block">JOIN US</span>
+                             <h3 class="text-3xl font-display font-bold mb-4">Apply Now</h3>
+                        </div>
+                        <button onclick="openModal('register')" class="w-full py-8 bg-white text-black font-bold text-xl rounded-xl hover:scale-[1.02] transition-transform mt-4" data-cursor="hover">
+                            Get Brochure
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SHOP SECTION (Marquee & Interactive) -->
+        <section id="shop" class="min-h-screen px-6 py-20 max-w-[1600px] mx-auto">
+            <div class="overflow-hidden py-10 border-b border-black">
+                <div class="whitespace-nowrap animate-marquee flex gap-8 items-center">
+                    <span class="text-8xl font-display font-bold">ESSENTIAL SUPPLY</span>
+                    <span class="text-8xl font-display font-bold text-transparent stroke-text">PRINT ON DEMAND</span>
+                    <span class="text-8xl font-display font-bold">PROTOTYPING</span>
+                    <span class="text-8xl font-display font-bold text-transparent stroke-text">ARDUINO KITS</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 mt-20">
+                <div class="bg-[#F0F0F0] rounded-[2rem] p-12 flex flex-col justify-center relative overflow-hidden group" data-cursor="hover">
+                    <div class="relative z-10">
+                        <h3 class="font-display text-5xl font-bold mb-6">Print Service</h3>
+                        <p class="text-lg text-gray-600 mb-10 max-w-md">Upload your Record/Thesis. We print, bind, and deliver to your hostel lobby by 6 PM.</p>
+                        <button class="px-8 py-3 border border-black rounded-full font-bold hover:bg-black hover:text-white transition-colors">Upload Files</button>
+                    </div>
+                    <i data-lucide="printer" class="absolute -bottom-10 -right-10 w-64 h-64 text-black/5 group-hover:rotate-12 transition-transform duration-500"></i>
+                </div>
+
+                <div class="bg-black text-white rounded-[2rem] p-12 flex flex-col justify-between relative group" data-cursor="hover">
+                    <div>
+                        <div class="flex justify-between items-start">
+                            <h3 class="font-display text-5xl font-bold">Starter Kit</h3>
+                            <span class="font-mono text-xl">₹1,499</span>
+                        </div>
+                        <p class="text-gray-400 mt-4">The complete engineer's toolkit.</p>
+                    </div>
+                    
+                    <div class="mt-10">
+                         <ul class="grid grid-cols-2 gap-4 font-mono text-sm text-gray-400">
+                             <li class="border-b border-white/20 pb-2">Arduino Uno R3</li>
+                             <li class="border-b border-white/20 pb-2">Jumper Wires (M-M)</li>
+                             <li class="border-b border-white/20 pb-2">Breadboard 800</li>
+                             <li class="border-b border-white/20 pb-2">Ultrasonic Sensor</li>
+                         </ul>
+                    </div>
+                    
+                    <button class="mt-8 w-full py-4 bg-white text-black font-bold rounded-lg hover:bg-gray-200 transition-colors">Add to Cart</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="px-6 py-10 border-t border-black/10 flex flex-col md:flex-row justify-between items-center gap-4">
+            <span class="font-display font-bold text-xl">HOPE.</span>
+            <span class="font-mono text-xs text-gray-500">© 2025 Hope Core Systems. All rights reserved.</span>
+        </footer>
+
+    </main>
+
+    <!-- MODALS -->
+    <div id="modal-backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] hidden opacity-0 transition-opacity duration-300" onclick="closeAllModals()"></div>
+
+    <!-- Register Modal -->
+    <div id="modal-register" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[70] hidden w-full max-w-md">
+        <div class="bg-white p-8 rounded-[2rem] shadow-2xl scale-90 opacity-0 transition-all duration-300 modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="font-display text-2xl font-bold">Join The Lab</h3>
+                <button onclick="closeAllModals()" class="p-2 hover:bg-gray-100 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form onsubmit="event.preventDefault(); closeAllModals();" class="space-y-4">
+                <div>
+                    <label class="block font-mono text-xs mb-1 ml-2">IDENTIFIER</label>
+                    <input type="text" placeholder="Student Name" class="w-full bg-gray-50 p-4 rounded-xl outline-none focus:ring-2 focus:ring-black/5">
+                </div>
+                <div>
+                    <label class="block font-mono text-xs mb-1 ml-2">CONTACT</label>
+                    <input type="email" placeholder="College Email" class="w-full bg-gray-50 p-4 rounded-xl outline-none focus:ring-2 focus:ring-black/5">
+                </div>
+                <button class="w-full bg-black text-white py-4 rounded-xl font-bold hover:bg-gray-800 transition-colors">Initialize Sequence</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Contact Modal -->
+    <div id="modal-contact" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[70] hidden w-full max-w-md">
+        <div class="bg-white p-8 rounded-[2rem] shadow-2xl scale-90 opacity-0 transition-all duration-300 modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="font-display text-2xl font-bold">Transmute Message</h3>
+                <button onclick="closeAllModals()" class="p-2 hover:bg-gray-100 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form onsubmit="event.preventDefault(); closeAllModals();" class="space-y-4">
+                <textarea placeholder="Input query parameters..." rows="4" class="w-full bg-gray-50 p-4 rounded-xl outline-none focus:ring-2 focus:ring-black/5 resize-none"></textarea>
+                <button class="w-full bg-black text-white py-4 rounded-xl font-bold hover:bg-gray-800 transition-colors">Send Data</button>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        .stroke-text {
+            -webkit-text-stroke: 1px #000;
+        }
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+            animation: marquee 20s linear infinite;
+        }
+    </style>
+
+    <script>
+        // --- 1. SETUP & INIT ---
+        lucide.createIcons();
+        
+        // Initialize Lenis (Smooth Scroll)
+        let lenis;
+        if (typeof Lenis !== 'undefined') {
+            lenis = new Lenis({
+                duration: 1.2,
+                easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                direction: 'vertical',
+                smooth: true,
+            });
+
+            function raf(time) {
+                lenis.raf(time);
+                requestAnimationFrame(raf);
+            }
+            requestAnimationFrame(raf);
+        } else {
+            console.warn('Lenis failed to load. Falling back to native smooth scroll.');
+            document.documentElement.style.scrollBehavior = 'smooth';
+        }
+
+        // --- 2. ANIMATIONS (GSAP) ---
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Hero Entrance
+        const tl = gsap.timeline();
+        tl.to('.reveal-text span', {
+            y: 0,
+            duration: 1.2,
+            stagger: 0.1,
+            ease: 'power4.out'
+        })
+        .to('.reveal-hero', {
+            opacity: 1,
+            y: 0,
+            duration: 1,
+            stagger: 0.1,
+            ease: 'power3.out'
+        }, '-=0.8');
+
+        // Scroll Animations for Cards
+        gsap.utils.toArray('.bento-card').forEach(card => {
+            gsap.from(card, {
+                scrollTrigger: {
+                    trigger: card,
+                    start: 'top 85%',
+                },
+                y: 50,
+                opacity: 0,
+                duration: 1,
+                ease: 'power3.out'
+            });
+        });
+
+        // --- 3. THREE.JS BACKGROUND (Fluid Morphing Mesh) ---
+        const initThree = () => {
+            const container = document.getElementById('webgl-container');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 5;
+
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
+
+            // Fluid Sphere
+            const geometry = new THREE.IcosahedronGeometry(2, 30); // High detail
+            const material = new THREE.MeshPhysicalMaterial({
+                color: 0xffffff,
+                roughness: 0.1,
+                metalness: 0.1,
+                clearcoat: 1.0,
+                clearcoatRoughness: 0.1,
+                flatShading: false,
+                side: THREE.DoubleSide
+            });
+
+            const mesh = new THREE.Mesh(geometry, material);
+            scene.add(mesh);
+
+            // Lighting
+            const light1 = new THREE.DirectionalLight(0xffffff, 1);
+            light1.position.set(5, 5, 5);
+            scene.add(light1);
+
+            const light2 = new THREE.PointLight(0x3B82F6, 2); // Blue accent
+            light2.position.set(-5, -5, 5);
+            scene.add(light2);
+            
+            const ambient = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambient);
+
+            // Mouse Interaction
+            let mouse = { x: 0, y: 0 };
+            window.addEventListener('mousemove', (e) => {
+                mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+            });
+
+            // Animation Loop
+            const clock = new THREE.Clock();
+            
+            function animate() {
+                requestAnimationFrame(animate);
+                const t = clock.getElapsedTime();
+
+                // Mesh Distortion (Simulate Fluid)
+                const positionAttribute = geometry.attributes.position;
+                const vertex = new THREE.Vector3();
+                for (let i = 0; i < positionAttribute.count; i++) {
+                    vertex.fromBufferAttribute(positionAttribute, i);
+                    // Noise-like movement
+                    const offset = Math.sin(vertex.x * 2 + t) * Math.cos(vertex.y * 2 + t) * 0.2;
+                    // Normalize to keep sphere shape roughly
+                    vertex.normalize().multiplyScalar(2 + offset);
+                    positionAttribute.setXYZ(i, vertex.x, vertex.y, vertex.z);
+                }
+                positionAttribute.needsUpdate = true;
+                geometry.computeVertexNormals();
+
+                // Rotation & Mouse Follow
+                mesh.rotation.y = t * 0.1;
+                mesh.rotation.z = t * 0.05;
+                
+                // Smooth follow mouse
+                mesh.position.x += (mouse.x * 1.5 - mesh.position.x) * 0.05;
+                mesh.position.y += (mouse.y * 1.5 - mesh.position.y) * 0.05;
+
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            // Color Change on Scroll (White in Light Mode, Dark in Dark Section)
+            window.addEventListener('scroll', () => {
+                const iotSection = document.getElementById('iot');
+                if (!iotSection) return;
+                const rect = iotSection.getBoundingClientRect();
+                
+                if (rect.top < window.innerHeight / 2 && rect.bottom > 0) {
+                    // In Dark Section: Make mesh wireframe or dark
+                     gsap.to(material.color, { r: 0.1, g: 0.1, b: 0.1, duration: 1 });
+                     gsap.to(material, { wireframe: true, duration: 0.5 });
+                } else {
+                    // In Light Section
+                    gsap.to(material.color, { r: 1, g: 1, b: 1, duration: 1 });
+                    gsap.to(material, { wireframe: false, duration: 0.5 });
+                }
+            });
+
+            // Resize
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        };
+        
+        initThree();
+
+        // --- 4. NAVIGATION & MODALS ---
+        function scrollToSection(id) {
+            if (lenis) {
+                lenis.scrollTo(`#${id}`);
+            } else {
+                document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+            }
+            
+            // Update Active Nav
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            const clickedBtn = Array.from(document.querySelectorAll('button')).find(b => b.getAttribute('onclick')?.includes(id));
+            if(clickedBtn && clickedBtn.classList.contains('nav-link')) clickedBtn.classList.add('active');
+        }
+
+        function openModal(id) {
+            const modal = document.getElementById(`modal-${id}`);
+            const backdrop = document.getElementById('modal-backdrop');
+            const content = modal.querySelector('.modal-content');
+            
+            modal.classList.remove('hidden');
+            backdrop.classList.remove('hidden');
+            
+            // Animate In
+            setTimeout(() => {
+                backdrop.classList.remove('opacity-0');
+                content.classList.remove('scale-90', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeAllModals() {
+            const modals = document.querySelectorAll('[id^="modal-"]');
+            const backdrop = document.getElementById('modal-backdrop');
+            
+            modals.forEach(m => {
+                const content = m.querySelector('.modal-content');
+                if(content) {
+                    content.classList.remove('scale-100', 'opacity-100');
+                    content.classList.add('scale-90', 'opacity-0');
+                }
+            });
+            backdrop.classList.add('opacity-0');
+            
+            setTimeout(() => {
+                modals.forEach(m => {
+                    if(m.id !== 'modal-backdrop') m.classList.add('hidden');
+                });
+                backdrop.classList.add('hidden');
+            }, 300);
+        }
+
+        // --- 5. CUSTOM CURSOR LOGIC ---
+        const cursor = document.getElementById('cursor');
+        const hoverables = document.querySelectorAll('[data-cursor="hover"], a, button');
+
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+
+        hoverables.forEach(el => {
+            el.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
+            el.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+        });
+
+    </script>
+</body>
+</html>
