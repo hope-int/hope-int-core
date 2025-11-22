@@ -410,50 +410,172 @@
 </section>
 
         <!-- Tech Stack Horizontal Scroll -->
-        <section class="py-24 bg-black text-white overflow-hidden" id="tech">
-            <div class="px-6 lg:px-20 mb-12 flex justify-between items-end">
-                <h2 class="font-display text-5xl font-bold">The Arsenal.</h2>
-                <p class="text-gray-500 text-right hidden md:block">Professional tools<br>for students.</p>
-            </div>
+        <section class="py-32 bg-[#050505] relative overflow-hidden" id="tech">
+    
+    <!-- Background Circuit Pattern -->
+    <div class="absolute inset-0 opacity-[0.03]" style="background-image: linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px); background-size: 50px 50px;"></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-[#050505] via-transparent to-[#050505]"></div>
 
-            <div class="flex gap-8 px-6 lg:px-20 overflow-x-auto pb-12 no-scrollbar">
-                <!-- Tech Item 1 -->
-                <div class="min-w-[280px] h-[350px] bg-gray-900 rounded-3xl p-6 flex flex-col justify-between border border-white/10 hover:border-white/50 transition-colors cursor-pointer">
-                    <div class="text-6xl font-display font-bold text-white/20">01</div>
-                    <div>
-                        <h3 class="text-2xl font-bold mb-2">Arduino / ESP32</h3>
-                        <p class="text-gray-400 text-sm">The brain of operations. Dual-core processing power with integrated WiFi.</p>
-                    </div>
-                </div>
-
-                <!-- Tech Item 2 -->
-                <div class="min-w-[280px] h-[350px] bg-gray-900 rounded-3xl p-6 flex flex-col justify-between border border-white/10 hover:border-white/50 transition-colors cursor-pointer">
-                    <div class="text-6xl font-display font-bold text-white/20">02</div>
-                    <div>
-                        <h3 class="text-2xl font-bold mb-2">Three.js & WebGL</h3>
-                        <p class="text-gray-400 text-sm">Visualize sensor data in real-time 3D on web dashboards.</p>
-                    </div>
-                </div>
-
-                <!-- Tech Item 3 -->
-                <div class="min-w-[280px] h-[350px] bg-gray-900 rounded-3xl p-6 flex flex-col justify-between border border-white/10 hover:border-white/50 transition-colors cursor-pointer">
-                    <div class="text-6xl font-display font-bold text-white/20">03</div>
-                    <div>
-                        <h3 class="text-2xl font-bold mb-2">Fusion 360</h3>
-                        <p class="text-gray-400 text-sm">CAD design for custom robotic parts and enclosures.</p>
-                    </div>
-                </div>
-
-                <!-- Tech Item 4 -->
-                <div class="min-w-[280px] h-[350px] bg-gray-900 rounded-3xl p-6 flex flex-col justify-between border border-white/10 hover:border-white/50 transition-colors cursor-pointer">
-                    <div class="text-6xl font-display font-bold text-white/20">04</div>
-                    <div>
-                        <h3 class="text-2xl font-bold mb-2">Firebase</h3>
-                        <p class="text-gray-400 text-sm">Realtime database for storing robot logs and telemetry.</p>
-                    </div>
+    <div class="max-w-7xl mx-auto px-6 lg:px-12 relative z-10">
+        
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-end mb-20">
+            <div>
+                <h2 class="font-display text-5xl lg:text-7xl font-bold text-white mb-4">
+                    The<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-gray-500 to-white">Arsenal.</span>
+                </h2>
+                <div class="flex items-center gap-2 text-emerald-500 font-mono text-xs">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    SYSTEMS ONLINE
                 </div>
             </div>
-        </section>
+            <div class="text-right hidden md:block">
+                <p class="text-gray-500 font-mono text-sm">deploy_target: production<br>v.2025.4.1</p>
+            </div>
+        </div>
+
+        <!-- Tech Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            <!-- TECH 1: ESP32 -->
+            <div class="group relative bg-[#0a0a0a] border border-white/10 rounded-xl p-8 overflow-hidden transition-all hover:border-emerald-500/50">
+                <!-- Hover Glow -->
+                <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div class="relative z-10 flex flex-col h-full justify-between">
+                    <div>
+                        <div class="font-mono text-[10px] text-gray-500 mb-4 flex justify-between">
+                            <span>HARDWARE.SOC</span>
+                            <span class="text-emerald-500">240MHz</span>
+                        </div>
+                        <h3 class="text-3xl font-display font-bold text-white mb-2 group-hover:translate-x-2 transition-transform duration-300">ESP32-S3</h3>
+                        <p class="text-gray-400 text-sm leading-relaxed">Dual-core Tensilica LX7 processor. The industry standard for IoT. Built-in WiFi & BLE 5.0 Mesh capabilities.</p>
+                    </div>
+                    
+                    <!-- Tech Specs Footer -->
+                    <div class="mt-8 pt-4 border-t border-white/5 flex gap-2 flex-wrap">
+                        <span class="px-2 py-1 bg-white/5 rounded text-[10px] text-gray-300 font-mono">GPIO Control</span>
+                        <span class="px-2 py-1 bg-white/5 rounded text-[10px] text-gray-300 font-mono">I2C / SPI</span>
+                        <span class="px-2 py-1 bg-white/5 rounded text-[10px] text-gray-300 font-mono">PWM</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TECH 2: C++ -->
+            <div class="group relative bg-[#0a0a0a] border border-white/10 rounded-xl p-8 overflow-hidden transition-all hover:border-blue-500/50">
+                <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div class="relative z-10 flex flex-col h-full justify-between">
+                    <div>
+                        <div class="font-mono text-[10px] text-gray-500 mb-4 flex justify-between">
+                            <span>FIRMWARE.CORE</span>
+                            <span class="text-blue-500">LOW-LATENCY</span>
+                        </div>
+                        <h3 class="text-3xl font-display font-bold text-white mb-2 group-hover:translate-x-2 transition-transform duration-300">C++ / Wiring</h3>
+                        <p class="text-gray-400 text-sm leading-relaxed">Direct hardware register access. Write efficient, non-blocking code using FreeRTOS tasks and interrupts.</p>
+                    </div>
+                    
+                    <div class="mt-8 pt-4 border-t border-white/5 flex gap-2 flex-wrap">
+                        <span class="px-2 py-1 bg-white/5 rounded text-[10px] text-gray-300 font-mono">Memory Mgmt</span>
+                        <span class="px-2 py-1 bg-white/5 rounded text-[10px] text-gray-300 font-mono">Pointers</span>
+                        <span class="px-2 py-1 bg-white/5 rounded text-[10px] text-gray-300 font-mono">Classes</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TECH 3: MQTT -->
+            <div class="group relative bg-[#0a0a0a] border border-white/10 rounded-xl p-8 overflow-hidden transition-all hover:border-purple-500/50">
+                <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div class="relative z-10 flex flex-col h-full justify-between">
+                    <div>
+                        <div class="font-mono text-[10px] text-gray-500 mb-4 flex justify-between">
+                            <span>NETWORK.PROTO</span>
+                            <span class="text-purple-500">M2M</span>
+                        </div>
+                        <h3 class="text-3xl font-display font-bold text-white mb-2 group-hover:translate-x-2 transition-transform duration-300">MQTT</h3>
+                        <p class="text-gray-400 text-sm leading-relaxed">Lightweight Pub/Sub messaging protocol. Send telemetry from robot to cloud in milliseconds with minimal overhead.</p>
+                    </div>
+                    
+                    <div class="mt-8 pt-4 border-t border-white/5 flex gap-2 flex-wrap">
+                        <span class="px-2 py-1 bg-white/5 rounded text-[10px] text-gray-300 font-mono">JSON Payload</span>
+                        <span class="px-2 py-1 bg-white/5 rounded text-[10px] text-gray-300 font-mono">QoS Levels</span>
+                        <span class="px-2 py-1 bg-white/5 rounded text-[10px] text-gray-300 font-mono">Topics</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TECH 4: Fusion 360 -->
+            <div class="group relative bg-[#0a0a0a] border border-white/10 rounded-xl p-8 overflow-hidden transition-all hover:border-orange-500/50">
+                <div class="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div class="relative z-10 flex flex-col h-full justify-between">
+                    <div>
+                        <div class="font-mono text-[10px] text-gray-500 mb-4 flex justify-between">
+                            <span>MECHANICAL.CAD</span>
+                            <span class="text-orange-500">PARAMETRIC</span>
+                        </div>
+                        <h3 class="text-3xl font-display font-bold text-white mb-2 group-hover:translate-x-2 transition-transform duration-300">Fusion 360</h3>
+                        <p class="text-gray-400 text-sm leading-relaxed">Industrial CAD workflow. Design custom chassis parts, simulate assembly joints, and export for 3D printing.</p>
+                    </div>
+                    
+                    <div class="mt-8 pt-4 border-t border-white/5 flex gap-2 flex-wrap">
+                        <span class="px-2 py-1 bg-white/5 rounded text-[10px] text-gray-300 font-mono">Sketching</span>
+                        <span class="px-2 py-1 bg-white/5 rounded text-[10px] text-gray-300 font-mono">Extrusion</span>
+                        <span class="px-2 py-1 bg-white/5 rounded text-[10px] text-gray-300 font-mono">Tolerance</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TECH 5: React + Three.js -->
+            <div class="group relative bg-[#0a0a0a] border border-white/10 rounded-xl p-8 overflow-hidden transition-all hover:border-indigo-500/50">
+                <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div class="relative z-10 flex flex-col h-full justify-between">
+                    <div>
+                        <div class="font-mono text-[10px] text-gray-500 mb-4 flex justify-between">
+                            <span>FRONTEND.VIZ</span>
+                            <span class="text-indigo-500">WEBGL</span>
+                        </div>
+                        <h3 class="text-3xl font-display font-bold text-white mb-2 group-hover:translate-x-2 transition-transform duration-300">React + Three.js</h3>
+                        <p class="text-gray-400 text-sm leading-relaxed">Build a Digital Twin. Visualize sensor data in a 3D web dashboard synced in real-time with your physical robot.</p>
+                    </div>
+                    
+                    <div class="mt-8 pt-4 border-t border-white/5 flex gap-2 flex-wrap">
+                        <span class="px-2 py-1 bg-white/5 rounded text-[10px] text-gray-300 font-mono">React Three Fiber</span>
+                        <span class="px-2 py-1 bg-white/5 rounded text-[10px] text-gray-300 font-mono">State Mgmt</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TECH 6: Firebase -->
+            <div class="group relative bg-[#0a0a0a] border border-white/10 rounded-xl p-8 overflow-hidden transition-all hover:border-yellow-500/50">
+                <div class="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div class="relative z-10 flex flex-col h-full justify-between">
+                    <div>
+                        <div class="font-mono text-[10px] text-gray-500 mb-4 flex justify-between">
+                            <span>BACKEND.DB</span>
+                            <span class="text-yellow-500">NOSQL</span>
+                        </div>
+                        <h3 class="text-3xl font-display font-bold text-white mb-2 group-hover:translate-x-2 transition-transform duration-300">Firebase</h3>
+                        <p class="text-gray-400 text-sm leading-relaxed">Serverless infrastructure. Authenticate users, store historic sensor logs, and trigger cloud functions.</p>
+                    </div>
+                    
+                    <div class="mt-8 pt-4 border-t border-white/5 flex gap-2 flex-wrap">
+                        <span class="px-2 py-1 bg-white/5 rounded text-[10px] text-gray-300 font-mono">Firestore</span>
+                        <span class="px-2 py-1 bg-white/5 rounded text-[10px] text-gray-300 font-mono">Auth</span>
+                        <span class="px-2 py-1 bg-white/5 rounded text-[10px] text-gray-300 font-mono">Hosting</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
 
         <!-- Enrollment Form -->
         <section class="py-32 px-6 lg:px-20 bg-white relative" id="enroll">
