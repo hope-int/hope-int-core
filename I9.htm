@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOPE INT CORE | Future Systems</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@300;400;500;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- GSAP for smooth animations (Lightweight version) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: '#050505',
+                        light: '#F2F2F2',
+                        accent: '#2B2B2B',
+                        brand: '#3B82F6' 
+                    },
+                    fontFamily: {
+                        sans: ['Space Grotesk', 'sans-serif'],
+                        body: ['Inter', 'sans-serif'],
+                        display: ['Syne', 'sans-serif'],
+                    },
+                    backgroundImage: {
+                        'noise': "url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22 opacity=%220.05%22/%3E%3C/svg%3E')",
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --cursor-size: 20px;
+        }
+
+        body {
+            background-color: #F2F2F2;
+            color: #050505;
+            cursor: none; /* Custom cursor */
+            overflow-x: hidden;
+        }
+
+        /* --- NOISE OVERLAY --- */
+        .noise-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: theme('backgroundImage.noise');
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* --- CUSTOM CURSOR --- */
+        #cursor {
+            position: fixed;
+            top: 0; left: 0;
+            width: var(--cursor-size);
+            height: var(--cursor-size);
+            border: 1px solid #000;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s, background-color 0.3s, border-color 0.3s;
+            mix-blend-mode: difference;
+        }
+        #cursor.hovered {
+            width: 50px;
+            height: 50px;
+            background-color: white;
+            border-color: transparent;
+            mix-blend-mode: difference;
+        }
+
+        /* --- UTILS --- */
+        .glass {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .glass-dark {
+            background: rgba(10, 10, 10, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .text-outline {
+            -webkit-text-stroke: 1px rgba(0,0,0,0.2);
+            color: transparent;
+        }
+
+        .reveal-text {
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+            transition: clip-path 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .bento-card {
+            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .bento-card:hover {
+            transform: translateY(-5px) scale(1.01);
+        }
+
+        /* 3D Canvas fixed behind content */
+        #webgl-container {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            opacity: 0.6;
+            transition: opacity 0.5s ease;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-black selection:text-white">
+
+    <div class="noise-overlay"></div>
+    <div id="cursor"></div>
+
+    <!-- GLOBAL 3D CANVAS -->
+    <div id="webgl-container"></div>
+
+    <!-- NAVIGATION (Dock Style) -->
+    <nav class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50">
+        <div class="glass px-2 py-2 rounded-full flex items-center gap-2 shadow-2xl transition-all duration-300 hover:scale-105">
+            <button onclick="scrollToSection('home')" class="nav-btn w-12 h-12 rounded-full flex items-center justify-center hover:bg-black hover:text-white transition-all group relative">
+                <i data-lucide="home" class="w-5 h-5"></i>
+                <span class="absolute -top-10 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">Home</span>
+            </button>
+            <button onclick="scrollToSection('education')" class="nav-btn w-12 h-12 rounded-full flex items-center justify-center hover:bg-black hover:text-white transition-all group relative">
+                <i data-lucide="book-open" class="w-5 h-5"></i>
+                <span class="absolute -top-10 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">Learn</span>
+            </button>
+            <button onclick="scrollToSection('iot')" class="nav-btn w-12 h-12 rounded-full flex items-center justify-center hover:bg-black hover:text-white transition-all group relative">
+                <i data-lucide="cpu" class="w-5 h-5"></i>
+                <span class="absolute -top-10 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">Labs</span>
+            </button>
+            <button onclick="scrollToSection('shop')" class="nav-btn w-12 h-12 rounded-full flex items-center justify-center hover:bg-black hover:text-white transition-all group relative">
+                <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+                <span class="absolute -top-10 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">Shop</span>
+            </button>
+            <div class="w-px h-6 bg-gray-300 mx-1"></div>
+            <button onclick="toggleModal('contact')" class="nav-btn bg-black text-white w-12 h-12 rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors">
+                <i data-lucide="message-circle" class="w-5 h-5"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- HEADER LOGO -->
+    <header class="fixed top-0 left-0 w-full p-6 z-40 flex justify-between items-center mix-blend-difference text-white pointer-events-none">
+        <div class="text-xl font-bold tracking-tighter font-display">HOPE<br>CORE</div>
+        <div class="text-xs font-mono uppercase tracking-widest hidden md:block">Est. 2025 // Kerala</div>
+    </header>
+
+    <main>
+        <!-- SECTION 1: HERO -->
+        <section id="home" class="min-h-screen flex flex-col justify-center items-center relative px-4 pt-20">
+            <div class="text-center z-10 mix-blend-difference text-white">
+                <div class="overflow-hidden mb-2">
+                    <h1 class="text-[12vw] leading-[0.85] font-display font-bold tracking-tighter uppercase animate-slide-up">
+                        Fluid
+                    </h1>
+                </div>
+                <div class="overflow-hidden">
+                    <h1 class="text-[12vw] leading-[0.85] font-display font-bold tracking-tighter uppercase text-outline animate-slide-up" style="animation-delay: 0.1s;">
+                        Systems
+                    </h1>
+                </div>
+                
+                <p class="font-mono text-sm md:text-base mt-8 max-w-md mx-auto opacity-0 animate-fade-in" style="animation-delay: 0.5s;">
+                    The convergence of academic excellence, robotic innovation, and essential student infrastructure.
+                </p>
+
+                <div class="mt-10 opacity-0 animate-fade-in pointer-events-auto" style="animation-delay: 0.8s;">
+                    <button onclick="scrollToSection('education')" class="nav-btn group relative px-8 py-3 bg-white text-black rounded-full overflow-hidden">
+                        <span class="relative z-10 font-bold text-sm uppercase tracking-wide">Enter Core</span>
+                        <div class="absolute inset-0 bg-gray-200 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300 ease-out"></div>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Scroll Indicator -->
+            <div class="absolute bottom-32 left-8 md:left-12 mix-blend-difference text-white animate-bounce hidden md:block">
+                <i data-lucide="arrow-down" class="w-6 h-6"></i>
+            </div>
+        </section>
+
+        <!-- SECTION 2: EDUCATION (Bento Grid) -->
+        <section id="education" class="min-h-screen py-20 px-4 md:px-12 relative">
+            <div class="max-w-7xl mx-auto">
+                <div class="mb-16">
+                    <span class="text-xs font-mono uppercase border border-black/20 px-3 py-1 rounded-full">Module 01</span>
+                    <h2 class="text-6xl md:text-8xl font-display font-bold mt-4 leading-none">Academic<br>Database</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 md:grid-rows-2 gap-6 h-auto md:h-[800px]">
+                    <!-- Large Card -->
+                    <div class="bento-card col-span-1 md:col-span-2 row-span-2 glass rounded-[2rem] p-8 md:p-12 flex flex-col justify-between relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-64 h-64 bg-blue-400/20 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2"></div>
+                        
+                        <div>
+                            <div class="w-16 h-16 rounded-full bg-white border border-gray-100 flex items-center justify-center mb-6">
+                                <i data-lucide="library" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="text-4xl font-bold mb-4">KTU Repository</h3>
+                            <p class="text-gray-600 max-w-sm text-lg">Access the entire engineering syllabus, simplified notes, and previous year question papers in one fluid interface.</p>
+                        </div>
+
+                        <div class="mt-8 flex gap-4">
+                            <button class="nav-btn bg-black text-white px-6 py-3 rounded-full text-sm font-bold hover:scale-105 transition-transform">Browse Notes</button>
+                            <button class="nav-btn border border-black px-6 py-3 rounded-full text-sm font-bold hover:bg-black hover:text-white transition-colors">Upload</button>
+                        </div>
+                    </div>
+
+                    <!-- Audio Card -->
+                    <div class="bento-card col-span-1 glass rounded-[2rem] p-8 flex flex-col justify-center relative group hover:bg-white transition-colors cursor-pointer">
+                        <div class="absolute top-6 right-6 p-2 bg-black text-white rounded-full">
+                            <i data-lucide="headphones" class="w-4 h-4"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-2">Audio Lectures</h3>
+                        <div class="flex items-center gap-2 mt-4">
+                            <div class="h-8 flex gap-1 items-end">
+                                <div class="w-1 bg-black h-4 animate-[bounce_1s_infinite]"></div>
+                                <div class="w-1 bg-black h-6 animate-[bounce_1.2s_infinite]"></div>
+                                <div class="w-1 bg-black h-3 animate-[bounce_0.8s_infinite]"></div>
+                                <div class="w-1 bg-black h-7 animate-[bounce_1.1s_infinite]"></div>
+                            </div>
+                            <span class="text-xs font-mono text-gray-500">Listen on the go</span>
+                        </div>
+                    </div>
+
+                    <!-- AI Card -->
+                    <div class="bento-card col-span-1 glass rounded-[2rem] p-8 flex flex-col justify-between group hover:bg-black hover:text-white transition-all cursor-pointer">
+                        <h3 class="text-2xl font-bold">AI Summarizer</h3>
+                        <div class="flex justify-between items-end">
+                            <p class="text-sm opacity-60 max-w-[120px]">Summarize 50 pages in 10 seconds.</p>
+                            <i data-lucide="sparkles" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: IOT LABS (Dark Mode Vibe) -->
+        <section id="iot" class="min-h-screen py-20 px-4 md:px-12 relative bg-black text-white rounded-t-[3rem] mt-12 overflow-hidden">
+            <!-- Grid Background -->
+            <div class="absolute inset-0 opacity-20" style="background-image: linear-gradient(#333 1px, transparent 1px), linear-gradient(90deg, #333 1px, transparent 1px); background-size: 40px 40px;"></div>
+
+            <div class="relative z-10 max-w-7xl mx-auto flex flex-col md:flex-row gap-12 items-center min-h-[80vh]">
+                <div class="w-full md:w-1/2">
+                    <div class="inline-flex items-center gap-2 border border-white/20 px-4 py-2 rounded-full mb-8 backdrop-blur-md">
+                        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                        <span class="text-xs font-mono tracking-widest uppercase">Bootcamp Active</span>
+                    </div>
+                    <h2 class="text-7xl md:text-9xl font-display font-bold leading-[0.85] tracking-tighter mb-8">
+                        HARD<br><span class="text-gray-600">WARE</span>
+                    </h2>
+                    <p class="text-gray-400 text-lg max-w-md mb-8">
+                        Move beyond code. Solder, wire, and deploy autonomous systems. Our summer camps provide the kit, the curriculum, and the certification.
+                    </p>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-6 border border-white/10 rounded-2xl bg-white/5 hover:bg-white/10 transition-colors">
+                            <div class="text-4xl font-bold font-display mb-1">14</div>
+                            <div class="text-xs text-gray-500 uppercase">Days Intensive</div>
+                        </div>
+                        <div class="p-6 border border-white/10 rounded-2xl bg-white/5 hover:bg-white/10 transition-colors">
+                            <div class="text-4xl font-bold font-display mb-1">05</div>
+                            <div class="text-xs text-gray-500 uppercase">Projects Built</div>
+                        </div>
+                    </div>
+
+                    <button onclick="toggleModal('register')" class="nav-btn mt-10 w-full md:w-auto bg-white text-black px-8 py-4 rounded-xl font-bold hover:scale-[1.02] transition-transform flex items-center justify-center gap-2">
+                        <span>Initialize Protocol</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                
+                <!-- The 3D view here is handled by the global canvas overlaying this section with a specific material -->
+                <div class="w-full md:w-1/2 h-[400px] flex items-center justify-center border border-dashed border-white/20 rounded-3xl relative">
+                    <div class="absolute top-4 left-4 text-xs font-mono text-gray-500">FIG 2.1 // DRONE FRAME</div>
+                    <div class="absolute bottom-4 right-4 text-xs font-mono text-gray-500">RENDER_MODE: WIREFRAME</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: SHOP (High Fashion E-com) -->
+        <section id="shop" class="min-h-screen py-20 px-4 md:px-12 bg-white text-black">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-end mb-20 border-b border-black/10 pb-8">
+                    <h2 class="text-6xl md:text-8xl font-display font-bold leading-none">Supply<br>Chain</h2>
+                    <p class="font-mono text-sm text-gray-500 max-w-xs mt-6 md:mt-0">
+                        High-grade components and printing services delivered to your hostel doorstep.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-y-12 gap-x-8">
+                    <!-- Product 1 -->
+                    <div class="group cursor-pointer nav-btn">
+                        <div class="aspect-[3/4] bg-gray-100 rounded-2xl mb-6 relative overflow-hidden">
+                            <div class="absolute inset-0 bg-gray-200 flex items-center justify-center group-hover:scale-110 transition-transform duration-700">
+                                <!-- CSS Placeholder for Product Image -->
+                                <div class="w-32 h-40 border-2 border-black/20 rounded-lg transform rotate-12 bg-white"></div>
+                            </div>
+                            <div class="absolute bottom-4 left-4 bg-white px-3 py-1 rounded-full text-xs font-bold">In Stock</div>
+                        </div>
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-bold text-lg">Arduino Starter</h3>
+                                <p class="text-sm text-gray-500">Essentials Pack</p>
+                            </div>
+                            <span class="font-mono">₹1,499</span>
+                        </div>
+                    </div>
+
+                    <!-- Product 2 -->
+                    <div class="group cursor-pointer nav-btn">
+                        <div class="aspect-[3/4] bg-gray-100 rounded-2xl mb-6 relative overflow-hidden">
+                            <div class="absolute inset-0 bg-gray-200 flex items-center justify-center group-hover:scale-110 transition-transform duration-700">
+                                <div class="w-24 h-24 rounded-full border-2 border-black/20 bg-white"></div>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-bold text-lg">Print Service</h3>
+                                <p class="text-sm text-gray-500">A4 / Bond Paper</p>
+                            </div>
+                            <span class="font-mono">₹2/page</span>
+                        </div>
+                    </div>
+
+                    <!-- Product 3 -->
+                    <div class="group cursor-pointer nav-btn">
+                        <div class="aspect-[3/4] bg-gray-100 rounded-2xl mb-6 relative overflow-hidden">
+                            <div class="absolute inset-0 bg-gray-200 flex items-center justify-center group-hover:scale-110 transition-transform duration-700">
+                                <div class="w-32 h-12 border-2 border-black/20 bg-white"></div>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-bold text-lg">Raspberry Pi 4</h3>
+                                <p class="text-sm text-gray-500">8GB Model B</p>
+                            </div>
+                            <span class="font-mono">₹5,999</span>
+                        </div>
+                    </div>
+
+                    <!-- CTA Card -->
+                    <div class="aspect-[3/4] bg-black text-white rounded-2xl p-8 flex flex-col justify-between group hover:bg-accent transition-colors">
+                        <div class="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center">
+                            <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-display text-4xl leading-none mb-2">View<br>All</h3>
+                            <p class="text-gray-400 text-sm">Browse 50+ items</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="bg-white px-4 py-12 md:px-12 border-t border-black/10">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="text-[10vw] font-display font-bold opacity-10 leading-none select-none">HOPE</div>
+                <div class="flex gap-6 mt-8 md:mt-0">
+                    <a href="#" class="nav-btn text-sm font-bold hover:underline">Instagram</a>
+                    <a href="#" class="nav-btn text-sm font-bold hover:underline">LinkedIn</a>
+                    <a href="#" class="nav-btn text-sm font-bold hover:underline">Support</a>
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <!-- MODAL (Unified) -->
+    <div id="modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center px-4 opacity-0 transition-opacity duration-300">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="toggleModal()"></div>
+        <div class="relative bg-white w-full max-w-lg p-10 rounded-[2rem] shadow-2xl transform scale-95 transition-transform duration-300" id="modal-content">
+            <button onclick="toggleModal()" class="absolute top-6 right-6 p-2 rounded-full hover:bg-gray-100"><i data-lucide="x"></i></button>
+            
+            <div id="modal-body-contact" class="hidden">
+                <h3 class="font-display text-4xl font-bold mb-2">Connect</h3>
+                <p class="text-gray-500 mb-6">Drop us a line. We reply within 24 hours.</p>
+                <form onsubmit="event.preventDefault(); toggleModal(); showToast('Message Sent');" class="space-y-4">
+                    <input type="text" placeholder="Name" class="w-full bg-gray-50 border-0 p-4 rounded-xl focus:ring-2 focus:ring-black">
+                    <input type="email" placeholder="Email" class="w-full bg-gray-50 border-0 p-4 rounded-xl focus:ring-2 focus:ring-black">
+                    <textarea rows="3" placeholder="Message" class="w-full bg-gray-50 border-0 p-4 rounded-xl focus:ring-2 focus:ring-black"></textarea>
+                    <button class="w-full bg-black text-white py-4 rounded-xl font-bold">Send</button>
+                </form>
+            </div>
+
+            <div id="modal-body-register" class="hidden">
+                <h3 class="font-display text-4xl font-bold mb-2">Join Lab</h3>
+                <p class="text-gray-500 mb-6">Secure your spot for the upcoming bootcamps.</p>
+                <form onsubmit="event.preventDefault(); toggleModal(); showToast('Registration Pending');" class="space-y-4">
+                    <input type="text" placeholder="Student ID" class="w-full bg-gray-50 border-0 p-4 rounded-xl focus:ring-2 focus:ring-black">
+                    <button class="w-full bg-black text-white py-4 rounded-xl font-bold">Apply Now</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="fixed top-8 left-1/2 -translate-x-1/2 bg-black text-white px-6 py-3 rounded-full shadow-xl z-[110] transform -translate-y-32 transition-transform duration-500 flex items-center gap-2">
+        <i data-lucide="check-circle" class="w-4 h-4 text-green-400"></i>
+        <span id="toast-msg" class="font-mono text-sm">Success</span>
+    </div>
+
+    <script>
+        // --- 1. SETUP & UTILS ---
+        lucide.createIcons();
+
+        function showToast(msg) {
+            const el = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            el.classList.remove('-translate-y-32');
+            setTimeout(() => el.classList.add('-translate-y-32'), 3000);
+        }
+
+        function toggleModal(type) {
+            const modal = document.getElementById('modal');
+            const content = document.getElementById('modal-content');
+            
+            if (modal.classList.contains('hidden')) {
+                // Open
+                document.getElementById('modal-body-contact').classList.add('hidden');
+                document.getElementById('modal-body-register').classList.add('hidden');
+                document.getElementById('modal-body-' + (type || 'contact')).classList.remove('hidden');
+
+                modal.classList.remove('hidden');
+                // Small delay to allow display:block to apply before opacity transition
+                setTimeout(() => {
+                    modal.classList.remove('opacity-0');
+                    content.classList.remove('scale-95');
+                    content.classList.add('scale-100');
+                }, 10);
+            } else {
+                // Close
+                modal.classList.add('opacity-0');
+                content.classList.remove('scale-100');
+                content.classList.add('scale-95');
+                setTimeout(() => modal.classList.add('hidden'), 300);
+            }
+        }
+
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // --- 2. CUSTOM CURSOR & HOVER EFFECTS ---
+        const cursor = document.getElementById('cursor');
+        
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+
+        document.querySelectorAll('.nav-btn, button, a').forEach(el => {
+            el.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
+            el.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+        });
+
+        // --- 3. THREE.JS GLOBAL SCENE ---
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        document.getElementById('webgl-container').appendChild(renderer.domElement);
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+        
+        const pointLight = new THREE.PointLight(0xffffff, 1);
+        pointLight.position.set(5, 5, 5);
+        scene.add(pointLight);
+
+        const pointLight2 = new THREE.PointLight(0x3B82F6, 2); // Blue accent
+        pointLight2.position.set(-5, -5, 5);
+        scene.add(pointLight2);
+
+        // Object: Abstract Shape (Icosahedron)
+        const geometry = new THREE.IcosahedronGeometry(1.5, 0); // Low poly look
+        const material = new THREE.MeshPhysicalMaterial({ 
+            color: 0xffffff, 
+            roughness: 0.2, 
+            metalness: 0.1,
+            transmission: 0,
+            clearcoat: 1.0
+        });
+        const mesh = new THREE.Mesh(geometry, material);
+        scene.add(mesh);
+
+        // Wireframe overlay
+        const wireGeo = new THREE.WireframeGeometry(geometry);
+        const wireMat = new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.1 });
+        const wireframe = new THREE.LineSegments(wireGeo, wireMat);
+        mesh.add(wireframe);
+
+        camera.position.z = 5;
+
+        // Mouse interaction for 3D
+        let mouseX = 0;
+        let mouseY = 0;
+        let targetX = 0;
+        let targetY = 0;
+
+        const windowHalfX = window.innerWidth / 2;
+        const windowHalfY = window.innerHeight / 2;
+
+        document.addEventListener('mousemove', (event) => {
+            mouseX = (event.clientX - windowHalfX);
+            mouseY = (event.clientY - windowHalfY);
+        });
+
+        // --- 4. SCROLL OBSERVER FOR SCENE CHANGE ---
+        // We detect which section is in view and morph/color the 3D object
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.id;
+                    updateSceneForSection(id);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        ['home', 'education', 'iot', 'shop'].forEach(id => {
+            const el = document.getElementById(id);
+            if(el) observer.observe(el);
+        });
+
+        function updateSceneForSection(section) {
+            // Using GSAP to tween 3D properties
+            switch(section) {
+                case 'home':
+                    gsap.to(mesh.scale, {x: 1, y: 1, z: 1, duration: 1});
+                    gsap.to(mesh.rotation, {x: 0, y: 0, duration: 1});
+                    gsap.to(material.color, {r: 1, g: 1, b: 1, duration: 1}); // White
+                    wireMat.color.setHex(0x000000);
+                    break;
+                case 'education':
+                    gsap.to(mesh.scale, {x: 0.8, y: 0.8, z: 0.8, duration: 1});
+                    gsap.to(material.color, {r: 0.9, g: 0.9, b: 1, duration: 1}); // Slight Blue tint
+                    break;
+                case 'iot':
+                    gsap.to(mesh.scale, {x: 1.4, y: 1.4, z: 1.4, duration: 1});
+                    gsap.to(material.color, {r: 0.1, g: 0.1, b: 0.1, duration: 1}); // Dark/Black
+                    wireMat.color.setHex(0xffffff); // White wires
+                    wireMat.opacity = 0.3;
+                    break;
+                case 'shop':
+                    gsap.to(mesh.scale, {x: 0.5, y: 0.5, z: 0.5, duration: 1});
+                    gsap.to(material.color, {r: 1, g: 1, b: 1, duration: 1});
+                    wireMat.color.setHex(0x000000);
+                    break;
+            }
+        }
+
+        // Animation Loop
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            targetX = mouseX * 0.001;
+            targetY = mouseY * 0.001;
+
+            // Smooth rotation following mouse
+            mesh.rotation.y += 0.05 * (targetX - mesh.rotation.y);
+            mesh.rotation.x += 0.05 * (targetY - mesh.rotation.x);
+
+            // Constant idle rotation
+            mesh.rotation.z += 0.002;
+            
+            // Subtle floating
+            mesh.position.y = Math.sin(clock.getElapsedTime()) * 0.1;
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Handle Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // --- 5. INTRO ANIMATIONS ---
+        window.addEventListener('load', () => {
+            // GSAP Intro
+            const tl = gsap.timeline();
+            tl.from("h1", { y: 100, opacity: 0, duration: 1, stagger: 0.1, ease: "power4.out" });
+        });
+
+    </script>
+</body>
+</html>
