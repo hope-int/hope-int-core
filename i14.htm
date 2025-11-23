@@ -236,60 +236,130 @@
     </div>
 </div>
 
-        <!-- 2. EDUCATION: THE ECOSYSTEM -->
-        <div id="education" class="page-section hidden min-h-screen pt-32 pb-20 px-6 md:px-12 bg-concrete">
-            <div class="max-w-7xl mx-auto">
-                <div class="flex justify-between items-end mb-12">
-                    <div>
-                        <h2 class="font-display text-5xl md:text-7xl font-bold">ACADEMIC<br><span class="text-gray-400">ARCHIVE</span></h2>
-                    </div>
-                    <div class="hidden md:block text-right">
-                        <p class="font-mono text-xs uppercase tracking-widest text-gray-500">Resource Database</p>
-                        <p class="font-display text-xl font-bold">v.2025.1</p>
+<!-- 2. EDUCATION: THE ECOSYSTEM (ACHIEVER PROTOCOL) -->
+<div id="education" class="page-section hidden min-h-screen pt-32 pb-20 px-6 md:px-12 bg-concrete">
+    <div class="max-w-7xl mx-auto">
+        
+        <!-- HEADER: ACHIEVER PROTOCOL -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 border-b border-gray-300 pb-8">
+            <div>
+                <p class="font-mono text-xs uppercase tracking-[0.2em] text-impact mb-3">Module 01: The Pipeline Fix</p>
+                <h2 class="font-display text-5xl md:text-7xl font-bold leading-tight">ACHIEVER<br><span class="text-gray-600">PROTOCOL</span></h2>
+            </div>
+            <div class="mt-4 md:mt-0 text-left md:text-right max-w-sm">
+                <p class="font-sans text-lg font-medium text-void">
+                    We turn students from confused consumers of syllabus into proactive, industry-ready achievers using a unified digital hub.
+                </p>
+            </div>
+        </div>
+
+        <!-- DYNAMIC GRID LAYOUT -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 h-auto">
+            
+            <!-- TILE 1: CORE KNOWLEDGE BASE (High-Quality Notes) -->
+            <div class="md:col-span-2 bg-white rounded-3xl p-8 border border-gray-200 hover:border-black transition-all cursor-pointer group relative overflow-hidden shadow-xl md:row-span-2">
+                <div class="flex justify-between items-start">
+                    <i data-lucide="book-open-check" class="w-12 h-12 mb-2 text-impact"></i>
+                    <!-- Status Badge -->
+                    <div class="bg-neon text-black px-4 py-2 rounded-full font-mono text-xs font-bold uppercase tracking-widest flex items-center gap-1">
+                        <i data-lucide="shield-check" class="w-4 h-4"></i> VETTED
                     </div>
                 </div>
+                
+                <h3 class="font-display text-4xl font-extrabold mt-8 mb-2">KTU Master Repository</h3>
+                <p class="text-gray-600 text-base max-w-lg">
+                    Access distilled, exam-focused knowledge modules. We remove the fluff and guarantee the quality required for placement-level understanding.
+                </p>
+                
+                <!-- Progress Bar Mock -->
+                <div class="mt-16 bg-gray-100 rounded-full h-3">
+                    <div class="bg-impact h-3 rounded-full" style="width: 75%;"></div>
+                </div>
+                <p class="text-xs font-mono text-gray-500 mt-2">75% Syllabus Mapped (Latest Revision: Q4 2024)</p>
 
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 h-auto">
-                    <!-- KTU REPO -->
-                    <div class="md:col-span-2 md:row-span-2 bg-white rounded-[1.5rem] p-8 border border-gray-200 hover:border-black transition-all cursor-pointer group relative overflow-hidden">
-                        <div class="absolute top-4 right-4 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                        <i data-lucide="library" class="w-10 h-10 mb-32 text-gray-800"></i>
-                        <h3 class="font-display text-3xl font-bold mb-2">KTU Repository</h3>
-                        <p class="text-gray-500 text-sm">Distilled notes, Module 1-5. No fluff. Just what you need to pass.</p>
-                        <div class="absolute bottom-0 right-0 p-8 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <i data-lucide="arrow-right" class="w-8 h-8"></i>
-                        </div>
+                <!-- Action Link -->
+                <button class="w-full mt-6 bg-black text-white py-4 rounded-xl text-sm font-bold uppercase hover:bg-neon hover:text-black transition-colors">
+                    Search Notes & Guides
+                </button>
+            </div>
+
+            <!-- TILE 2: SKILL INJECTION LABS (Bridge to IoT/Robotics) -->
+            <div onclick="router('iot')" class="md:col-span-2 bg-void text-white rounded-3xl p-8 cursor-pointer hover:bg-ash transition-colors group relative overflow-hidden shadow-xl">
+                <div class="flex justify-between items-center">
+                    <i data-lucide="cpu" class="w-10 h-10 mb-4 text-neon"></i>
+                    <p class="font-mono text-xs text-neon uppercase">LINKED TO IOT WING</p>
+                </div>
+                
+                <h3 class="font-display text-3xl font-bold mb-2">Practical Skill Tracks</h3>
+                <p class="text-gray-400 text-sm">
+                    Move beyond theory. Guided, hands-on projects (e.g., ESP32, Docker, 3D Printing) that directly result in a portfolio artifact.
+                </p>
+                
+                <!-- Live Metric Mock -->
+                <div class="mt-4 flex items-center gap-4">
+                    <div class="text-2xl font-display font-bold text-white">32</div>
+                    <p class="text-xs font-mono text-gray-500 uppercase">Projects Live</p>
+                </div>
+                
+                <!-- Action -->
+                <div class="absolute bottom-6 right-8 text-neon font-bold text-sm transform group-hover:translate-x-1 transition-transform">
+                    START LAB <i data-lucide="arrow-right" class="w-4 h-4 inline-block ml-1"></i>
+                </div>
+            </div>
+            
+            <!-- TILE 3: CAREER COMMAND (The Pipeline Fix) -->
+            <div class="md:col-span-1 bg-white border border-gray-200 rounded-3xl p-8 cursor-pointer hover:bg-gray-100 transition-colors group shadow-md">
+                <i data-lucide="rocket" class="w-8 h-8 mb-4 text-impact"></i>
+                <h3 class="font-bold text-xl">Career Command</h3>
+                <p class="text-xs text-gray-500 mt-2">
+                    Personalized placement trajectory: S1 Readiness Check -> Resume Builder -> Internship Matchmaker.
+                </p>
+                <div class="mt-4 flex flex-col space-y-2">
+                    <div class="flex items-center text-xs font-mono text-black">
+                        <i data-lucide="trending-up" class="w-3 h-3 text-neon mr-2"></i> Placement Index: 7.8/10
                     </div>
-
-                    <!-- AUDIO LECTURES -->
-                    <div class="md:col-span-2 bg-black text-white rounded-[1.5rem] p-8 flex items-center justify-between cursor-pointer group">
-                        <div>
-                            <h3 class="font-display text-2xl font-bold mb-1">Audio Deck</h3>
-                            <p class="text-gray-400 text-xs font-mono">LEARN WHILE COMMUTING</p>
-                        </div>
-                        <div class="flex gap-1 items-end h-8">
-                            <div class="w-1 bg-neon h-4 animate-[bounce_1s_infinite]"></div>
-                            <div class="w-1 bg-neon h-8 animate-[bounce_1.2s_infinite]"></div>
-                            <div class="w-1 bg-neon h-5 animate-[bounce_0.8s_infinite]"></div>
-                        </div>
-                    </div>
-
-                    <!-- AI TUTOR -->
-                    <div class="md:col-span-1 bg-gray-200 rounded-[1.5rem] p-8 cursor-pointer hover:bg-neon transition-colors group">
-                        <i data-lucide="bot" class="w-8 h-8 mb-4"></i>
-                        <h3 class="font-bold text-lg">HOPE AI</h3>
-                        <p class="text-xs text-gray-600 group-hover:text-black mt-2">24/7 Doubt Clearance</p>
-                    </div>
-
-                    <!-- ROADMAPS -->
-                    <div class="md:col-span-1 bg-white border border-gray-200 rounded-[1.5rem] p-8 cursor-pointer group">
-                        <i data-lucide="map" class="w-8 h-8 mb-4"></i>
-                        <h3 class="font-bold text-lg">Career Maps</h3>
-                        <p class="text-xs text-gray-500 mt-2">S1 to Placement</p>
+                    <div class="flex items-center text-xs font-mono text-black">
+                        <i data-lucide="briefcase" class="w-3 h-3 text-impact mr-2"></i> Current Internships: 4
                     </div>
                 </div>
             </div>
+
+            <!-- TILE 4: THE STUDENT DIAGNOSTIC -->
+            <div class="md:col-span-1 bg-alert/10 border border-alert/20 rounded-3xl p-8 cursor-pointer hover:bg-alert/20 transition-colors group shadow-md">
+                <i data-lucide="alert-triangle" class="w-8 h-8 mb-4 text-alert animate-pulse"></i>
+                <h3 class="font-bold text-xl text-alert">Student Diagnostic</h3>
+                <p class="text-xs text-gray-700 mt-2">
+                    A deep-scan of your academic, emotional, and skill bottlenecks. Provides instant, actionable fixes.
+                </p>
+                <button class="mt-4 text-xs font-bold uppercase tracking-widest bg-alert text-white px-4 py-2 rounded-lg hover:bg-black transition-colors">
+                    Run Analysis
+                </button>
+            </div>
+            
+            <!-- TILE 5: HOPE AI + AUDIO DECK (The Co-pilot) -->
+            <div class="md:col-span-2 bg-black text-white rounded-3xl p-8 flex items-center justify-between cursor-pointer group shadow-xl hover:shadow-2xl">
+                <div class="max-w-[70%]">
+                    <div class="flex items-center gap-3 mb-2">
+                         <i data-lucide="bot" class="w-6 h-6 text-neon"></i>
+                         <h3 class="font-display text-2xl font-bold">HOPE AI + Audio Deck</h3>
+                    </div>
+                    <p class="text-gray-400 text-sm font-mono mt-1">
+                        24/7 Co-pilot for doubts and on-the-go contextual lecture replays. (Query Limit: 10/Hour)
+                    </p>
+                </div>
+                <!-- Audio Wave Visualizer -->
+                <div class="flex gap-1 items-end h-10 w-auto">
+                    <div class="w-1.5 bg-neon h-4 animate-[bounce_1s_infinite]"></div>
+                    <div class="w-1.5 bg-neon h-8 animate-[bounce_1.2s_infinite]"></div>
+                    <div class="w-1.5 bg-neon h-5 animate-[bounce_0.8s_infinite]"></div>
+                    <div class="w-1.5 bg-neon h-7 animate-[bounce_1.1s_infinite]"></div>
+                    <div class="w-1.5 bg-neon h-6 animate-[bounce_0.9s_infinite]"></div>
+                </div>
+            </div>
+            
         </div>
+    </div>
+</div>
 
         <!-- 3. OPPORTUNITIES: THE ENGINE (NEW) -->
         <div id="opportunities" class="page-section hidden min-h-screen pt-32 pb-20 px-6 md:px-12 bg-ash text-white">
