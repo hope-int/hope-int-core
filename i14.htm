@@ -161,84 +161,79 @@
     <main class="relative min-h-screen pb-10">
 
         <!-- 1. HOME: THE MISSION -->
-        <div id="home" class="relative min-h-screen flex flex-col justify-center px-6 md:px-12 border-b border-gray-800">
-
-    <!-- 1. Background Layer: Engineering Grid -->
-    <div class="absolute inset-0 grid-bg opacity-20 pointer-events-none"></div>
-    <div class="absolute inset-0 bg-gradient-to-t from-hopeBlack via-transparent to-hopeBlack pointer-events-none"></div>
-
-    <!-- 2. System HUD (Heads Up Display) - Top Right -->
-    <div class="absolute top-6 right-6 md:top-12 md:right-12 flex flex-col items-end gap-2 text-[10px] md:text-xs font-mono text-gray-500 z-20">
-        <div class="flex items-center gap-2">
-            <span>[SYS_STATUS]</span>
-            <span class="w-2 h-2 bg-neon rounded-full animate-pulse"></span>
-            <span class="text-neon">ONLINE</span>
-        </div>
-        <div class="flex flex-col text-right opacity-70">
-            <span>MODULE 01: EDUCATION [ACTIVE]</span>
-            <span>MODULE 02: OPPORTUNITY [HUNTING]</span>
-            <span>MODULE 03: IOT/ROBOTICS [READY]</span>
-            <span>MODULE 04: SOCIAL IMPACT [ENGAGED]</span>
-        </div>
+       <div id="home" class="page-section min-h-screen flex flex-col pt-32 px-6 md:px-12 relative overflow-hidden">
+    
+    <!-- 1. Background Code Decoration -->
+    <!-- Opacity reduced for light background -->
+    <div class="absolute top-0 left-0 w-full h-full opacity-10 text-[10px] font-mono p-4 break-all overflow-hidden pointer-events-none z-0 text-ash terminal-scanline">
+        01001000 01001111 01010000 01000101 00100000 01010011 01011001 01010011 01010100 01000101 01001101
+        EXECUTE_PROTOCOL: UPLIFT.V2 // 4-PILLAR CHECK
+        TARGET: POVERTY_ERADICATION
+        STATUS: ACTIVE
+        INIT: EDUCATION.V1 | INIT: OPPORTUNITY.V1 | INIT: ECOMMERCE.V1 | INIT: IMPACT.V1
+        ... (repeat code/status text to fill space)
     </div>
 
+    <!-- 2. System HUD (Heads Up Display) - Top Right -->
+    <!-- Reinforces the 4-Pillar ecosystem concept -->
+    <div class="absolute top-24 right-6 md:top-32 md:right-12 flex flex-col items-end gap-1 text-[10px] md:text-xs font-mono text-gray-700 z-20">
+        <div class="flex items-center gap-2">
+            <span>[SYS_CORE]</span>
+            <span class="w-2 h-2 bg-neon rounded-full animate-pulse"></span>
+            <span class="text-black font-bold">ACTIVE</span>
+        </div>
+        <div class="flex flex-col text-right opacity-80 mt-2">
+            <span class="text-impact font-bold">MODULE 01: EDUCATION [RUN]</span>
+            <span>MODULE 02: OPPORTUNITY [HUNT]</span>
+            <span>MODULE 03: IOT/ROBOTICS [LABS]</span>
+            <span class="text-impact font-bold">MODULE 04: SOCIAL IMPACT [VOW]</span>
+        </div>
+    </div>
+    
     <!-- 3. Main Content Content -->
-    <div class="relative z-10 max-w-7xl mx-auto w-full pt-10">
+    <div class="relative z-10 mt-auto mb-32 md:mb-0 md:mt-20 max-w-7xl mx-auto w-full">
         
         <!-- Badge -->
-        <div class="inline-flex items-center gap-2 px-3 py-1 border border-gray-700 rounded-full bg-hopeGray/30 backdrop-blur-sm mb-8">
-            <span class="w-1.5 h-1.5 bg-neon rounded-full"></span>
-            <span class="text-[10px] uppercase tracking-[0.2em] font-mono text-gray-300">Hope International Core © 2025</span>
+        <div class="text-reveal-mask">
+            <p class="text-reveal-child text-xs font-mono uppercase tracking-widest mb-4 pl-2 border-l-2 border-neon text-gray-700">
+                HOPE CORE. A 20-Year Legacy System
+            </p>
         </div>
 
-        <!-- Headline -->
-        <h1 class="font-sans font-extrabold text-5xl md:text-[7vw] leading-[0.9] tracking-tight mb-6">
-            FROM <span class="text-gray-600 line-through decoration-neon/50 decoration-2">CONSUMER</span><br>
-            TO <span class="text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">ACHIEVER.</span>
-        </h1>
+        <!-- Headline: The Core Philosophy -->
+        <div class="text-reveal-mask">
+            <h1 class="text-reveal-child font-display text-6xl md:text-[10vw] font-bold tracking-tighter leading-[0.85] mb-6">
+                FROM <span class="text-gray-400 line-through decoration-black/50 decoration-2">CONSUMER</span><br>
+                TO <span class="text-transparent bg-clip-text bg-gradient-to-r from-black to-gray-500">ACHIEVER.</span>
+            </h1>
+        </div>
 
         <!-- Deep Definition Subtext -->
-        <div class="max-w-2xl border-l-2 border-neon pl-6 mb-10">
-            <p class="text-lg md:text-xl text-gray-400 font-light leading-relaxed">
-                HOPE is not a platform. It is a <b class="text-white">mission-driven ecosystem</b> engineered to fix the broken pipeline between education, industry, and humanity.
+        <div class="text-reveal-mask max-w-2xl">
+            <p class="text-reveal-child text-xl md:text-2xl text-void font-medium leading-relaxed">
+                <span class="font-bold">Not a platform. A System.</span> We transform students into industry leaders by unifying education, opportunity, technology, and social impact.
             </p>
         </div>
 
         <!-- Action Modules (Buttons) -->
-        <div class="flex flex-wrap gap-4 items-center">
-            <!-- Primary Action: Enter the System -->
-            <button onclick="router('dashboard')" class="group relative px-8 py-4 bg-white text-black font-bold text-sm tracking-widest uppercase overflow-hidden hover:bg-neon transition-all duration-300 clip-path-slant">
-                <span class="relative z-10 group-hover:text-black">Enter Ecosystem</span>
-                <div class="absolute inset-0 bg-neon transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
-            </button>
-
-            <!-- Secondary Action: The Emotional Vow -->
-            <button onclick="router('impact')" class="group px-8 py-4 border border-gray-700 text-white font-mono text-sm tracking-widest uppercase hover:border-neon hover:text-neon transition-colors duration-300 flex items-center gap-3">
-                <span>The Vow</span>
-                <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-            </button>
+        <div class="text-reveal-mask mt-10">
+            <div class="text-reveal-child flex flex-wrap gap-4">
+                <!-- Primary Action: Enter the System -->
+                <button onclick="router('education')" class="magnetic-btn bg-black text-white px-8 py-4 rounded-xl font-bold uppercase text-sm tracking-widest hover:bg-neon hover:text-black transition-colors glitch-hover">
+                    Launch Education Protocol
+                </button>
+                <!-- Secondary Action: The Emotional Vow -->
+                <button onclick="router('impact')" class="magnetic-btn border border-black px-8 py-4 rounded-xl font-bold uppercase text-sm tracking-widest hover:bg-impact hover:text-white transition-colors">
+                    The Social Vow <i data-lucide="heart" class="w-4 h-4 inline-block ml-1"></i>
+                </button>
+            </div>
         </div>
     </div>
-
-    <!-- 4. Live System Ticker (The Opportunity Engine) -->
-    <div class="absolute bottom-0 left-0 w-full bg-hopeGray/50 backdrop-blur-md border-t border-gray-800 py-3 overflow-hidden z-20">
-        <div class="animate-marquee whitespace-nowrap flex gap-12 text-xs font-mono text-gray-400">
-            <span class="flex items-center gap-2"><span class="text-neon">●</span> INTERNSHIPS LIVE: 42</span>
-            <span class="flex items-center gap-2"><span class="text-neon">●</span> MEALS SERVED TODAY: 150</span>
-            <span class="flex items-center gap-2"><span class="text-neon">●</span> ROBOTICS KITS DEPLOYED: 12</span>
-            <span class="flex items-center gap-2"><span class="text-neon">●</span> SCHOLARSHIPS GRANTED: $5,000</span>
-            <span class="flex items-center gap-2"><span class="text-neon">●</span> STARTUPS INCUBATED: 3</span>
-            <!-- Repeat for smooth loop -->
-            <span class="flex items-center gap-2"><span class="text-neon">●</span> INTERNSHIPS LIVE: 42</span>
-            <span class="flex items-center gap-2"><span class="text-neon">●</span> MEALS SERVED TODAY: 150</span>
-        </div>
+    
+    <!-- 3D Abstract -->
+    <div class="absolute top-1/4 right-[-10%] w-[50%] h-[70%] z-0 pointer-events-none hidden md:block opacity-0 fade-in-delayed">
+        <div id="canvas-hero" class="w-full h-full"></div>
     </div>
-
-    <!-- 3D Placeholder (Kept for your Three.js implementation) -->
-    <div class="absolute top-1/2 right-0 transform -translate-y-1/2 w-1/2 h-[80%] z-0 opacity-40 pointer-events-none hidden md:block mix-blend-screen">
-         <div id="canvas-hero" class="w-full h-full"></div>
-    </div>
-
 </div>
 
         <!-- 2. EDUCATION: THE ECOSYSTEM -->
