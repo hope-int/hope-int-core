@@ -740,71 +740,151 @@
 </div>
 
         <!-- 5. SHOP: STUDENT SURVIVAL SYSTEM -->
-        <div id="shop" class="page-section hidden min-h-screen pt-32 pb-20 px-6 md:px-12 bg-alabaster">
-            <div class="max-w-7xl mx-auto">
-                <div class="flex flex-col md:flex-row justify-between items-end mb-16">
-                    <h2 class="font-display text-6xl font-bold leading-none">SURVIVAL<br>SYSTEM</h2>
-                    <div class="bg-alert text-white px-6 py-3 rounded-full flex items-center gap-2 mt-6 md:mt-0 animate-pulse cursor-pointer shadow-xl shadow-red-200">
-                        <i data-lucide="zap" class="w-4 h-4"></i>
-                        <span class="font-bold text-xs uppercase tracking-widest">Panic Button</span>
+        <!-- 5. SHOP: STUDENT SURVIVAL SYSTEM -->
+<div id="shop" class="page-section hidden min-h-screen pt-32 pb-20 px-6 md:px-12 bg-concrete">
+    <div class="max-w-7xl mx-auto">
+        
+        <!-- HEADER: SURVIVAL SYSTEM - HYPER-LOCAL LOGISTICS -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 border-b border-gray-300 pb-8">
+            <div>
+                <p class="font-mono text-xs uppercase tracking-[0.2em] text-neon mb-3">Module 04: Logistical Support Matrix</p>
+                <h2 class="font-display text-6xl md:text-7xl font-bold leading-tight">SURVIVAL<br><span class="text-gray-600">SYSTEM</span></h2>
+            </div>
+            <div class="mt-4 md:mt-0 text-left md:text-right max-w-lg border-l-4 border-impact pl-4">
+                <p class="font-sans text-lg font-medium text-void">
+                    Curated essentials and tech components—delivered quicker than a promise. Directly supporting academic, project, and emergency student needs.
+                </p>
+            </div>
+        </div>
+
+        <!-- MAIN GRID: HIGH-DENSITY SERVICE & PRODUCT MATRIX (3 Columns) -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <!-- COLUMN 1: ACADEMIC ESSENTIALS & FINANCIAL RELIEF -->
+            <div class="lg:col-span-1 space-y-6">
+                <h3 class="font-display text-2xl font-bold border-b border-gray-300 pb-2 text-impact">Academic Readiness <i data-lucide="award" class="w-5 h-5 inline-block"></i></h3>
+                
+                <!-- Product 1: Exam Survival Kit -->
+                <div class="group bg-white rounded-xl p-4 cursor-pointer hover:shadow-xl transition-all duration-300 border border-gray-200">
+                    <div class="h-32 bg-gray-100 rounded-lg flex items-center justify-center relative">
+                        <i data-lucide="shield-check" class="w-12 h-12 text-gray-300 group-hover:text-impact transition-colors"></i>
+                        <span class="absolute top-2 right-2 bg-black text-neon text-[10px] px-2 py-0.5 rounded-full font-bold">HIGH DEMAND</span>
+                    </div>
+                    <div class="p-2">
+                        <h4 class="font-bold text-lg">Exam Survival Kit</h4>
+                        <p class="text-xs text-gray-500">Coffee, Energy Drink, Study Lamp, Pens (Curated for All-Nighters)</p>
+                        <div class="flex justify-between items-center mt-2">
+                             <span class="font-bold text-xl">₹299</span>
+                             <button class="bg-black text-white px-3 py-1 rounded-lg text-sm hover:bg-impact">Quick Order</button>
+                        </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <!-- Essential Item -->
-                    <div class="group bg-white rounded-[2rem] p-4 cursor-pointer hover:shadow-2xl transition-all duration-300">
-                        <div class="h-64 bg-gray-100 rounded-[1.5rem] flex items-center justify-center relative overflow-hidden">
-                            <div class="absolute top-4 left-4 bg-black text-white text-[10px] font-bold px-2 py-1 uppercase rounded">Essential</div>
-                            <div class="text-6xl font-display font-bold text-gray-300 group-hover:scale-110 transition-transform">BOOK</div>
-                        </div>
-                        <div class="p-4">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h3 class="font-bold text-xl">Lab Record</h3>
-                                    <p class="text-xs text-gray-400">180 Pages / Bond Paper</p>
-                                </div>
-                                <span class="font-bold text-lg">₹80</span>
-                            </div>
-                            <button class="w-full mt-4 bg-black text-white py-3 rounded-xl text-sm font-bold uppercase hover:bg-neon hover:text-black transition-colors">Instant Delivery</button>
-                        </div>
+                <!-- Product 2: Used Book Exchange (Social Impact Link) -->
+                <div class="group bg-impact/10 rounded-xl p-4 cursor-pointer hover:shadow-xl transition-all duration-300 border border-impact/20">
+                    <div class="h-32 bg-impact/5 rounded-lg flex items-center justify-center relative">
+                        <i data-lucide="piggy-bank" class="w-12 h-12 text-impact transition-colors"></i>
                     </div>
-
-                    <!-- Tech Item -->
-                    <div class="group bg-white rounded-[2rem] p-4 cursor-pointer hover:shadow-2xl transition-all duration-300">
-                         <div class="h-64 bg-gray-100 rounded-[1.5rem] flex items-center justify-center relative overflow-hidden">
-                            <div id="canvas-shop-1" class="w-full h-full absolute inset-0"></div>
-                        </div>
-                        <div class="p-4">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h3 class="font-bold text-xl">Arduino Uno</h3>
-                                    <p class="text-xs text-gray-400">Clone / Cable Included</p>
-                                </div>
-                                <span class="font-bold text-lg">₹550</span>
-                            </div>
-                            <button class="w-full mt-4 bg-black text-white py-3 rounded-xl text-sm font-bold uppercase hover:bg-neon hover:text-black transition-colors">Add to Drop</button>
-                        </div>
-                    </div>
-
-                    <!-- Service -->
-                    <div class="group bg-white rounded-[2rem] p-4 cursor-pointer hover:shadow-2xl transition-all duration-300">
-                        <div class="h-64 bg-gray-100 rounded-[1.5rem] flex items-center justify-center">
-                             <i data-lucide="printer" class="w-20 h-20 text-gray-400 group-hover:text-black transition-colors"></i>
-                        </div>
-                        <div class="p-4">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h3 class="font-bold text-xl">Print Service</h3>
-                                    <p class="text-xs text-gray-400">Upload PDF -> Dorm Delivery</p>
-                                </div>
-                                <span class="font-bold text-lg">₹2/pg</span>
-                            </div>
-                            <button class="w-full mt-4 bg-black text-white py-3 rounded-xl text-sm font-bold uppercase hover:bg-neon hover:text-black transition-colors">Upload File</button>
+                    <div class="p-2">
+                        <h4 class="font-bold text-lg text-impact">Used Textbook Exchange</h4>
+                        <p class="text-xs text-gray-700">Buy and sell previous semester books instantly. Drives down financial barriers for students.</p>
+                        <div class="flex justify-between items-center mt-2">
+                             <span class="font-bold text-xl text-impact">~50% OFF</span>
+                             <button class="bg-impact text-white px-3 py-1 rounded-lg text-sm hover:bg-black">Browse Inventory</button>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- COLUMN 2: FABRICATION & TECH SUPPLY CHAIN -->
+            <div class="lg:col-span-1 space-y-6">
+                <h3 class="font-display text-2xl font-bold border-b border-gray-300 pb-2 text-neon">Fabrication Drop <i data-lucide="cpu" class="w-5 h-5 inline-block"></i></h3>
+                
+                <!-- Product 3: IoT Starter Kit (Direct Lab Link) -->
+                <div onclick="router('iot')" class="group bg-white rounded-xl p-4 cursor-pointer hover:shadow-xl transition-all duration-300 border border-gray-200">
+                    <div class="h-32 bg-gray-100 rounded-lg flex items-center justify-center relative overflow-hidden">
+                        <div id="canvas-shop-1" class="w-full h-full absolute inset-0 opacity-80"></div>
+                        <span class="absolute top-2 left-2 bg-black text-neon text-[10px] px-2 py-0.5 rounded-full font-bold">PROJECT KIT</span>
+                    </div>
+                    <div class="p-2">
+                        <h4 class="font-bold text-lg">ESP32 Project Kit</h4>
+                        <p class="text-xs text-gray-500">Wi-Fi/Bluetooth Enabled Microcontroller + Sensors</p>
+                        <div class="flex justify-between items-center mt-2">
+                             <span class="font-bold text-xl">₹950</span>
+                             <button class="bg-neon text-black px-3 py-1 rounded-lg text-sm font-bold hover:bg-black hover:text-neon">Add to Fabrication Queue</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Service 4: 3D Printing / Custom Fabrication -->
+                <div class="group bg-white rounded-xl p-4 cursor-pointer hover:shadow-xl transition-all duration-300 border border-gray-200">
+                    <div class="h-32 bg-gray-100 rounded-lg flex items-center justify-center relative">
+                         <i data-lucide="hard-hat" class="w-12 h-12 text-gray-300 group-hover:text-neon transition-colors"></i>
+                    </div>
+                    <div class="p-2">
+                        <h4 class="font-bold text-lg">Custom 3D Print Service</h4>
+                        <p class="text-xs text-gray-500">Upload STL file. Filament color: Black/Grey. 4hr Turnaround.</p>
+                        <div class="flex justify-between items-center mt-2">
+                             <span class="font-bold text-xl">₹10/gram</span>
+                             <button class="bg-black text-white px-3 py-1 rounded-lg text-sm hover:bg-neon hover:text-black">Upload STL</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COLUMN 3: HYPER-LOGISTICS & EMERGENCY PROTOCOLS -->
+            <div class="lg:col-span-1 space-y-6">
+                <h3 class="font-display text-2xl font-bold border-b border-gray-300 pb-2 text-alert">Emergency & Service Protocol <i data-lucide="truck" class="w-5 h-5 inline-block"></i></h3>
+                
+                <!-- Service 5: The Panic Button (Core Mission Feature) -->
+                <div class="p-6 bg-alert/20 border-2 border-alert rounded-xl shadow-xl animate-pulse cursor-pointer hover:bg-alert/30 transition-colors">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-4">
+                            <i data-lucide="zap" class="w-8 h-8 text-alert"></i>
+                            <div>
+                                <h4 class="font-bold text-xl text-alert">PANIC BUTTON (10 Min Drop)</h4>
+                                <p class="text-xs text-gray-700">Immediate delivery to Dorm, Library, or Lab. Max 3 critical items.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="mt-4 w-full bg-alert text-white py-3 rounded-lg text-sm font-bold uppercase hover:bg-black transition-colors">Activate Priority Delivery</button>
+                </div>
+
+                <!-- Service 6: Midnight Print Run (Time-Critical Service) -->
+                <div class="p-6 bg-white rounded-xl border border-gray-200 shadow-lg cursor-pointer hover:shadow-xl transition-shadow">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-4">
+                            <i data-lucide="printer" class="w-8 h-8 text-black"></i>
+                            <div>
+                                <h4 class="font-bold text-xl">Midnight Print Run</h4>
+                                <p class="text-xs text-gray-500">2 AM Deadline. Perfect for last-minute report submissions.</p>
+                            </div>
+                        </div>
+                        <span class="font-bold text-lg text-neon">₹3/pg</span>
+                    </div>
+                    <button class="mt-4 w-full bg-black text-white py-3 rounded-lg text-sm font-bold uppercase hover:bg-neon hover:text-black transition-colors">Schedule File Upload</button>
+                </div>
+                
+                <!-- Live Delivery Tracking Mock -->
+                <div class="p-6 bg-white rounded-xl border border-gray-200 shadow-lg">
+                    <h4 class="font-bold text-xl mb-3">Live Drop Status</h4>
+                    <div class="space-y-2">
+                        <div class="flex items-center text-xs font-mono text-black">
+                            <i data-lucide="map-pin" class="w-4 h-4 text-impact mr-2"></i> Location: Gate 2 Checkpoint
+                        </div>
+                        <div class="flex items-center text-xs font-mono text-black">
+                            <i data-lucide="clock" class="w-4 h-4 text-neon mr-2"></i> ETA: <span class="text-alert font-bold">06:45 min</span>
+                        </div>
+                    </div>
+                    <div class="mt-4 bg-gray-200 rounded-full h-2.5">
+                        <div class="bg-impact h-2.5 rounded-full" style="width: 70%;"></div>
+                    </div>
+                </div>
+            </div>
+            
         </div>
+    </div>
+</div>
 
         <!-- 6. IMPACT: THE HEART (NEW) -->
         <div id="impact" class="page-section hidden min-h-screen pt-32 pb-20 px-6 md:px-12 bg-impact text-white">
