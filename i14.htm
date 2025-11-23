@@ -568,6 +568,7 @@
 </div>
 
 <!-- 4. IOT: THE TECH WING (FABRICATION PROTOCOL) -->
+<!-- 4. IOT: THE TECH WING (FABRICATION PROTOCOL) -->
 <div id="iot" class="page-section hidden min-h-screen pt-32 pb-20 px-6 md:px-12 bg-void text-white">
     <div class="max-w-7xl mx-auto">
         
@@ -584,139 +585,153 @@
             </div>
         </div>
 
-        <!-- MAIN GRID: HIGH-DENSITY, 3-COLUMN STRUCTURE -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- MAIN GRID: 1-2-1 STRUCTURE on LG screens -->
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
 
-            <!-- COLUMN 1: CORE FABRICATION TRACKS (The Skill Injection) -->
+            <!-- COLUMN 1 (1/4): CORE FABRICATION TRACKS (The Skill Injection) -->
             <div class="lg:col-span-1 space-y-6">
-                <h3 class="font-display text-3xl font-bold text-neon mb-4">Fabrication Tracks <i data-lucide="layers-3" class="w-6 h-6 inline-block"></i></h3>
-                <p class="text-sm text-gray-500 font-mono border-b border-gray-800 pb-2">Select a path that directly aligns with industry R&D requirements.</p>
+                <h3 class="font-display text-3xl font-bold text-neon mb-4">Skill Injection <i data-lucide="layers-3" class="w-6 h-6 inline-block"></i></h3>
+                <p class="text-sm text-gray-500 font-mono border-b border-gray-800 pb-2">Select a path that directly aligns with industrial R&D requirements.</p>
 
-                <!-- Track 1: AI/Embedded -->
-                <div class="p-6 rounded-3xl bg-ash border border-gray-800 hover:border-impact transition-colors cursor-pointer group shadow-xl">
-                    <div class="flex justify-between items-center">
-                        <i data-lucide="brain" class="w-8 h-8 text-white"></i>
-                        <span class="bg-impact/20 text-impact px-3 py-1 rounded-full text-[10px] font-bold">L4 - Expert</span>
+                <!-- Track 1: AI/Embedded (Expert) -->
+                <div class="p-4 rounded-xl bg-ash border border-gray-800 hover:border-impact transition-colors cursor-pointer group shadow-xl">
+                    <div class="flex justify-between items-start">
+                        <i data-lucide="brain" class="w-6 h-6 text-white"></i>
+                        <span class="bg-impact/20 text-impact px-2 py-0.5 rounded-full text-[10px] font-bold">L4 - AI</span>
                     </div>
-                    <h4 class="font-bold text-xl mt-3 group-hover:text-impact">AI Edge Computing</h4>
-                    <p class="text-xs text-gray-400 mt-2">
-                        Deploying TensorFlow Lite on Raspberry Pi for real-time object detection and embedded learning systems.
+                    <h4 class="font-bold text-lg mt-2 group-hover:text-impact">AI Edge Computing</h4>
+                    <p class="text-xs text-gray-400 mt-1">
+                        Deploying TensorFlow Lite on Raspberry Pi for real-time object detection.
                     </p>
-                    <div class="mt-3 flex justify-between text-xs font-mono text-gray-500">
-                        <span>Modules: 5</span>
-                        <span>Time: 8 Weeks</span>
-                    </div>
                 </div>
                 
-                <!-- Track 2: Robotics/Kinematics -->
-                <div class="p-6 rounded-3xl bg-ash border border-gray-800 hover:border-impact transition-colors cursor-pointer group shadow-xl">
-                    <div class="flex justify-between items-center">
-                        <i data-lucide="armchair" class="w-8 h-8 text-white"></i>
-                        <span class="bg-neon/20 text-neon px-3 py-1 rounded-full text-[10px] font-bold">L2 - Intermediate</span>
+                <!-- Track 2: Robotics/Kinematics (Intermediate) -->
+                <div class="p-4 rounded-xl bg-ash border border-gray-800 hover:border-impact transition-colors cursor-pointer group shadow-xl">
+                    <div class="flex justify-between items-start">
+                        <i data-lucide="armchair" class="w-6 h-6 text-white"></i>
+                        <span class="bg-neon/20 text-neon px-2 py-0.5 rounded-full text-[10px] font-bold">L2 - ROS</span>
                     </div>
-                    <h4 class="font-bold text-xl mt-3 group-hover:text-impact">Industrial Arm Simulation</h4>
-                    <p class="text-xs text-gray-400 mt-2">
-                        Mastering inverse kinematics and control loop stability for 6-DOF robotic manipulators using ROS.
+                    <h4 class="font-bold text-lg mt-2 group-hover:text-impact">Industrial Arm Simulation</h4>
+                    <p class="text-xs text-gray-400 mt-1">
+                        Mastering inverse kinematics and control loop stability (6-DOF).
                     </p>
-                    <div class="mt-3 flex justify-between text-xs font-mono text-gray-500">
-                        <span>Modules: 4</span>
-                        <span>Time: 6 Weeks</span>
-                    </div>
                 </div>
 
-                <!-- Track 3: Drone/Surveillance -->
-                <div class="p-6 rounded-3xl bg-ash border border-gray-800 hover:border-impact transition-colors cursor-pointer group shadow-xl">
-                    <div class="flex justify-between items-center">
-                        <i data-lucide="plane" class="w-8 h-8 text-white"></i>
-                        <span class="bg-gray-600/20 text-gray-400 px-3 py-1 rounded-full text-[10px] font-bold">L1 - Entry</span>
+                <!-- Track 3: Drone/Surveillance (Entry) -->
+                <div class="p-4 rounded-xl bg-ash border border-gray-800 hover:border-impact transition-colors cursor-pointer group shadow-xl">
+                    <div class="flex justify-between items-start">
+                        <i data-lucide="plane" class="w-6 h-6 text-white"></i>
+                        <span class="bg-gray-600/20 text-gray-400 px-2 py-0.5 rounded-full text-[10px] font-bold">L1 - UAV</span>
                     </div>
-                    <h4 class="font-bold text-xl mt-3 group-hover:text-impact">UAV Telemetry Basics</h4>
-                    <p class="text-xs text-gray-400 mt-2">
-                        Introduction to flight controllers, GPS mapping, and basic Python control scripts for drone systems.
+                    <h4 class="font-bold text-lg mt-2 group-hover:text-impact">UAV Telemetry Basics</h4>
+                    <p class="text-xs text-gray-400 mt-1">
+                        Introduction to flight controllers and GPS mapping using Python.
                     </p>
-                    <div class="mt-3 flex justify-between text-xs font-mono text-gray-500">
-                        <span>Modules: 3</span>
-                        <span>Time: 4 Weeks</span>
+                </div>
+                
+                <!-- Track 4: Network/Hacking (Advanced) -->
+                <div class="p-4 rounded-xl bg-ash border border-gray-800 hover:border-impact transition-colors cursor-pointer group shadow-xl">
+                    <div class="flex justify-between items-start">
+                        <i data-lucide="network" class="w-6 h-6 text-white"></i>
+                        <span class="bg-alert/20 text-alert px-2 py-0.5 rounded-full text-[10px] font-bold">L3 - Security</span>
                     </div>
+                    <h4 class="font-bold text-lg mt-2 group-hover:text-impact">Secure IoT Mesh</h4>
+                    <p class="text-xs text-gray-400 mt-1">
+                        Securing ESP32 clusters and preventing common attack vectors.
+                    </p>
                 </div>
             </div>
 
-            <!-- COLUMN 2: LIVE VISUALIZATION & CONTROL -->
+            <!-- COLUMN 2 & 3 (2/4): LIVE VISUALIZATION & CONTROL HUB -->
             <div class="lg:col-span-2 space-y-6">
-                <div class="h-96 lg:h-[400px] relative bg-black rounded-3xl p-6 border border-neon shadow-2xl">
+                <!-- Live Simulation Canvas -->
+                <div class="h-[400px] relative bg-black rounded-3xl p-6 border border-neon shadow-2xl">
                     <div id="canvas-iot" class="w-full h-full"></div>
                     <div class="absolute top-6 left-6 font-mono text-xs text-neon flex items-center gap-2">
                         <div class="w-2 h-2 bg-neon rounded-full animate-pulse"></div>
                         RUNTIME KINEMATICS SIMULATION (v2.1)
                     </div>
-                    <div class="absolute bottom-6 right-6 font-mono text-xs text-gray-500">TASK: PICK & PLACE, CYCLE TIME: 1.2s</div>
+                    
+                    <!-- Control Panel Mock -->
+                    <div class="absolute bottom-6 right-6 p-3 bg-gray-900/80 backdrop-blur-sm rounded-xl font-mono text-xs">
+                        <p class="text-gray-500 mb-1">CONTROL PANE</p>
+                        <div class="flex gap-3">
+                            <button class="px-2 py-1 bg-impact text-white rounded hover:bg-impact/80">RUN</button>
+                            <button class="px-2 py-1 bg-alert text-white rounded hover:bg-alert/80">STOP</button>
+                            <span class="text-gray-400">Cycles: 12/20</span>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- PROJECT SHOWCASE/SUBMISSION -->
-                <div class="grid grid-cols-2 gap-6">
+                <!-- PROJECT SUBMISSION AND REMOTE ACCESS -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="bg-ash p-6 rounded-3xl border border-gray-800 hover:border-neon transition-colors cursor-pointer group">
                         <i data-lucide="archive" class="w-6 h-6 text-impact mb-2"></i>
                         <h4 class="font-bold text-xl group-hover:text-neon">Portfolio Sync</h4>
-                        <p class="text-xs text-gray-400 mt-1">Submit your completed fabrication project for industrial grading and certification.</p>
+                        <p class="text-xs text-gray-400 mt-1">Submit your project for industrial grading and certification.</p>
                         <button class="mt-3 text-xs font-bold uppercase tracking-widest border-b border-white pb-1 hover:text-neon transition-colors">
-                            Submit Artifact
+                            Submit Artifact (3 Pending)
                         </button>
                     </div>
                     <div class="bg-ash p-6 rounded-3xl border border-gray-800 hover:border-neon transition-colors cursor-pointer group">
                         <i data-lucide="monitor-dot" class="w-6 h-6 text-impact mb-2"></i>
                         <h4 class="font-bold text-xl group-hover:text-neon">Remote Lab Access</h4>
-                        <p class="text-xs text-gray-400 mt-1">Book remote terminal access to the physical HOPE Lab equipment after hours.</p>
+                        <p class="text-xs text-gray-400 mt-1">Book terminal access to the physical lab equipment after hours.</p>
                         <button class="mt-3 text-xs font-bold uppercase tracking-widest border-b border-white pb-1 hover:text-neon transition-colors">
-                            Request Time Slot
+                            Request Time Slot (0/4 Slots Used)
                         </button>
                     </div>
                 </div>
             </div>
             
-            <!-- COLUMN 3: SUPPLY CHAIN & TOOLING (The Survival System Link) -->
+            <!-- COLUMN 4 (1/4): RESOURCE MATRIX (Supply Chain & Certification) -->
             <div class="lg:col-span-1 space-y-6">
                 <h3 class="font-display text-3xl font-bold text-impact mb-4">Resource Matrix <i data-lucide="package-search" class="w-6 h-6 inline-block"></i></h3>
-                <p class="text-sm text-gray-500 font-mono border-b border-gray-800 pb-2">Integrated supply chain for rapid component deployment.</p>
+                <p class="text-sm text-gray-500 font-mono border-b border-gray-800 pb-2">Integrated supply chain and accreditation pathway.</p>
 
-                <!-- Tool Library Access -->
-                <div class="p-6 rounded-3xl bg-ash border border-gray-800 shadow-xl">
-                    <i data-lucide="wrench" class="w-8 h-8 text-neon mb-2"></i>
-                    <h4 class="font-bold text-xl">Tool Library Checkout</h4>
-                    <p class="text-xs text-gray-400 mt-2">
-                        Access high-value equipment: Oscilloscopes, Reflow Stations, High-Precision 3D Printers.
-                    </p>
+                <!-- Tool Library Access (High Value Asset) -->
+                <div class="p-4 rounded-xl bg-black border border-gray-700 shadow-xl">
+                    <i data-lucide="wrench" class="w-6 h-6 text-neon mb-2"></i>
+                    <h4 class="font-bold text-lg">Tool Library Checkout</h4>
+                    <p class="text-xs text-gray-400 mt-1">Access high-value tools (Scopes, Reflow Stations, 3D Printers).</p>
                     <div class="mt-3 font-mono text-xs text-gray-500">
-                        <span class="text-neon font-bold">14</span> items available for loan.
+                        Available: <span class="text-neon font-bold">14/20</span>
                     </div>
-                    <button class="mt-4 text-xs font-bold uppercase tracking-widest border-b border-neon pb-1 hover:text-neon transition-colors">
-                        View Inventory
-                    </button>
                 </div>
                 
-                <!-- Direct E-Commerce Link -->
-                <div onclick="router('shop')" class="p-6 rounded-3xl bg-ash border border-gray-800 hover:border-neon transition-colors cursor-pointer group shadow-xl">
-                    <i data-lucide="truck" class="w-8 h-8 text-impact mb-2"></i>
-                    <h4 class="font-bold text-xl group-hover:text-neon">Component Supply</h4>
-                    <p class="text-xs text-gray-400 mt-2">
-                        Instant, curated delivery of project essentials (RPi, ESP, sensors, motors) from the HOPE E-Commerce wing.
+                <!-- Direct E-Commerce Link (The Survival System Link) -->
+                <div onclick="router('shop')" class="p-4 rounded-xl bg-black border border-gray-700 hover:border-impact transition-colors cursor-pointer group shadow-xl">
+                    <i data-lucide="truck" class="w-6 h-6 text-impact mb-2"></i>
+                    <h4 class="font-bold text-lg group-hover:text-impact">Component Supply</h4>
+                    <p class="text-xs text-gray-400 mt-1">
+                        Instant, curated delivery of RPi, ESP, and sensor kits from the E-Commerce wing.
                     </p>
                     <div class="mt-3 font-mono text-xs text-gray-500">
-                        <span class="text-impact font-bold">Priority Delivery</span> status activated.
+                        Status: <span class="text-impact font-bold">Priority Delivery Active</span>
                     </div>
-                    <button class="mt-4 text-xs font-bold uppercase tracking-widest border-b border-impact text-impact pb-1 hover:text-neon transition-colors">
-                        Order Project Kit
-                    </button>
                 </div>
 
-                <!-- Certification and Accreditation -->
-                <div class="p-6 rounded-3xl bg-ash border border-gray-800 shadow-xl">
-                    <i data-lucide="award" class="w-8 h-8 text-white mb-2"></i>
-                    <h4 class="font-bold text-xl">Accreditation Path</h4>
-                    <p class="text-xs text-gray-400 mt-2">
-                        Achieve HOPE Fabrication Certification, recognized by 10+ industry partners for internship preference.
+                <!-- Accreditation and Certification (Career Alignment) -->
+                <div class="p-4 rounded-xl bg-black border border-gray-700 shadow-xl">
+                    <i data-lucide="award" class="w-6 h-6 text-white mb-2"></i>
+                    <h4 class="font-bold text-lg">Fabrication Certification</h4>
+                    <p class="text-xs text-gray-400 mt-1">
+                        Achieve industry-recognized certification for internship preference.
                     </p>
                     <div class="mt-3 font-mono text-xs text-gray-500">
                         Next Exam: <span class="text-neon font-bold">Q1 2025</span>
+                    </div>
+                </div>
+                
+                <!-- NEW BLOCK: Impact Project Link -->
+                <div onclick="router('impact')" class="p-4 rounded-xl bg-impact border border-impact/50 hover:bg-impact/90 transition-colors cursor-pointer group shadow-xl">
+                    <i data-lucide="heart" class="w-6 h-6 text-neon mb-2"></i>
+                    <h4 class="font-bold text-lg group-hover:text-white">Social Impact Projects</h4>
+                    <p class="text-xs text-white/80 mt-1">
+                        Apply your fabrication skills to solve real-world problems for the vulnerable.
+                    </p>
+                    <div class="mt-3 font-mono text-xs text-white">
+                        <span class="font-bold">2</span> Active Deployments
                     </div>
                 </div>
             </div>
