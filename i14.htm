@@ -387,76 +387,166 @@
 </div>
 
         <!-- 3. OPPORTUNITIES: THE ENGINE (NEW) -->
-        <div id="opportunities" class="page-section hidden min-h-screen pt-32 pb-20 px-6 md:px-12 bg-ash text-white">
-            <div class="max-w-7xl mx-auto">
-                <div class="mb-10 border-b border-gray-800 pb-8">
-                    <div class="flex items-center gap-3 mb-2">
-                        <div class="w-3 h-3 bg-neon rounded-full animate-pulse"></div>
-                        <p class="font-mono text-neon text-xs tracking-widest">LIVE DATA FEED</p>
-                    </div>
-                    <h2 class="font-display text-5xl md:text-7xl font-bold">OPPORTUNITY<br>ENGINE</h2>
-                </div>
+<!-- 3. OPPORTUNITIES: THE ENGINE -->
+<div id="opportunities" class="page-section hidden min-h-screen pt-32 pb-20 px-6 md:px-12 bg-ash text-white">
+    <div class="max-w-7xl mx-auto">
+        
+        <!-- HEADER: OPPORTUNITY DYNAMICS -->
+        <div class="mb-12 border-b border-gray-800 pb-8">
+            <div class="flex items-center gap-3 mb-2">
+                <div class="w-3 h-3 bg-neon rounded-full animate-pulse"></div>
+                <p class="font-mono text-neon text-xs tracking-widest uppercase">MODULE 02: DYNAMIC DATA FEED (MISSION-CRITICAL)</p>
+            </div>
+            <h2 class="font-display text-5xl md:text-7xl font-bold leading-tight">OPPORTUNITY<br><span class="text-gray-400">DYNAMICS</span></h2>
+            <p class="text-lg text-gray-400 mt-4 max-w-xl">
+                We are the active engine that hunts, filters, and delivers opportunities (Internships, Scholarships, Startups) directly to the Achiever Force. Nothing is left to chance.
+            </p>
+        </div>
 
-                <!-- FLIGHT BOARD TERMINAL -->
-                <div class="bg-black border border-gray-800 rounded-xl overflow-hidden font-mono text-sm shadow-2xl">
-                    <div class="bg-gray-900 px-6 py-3 flex justify-between items-center border-b border-gray-800">
-                        <span class="text-gray-400">root@hope-sys:~/incoming-jobs</span>
-                        <div class="flex gap-2">
-                            <div class="w-3 h-3 rounded-full bg-red-500"></div>
-                            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
-                            <div class="w-3 h-3 rounded-full bg-green-500"></div>
-                        </div>
+        <!-- MAIN OPPORTUNITY BOARD: The Engine Output -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+            <!-- COLUMN 1: LIVE FEED TERMINAL (Flight Board) -->
+            <div class="md:col-span-2 bg-black border border-gray-800 rounded-3xl overflow-hidden font-mono text-sm shadow-2xl">
+                <div class="bg-gray-900 px-6 py-3 flex justify-between items-center border-b border-gray-800">
+                    <span class="text-gray-400">root@hope-engine:~/data-streams/incoming-ops</span>
+                    <div class="flex gap-2">
+                        <i data-lucide="scan" class="w-4 h-4 text-neon animate-pulse"></i>
+                        <span class="text-neon text-xs">Scanning...</span>
+                    </div>
+                </div>
+                
+                <div class="p-4 md:p-6 space-y-2 max-h-[500px] overflow-y-auto terminal-scanline">
+                    <!-- Header -->
+                    <div class="grid grid-cols-12 text-gray-500 text-xs uppercase tracking-wider mb-2 pb-2 border-b border-gray-800 sticky top-0 bg-black z-10">
+                        <div class="col-span-2">Type</div>
+                        <div class="col-span-4">Designation / Task</div>
+                        <div class="col-span-3">Source</div>
+                        <div class="col-span-3 text-right">Action/Status</div>
+                    </div>
+
+                    <!-- Row 1: High Priority Internship -->
+                    <div class="grid grid-cols-12 items-center hover:bg-gray-900 p-2 -mx-2 rounded cursor-pointer group transition-colors">
+                        <div class="col-span-2"><span class="bg-blue-900 text-blue-300 px-2 py-1 rounded text-[10px] font-bold">INTERNSHIP</span></div>
+                        <div class="col-span-4 font-bold text-white group-hover:text-neon">Embedded Systems (R&D)</div>
+                        <div class="col-span-3 text-gray-400">TCS Research Labs</div>
+                        <div class="col-span-3 text-right text-alert">APPLY NOW <i data-lucide="external-link" class="w-3 h-3 inline-block ml-1"></i></div>
+                    </div>
+
+                    <!-- Row 2: Scholarship Alert -->
+                    <div class="grid grid-cols-12 items-center hover:bg-gray-900 p-2 -mx-2 rounded cursor-pointer group transition-colors">
+                        <div class="col-span-2"><span class="bg-purple-900 text-purple-300 px-2 py-1 rounded text-[10px] font-bold">SCHOLARSHIP</span></div>
+                        <div class="col-span-4 font-bold text-white group-hover:text-neon">Merit Grant 2025</div>
+                        <div class="col-span-3 text-gray-400">State Govt.</div>
+                        <div class="col-span-3 text-right text-neon font-bold">ELIGIBLE</div>
+                    </div>
+
+                    <!-- Row 3: Workshop/Skill Injection -->
+                    <div class="grid grid-cols-12 items-center hover:bg-gray-900 p-2 -mx-2 rounded cursor-pointer group transition-colors">
+                        <div class="col-span-2"><span class="bg-green-900 text-green-300 px-2 py-1 rounded text-[10px] font-bold">WORKSHOP</span></div>
+                        <div class="col-span-4 font-bold text-white group-hover:text-neon">Advanced Prompt Engineering</div>
+                        <div class="col-span-3 text-gray-400">HOPE AI Team</div>
+                        <div class="col-span-3 text-right text-gray-500">View Details</div>
                     </div>
                     
-                    <div class="p-6 md:p-10 space-y-4">
-                        <!-- Header -->
-                        <div class="grid grid-cols-12 text-gray-500 text-xs uppercase tracking-wider mb-6 pb-2 border-b border-gray-800">
-                            <div class="col-span-2">Type</div>
-                            <div class="col-span-4">Role / Event</div>
-                            <div class="col-span-3">Organization</div>
-                            <div class="col-span-3 text-right">Deadline</div>
-                        </div>
+                    <!-- Row 4: Startup Exposure -->
+                    <div class="grid grid-cols-12 items-center hover:bg-gray-900 p-2 -mx-2 rounded cursor-pointer group transition-colors">
+                        <div class="col-span-2"><span class="bg-orange-900 text-orange-300 px-2 py-1 rounded text-[10px] font-bold">EXPOSURE</span></div>
+                        <div class="col-span-4 font-bold text-white group-hover:text-neon">FinTech Startup Meetup</div>
+                        <div class="col-span-3 text-gray-400">Incubator Hub</div>
+                        <div class="col-span-3 text-right text-gray-500">RSVP</div>
+                    </div>
 
-                        <!-- Row 1 -->
-                        <div class="grid grid-cols-12 items-center hover:bg-gray-900 p-2 -mx-2 rounded cursor-pointer group transition-colors">
-                            <div class="col-span-2"><span class="bg-blue-900 text-blue-300 px-2 py-1 rounded text-[10px]">INTERNSHIP</span></div>
-                            <div class="col-span-4 font-bold text-white group-hover:text-neon">Full Stack Dev</div>
-                            <div class="col-span-3 text-gray-400">Zoho Corp</div>
-                            <div class="col-span-3 text-right text-alert">24h REMAINING</div>
-                        </div>
+                    <!-- Row 5: Competition -->
+                    <div class="grid grid-cols-12 items-center hover:bg-gray-900 p-2 -mx-2 rounded cursor-pointer group transition-colors">
+                        <div class="col-span-2"><span class="bg-red-900 text-red-300 px-2 py-1 rounded text-[10px] font-bold">COMPETE</span></div>
+                        <div class="col-span-4 font-bold text-white group-hover:text-neon">CTF Cyber Challenge</div>
+                        <div class="col-span-3 text-gray-400">Infosys</div>
+                        <div class="col-span-3 text-right text-alert">REGISTRATION CLOSES</div>
+                    </div>
+                    
+                    <!-- Row 6: Local Internship -->
+                    <div class="grid grid-cols-12 items-center hover:bg-gray-900 p-2 -mx-2 rounded cursor-pointer group transition-colors">
+                        <div class="col-span-2"><span class="bg-blue-900 text-blue-300 px-2 py-1 rounded text-[10px] font-bold">INTERNSHIP</span></div>
+                        <div class="col-span-4 font-bold text-white group-hover:text-neon">Python/Data Analyst (Part-time)</div>
+                        <div class="col-span-3 text-gray-400">Local Tech Hub</div>
+                        <div class="col-span-3 text-right text-gray-500">2 Days Left</div>
+                    </div>
+                    
+                    <!-- Row 7: Placement Drive -->
+                    <div class="grid grid-cols-12 items-center hover:bg-gray-900 p-2 -mx-2 rounded cursor-pointer group transition-colors">
+                        <div class="col-span-2"><span class="bg-gray-700 text-white px-2 py-1 rounded text-[10px] font-bold">PLACEMENT</span></div>
+                        <div class="col-span-4 font-bold text-white group-hover:text-neon">Campus Drive (S7 Achievers)</div>
+                        <div class="col-span-3 text-gray-400">Wipro</div>
+                        <div class="col-span-3 text-right text-neon font-bold">PRE-REGISTER</div>
+                    </div>
+                    
+                    <!-- Row 8: Student Entrepreneurship Showcase -->
+                    <div class="grid grid-cols-12 items-center hover:bg-gray-900 p-2 -mx-2 rounded cursor-pointer group transition-colors">
+                        <div class="col-span-2"><span class="bg-impact text-white px-2 py-1 rounded text-[10px] font-bold">SHOWCASE</span></div>
+                        <div class="col-span-4 font-bold text-white group-hover:text-neon">Final Year Project Demo Day</div>
+                        <div class="col-span-3 text-gray-400">HOPE Stage</div>
+                        <div class="col-span-3 text-right text-gray-500">SUBMIT PROJECT</div>
+                    </div>
 
-                        <!-- Row 2 -->
-                        <div class="grid grid-cols-12 items-center hover:bg-gray-900 p-2 -mx-2 rounded cursor-pointer group transition-colors">
-                            <div class="col-span-2"><span class="bg-purple-900 text-purple-300 px-2 py-1 rounded text-[10px]">HACKATHON</span></div>
-                            <div class="col-span-4 font-bold text-white group-hover:text-neon">HackTheFuture '25</div>
-                            <div class="col-span-3 text-gray-400">TCS & HOPE</div>
-                            <div class="col-span-3 text-right text-gray-400">Apply Now</div>
-                        </div>
+                </div>
+            </div>
 
-                        <!-- Row 3 -->
-                        <div class="grid grid-cols-12 items-center hover:bg-gray-900 p-2 -mx-2 rounded cursor-pointer group transition-colors">
-                            <div class="col-span-2"><span class="bg-green-900 text-green-300 px-2 py-1 rounded text-[10px]">WORKSHOP</span></div>
-                            <div class="col-span-4 font-bold text-white group-hover:text-neon">ESP32 & Drone Arch</div>
-                            <div class="col-span-3 text-gray-400">HOPE LABS</div>
-                            <div class="col-span-3 text-right text-gray-400">Seats Full</div>
+            <!-- COLUMN 2: KPIs AND AUXILIARY TOOLS -->
+            <div class="md:col-span-1 space-y-6">
+                
+                <!-- KPI BLOCK: Engine Performance -->
+                <div class="bg-black border border-gray-800 p-6 rounded-3xl shadow-xl">
+                    <h3 class="font-display text-2xl font-bold mb-4 border-b border-gray-800 pb-2">Engine Metrics</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400 font-mono text-sm">Opportunities Mapped:</span>
+                            <span class="text-neon font-bold text-xl">102</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400 font-mono text-sm">Avg. Response Time (Days):</span>
+                            <span class="text-white font-bold text-xl">2.1</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400 font-mono text-sm">Placement Success Rate:</span>
+                            <span class="text-impact font-bold text-xl">88%</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                    <div class="bg-ash border border-gray-800 p-8 rounded-2xl">
-                        <h3 class="font-display text-2xl font-bold mb-2">Startup Incubator</h3>
-                        <p class="text-gray-400 text-sm mb-4">Got an idea? We provide the team, the funding, and the mentor.</p>
-                        <button class="text-xs font-bold uppercase tracking-widest border-b border-neon pb-1 hover:text-neon">Submit Pitch Deck</button>
+                <!-- Startup Incubator -->
+                <div class="bg-ash border border-gray-800 p-6 rounded-3xl shadow-xl">
+                    <div class="flex items-center gap-3 mb-3">
+                         <i data-lucide="layers" class="w-6 h-6 text-neon"></i>
+                         <h3 class="font-display text-2xl font-bold">Startup Incubator</h3>
                     </div>
-                    <div class="bg-ash border border-gray-800 p-8 rounded-2xl">
-                        <h3 class="font-display text-2xl font-bold mb-2">Scholarship Radar</h3>
-                        <p class="text-gray-400 text-sm mb-4">Automated hunting for government and private grants.</p>
-                        <button class="text-xs font-bold uppercase tracking-widest border-b border-neon pb-1 hover:text-neon">Check Eligibility</button>
+                    <p class="text-gray-400 text-sm mb-4">
+                        Idea-to-Launch Protocol. Access seed funding, co-founder match, and legal consultation.
+                    </p>
+                    <button class="text-xs font-bold uppercase tracking-widest border-b border-neon pb-1 hover:text-neon">
+                        Apply for Seed Capital
+                    </button>
+                    <div class="mt-3 font-mono text-xs text-gray-500">Current Cohort: 4 Teams</div>
+                </div>
+
+                <!-- Scholarship Radar -->
+                <div class="bg-ash border border-gray-800 p-6 rounded-3xl shadow-xl">
+                    <div class="flex items-center gap-3 mb-3">
+                        <i data-lucide="graduation-cap" class="w-6 h-6 text-impact"></i>
+                        <h3 class="font-display text-2xl font-bold">Scholarship Radar</h3>
                     </div>
+                    <p class="text-gray-400 text-sm mb-4">
+                        Automated eligibility checker and application assistance. Never miss a deadline or a grant opportunity.
+                    </p>
+                    <button class="text-xs font-bold uppercase tracking-widest border-b border-impact text-impact pb-1 hover:text-neon">
+                        Run Auto-Fill Application
+                    </button>
+                    <div class="mt-3 font-mono text-xs text-gray-500">Total Grants Secured: ₹1.4M+</div>
                 </div>
             </div>
         </div>
+    </div>
+</div>
 
         <!-- 4. IOT: THE TECH WING -->
         <div id="iot" class="page-section hidden min-h-screen pt-32 pb-20 px-6 md:px-12 bg-void text-white">
